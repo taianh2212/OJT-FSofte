@@ -1,0 +1,114 @@
+package com.tourbooking.booking.backend.service.impl;
+
+import java.util.Comparator;
+import java.util.List;
+
+import com.tourbooking.booking.backend.exception.AppException;
+import com.tourbooking.booking.backend.exception.ErrorCode;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.tourbooking.booking.backend.mapper.ReviewMapper;
+import com.tourbooking.booking.backend.model.dto.request.ReviewRequest;
+import com.tourbooking.booking.backend.model.dto.response.ReviewResponse;
+import com.tourbooking.booking.backend.model.entity.Review;
+import com.tourbooking.booking.backend.model.entity.Tour;
+import com.tourbooking.booking.backend.model.entity.User;
+import com.tourbooking.booking.backend.repository.ReviewRepository;
+import com.tourbooking.booking.backend.repository.TourRepository;
+import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.service.ReviewService;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ReviewServiceImpl implements ReviewService {
+
+    private final ReviewRepository reviewRepo;
+    private final TourRepository tourRepo;
+    private final UserRepository userRepo;
+
+    @Override
+    public List<ReviewResponse> getReviewsByTour(
+            Long tourId,
+            Integer minRating,
+            Integer maxRating,
+            String sortBy,
+            String direction) {
+
+        List<Review> reviews;
+        if (minRating != null && maxRating != null) {
+            reviews = reviewRepo.findByTourIdAndRatingBetween(tourId, minRating, maxRating);
+        } else {
+            reviews = reviewRepo.findByTourId(tourId);
+        }
+
+        Comparator<Review> comparator;
+        if ("rating".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Review::getRating);
+        } else {
+            comparator = Comparator.comparing(Review::getCreatedAt);
+        }
+
+        if ("desc".equalsIgnoreCase(direction)) {
+            comparator = comparator.reversed();
+        }
+
+        return reviews.stream()
+                .sorted(comparator)
+                .map(ReviewMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public ReviewResponse createReview(ReviewRequest request) {
+        Review review = ReviewMapper.toEntity(request);
+
+        Tour tour = tourRepo.findById(request.getTourId())
+                .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
+        User user = userRepo.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        review.setTour(tour);
+        review.setUser(user);
+
+        Review savedReview = reviewRepo.save(review);
+        return ReviewMapper.toResponse(savedReview);
+    }
+
+    @Override
+    @Transactional
+    public ReviewResponse updateReview(Long id, ReviewRequest request) {
+        Review existingReview = reviewRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
+
+        ReviewMapper.updateEntityFromRequest(existingReview, request);
+
+        if (request.getTourId() != null && !request.getTourId().equals(existingReview.getTour().getId())) {
+            Tour tour = tourRepo.findById(request.getTourId())
+                    .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
+            existingReview.setTour(tour);
+        }
+
+        if (request.getUserId() != null && !request.getUserId().equals(existingReview.getUser().getId())) {
+            User user = userRepo.findById(request.getUserId())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            existingReview.setUser(user);
+        }
+
+        Review updatedReview = reviewRepo.save(existingReview);
+        return ReviewMapper.toResponse(updatedReview);
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(Long id) {
+        if (!reviewRepo.existsById(id)) {
+            throw new AppException(ErrorCode.REVIEW_NOT_FOUND);
+        }
+        reviewRepo.deleteById(id);
+    }
+}
