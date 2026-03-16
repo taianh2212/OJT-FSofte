@@ -22,29 +22,46 @@ public class DataInitializer {
     public CommandLineRunner initData() {
         return args -> {
             log.info("Checking for seed data...");
-            if (userRepository.count() == 0) {
-                log.info("No users found. Creating test users...");
-                
-                User admin = new User();
-                admin.setFullName("Admin User");
-                admin.setEmail("admin@gmail.com");
-                admin.setPasswordHash(passwordEncoder.encode("123456"));
-                admin.setRole(UserRole.ADMIN);
-                admin.setIsActive(true);
-                userRepository.save(admin);
+            
+            // Create or Update Admin
+            userRepository.findByEmail("admin@gmail.com").ifPresentOrElse(
+                admin -> {
+                    admin.setPasswordHash(passwordEncoder.encode("123456"));
+                    userRepository.save(admin);
+                    log.info("Updated Admin password.");
+                },
+                () -> {
+                    User admin = new User();
+                    admin.setFullName("Admin User");
+                    admin.setEmail("admin@gmail.com");
+                    admin.setPasswordHash(passwordEncoder.encode("123456"));
+                    admin.setRole(UserRole.ADMIN);
+                    admin.setIsActive(true);
+                    userRepository.save(admin);
+                    log.info("Created Admin User.");
+                }
+            );
 
-                User customer = new User();
-                customer.setFullName("Normal User");
-                customer.setEmail("user@gmail.com");
-                customer.setPasswordHash(passwordEncoder.encode("123456"));
-                customer.setRole(UserRole.CUSTOMER);
-                customer.setIsActive(true);
-                userRepository.save(customer);
+            // Create or Update Customer
+            userRepository.findByEmail("user@gmail.com").ifPresentOrElse(
+                customer -> {
+                    customer.setPasswordHash(passwordEncoder.encode("123456"));
+                    userRepository.save(customer);
+                    log.info("Updated User password.");
+                },
+                () -> {
+                    User customer = new User();
+                    customer.setFullName("Normal User");
+                    customer.setEmail("user@gmail.com");
+                    customer.setPasswordHash(passwordEncoder.encode("123456"));
+                    customer.setRole(UserRole.CUSTOMER);
+                    customer.setIsActive(true);
+                    userRepository.save(customer);
+                    log.info("Created Normal User.");
+                }
+            );
 
-                log.info(">>> SUCCESS: 2 test users created (admin@gmail.com / 123456)");
-            } else {
-                log.info("Users already exist in database.");
-            }
+            log.info(">>> SUCCESS: Test users are ready (admin@gmail.com / 123456)");
         };
     }
 }
