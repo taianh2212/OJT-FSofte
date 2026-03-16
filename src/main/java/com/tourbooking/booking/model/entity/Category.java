@@ -1,0 +1,21 @@
+﻿package com.tourbooking.booking.model.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.List;
+
+@Entity
+@Table(name = "Categories")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@AttributeOverride(name = "id", column = @Column(name = "CategoryID", nullable = false, unique = true))
+public class Category extends Base {
+
+    @Column(name = "CategoryName", nullable = false, length = 100)
+    private String categoryName;
+
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Tour> tours;
+}
