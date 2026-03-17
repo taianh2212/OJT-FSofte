@@ -5,15 +5,15 @@ import com.tourbooking.booking.backend.model.dto.request.UserRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
 import com.tourbooking.booking.backend.model.dto.response.AuthResponse;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
+import com.tourbooking.booking.backend.service.MailService;
 import com.tourbooking.booking.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -22,16 +22,23 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final MailService mailService;
+    private final com.tourbooking.booking.backend.service.RateLimiterService rateLimiterService;
 
+    // ================= LOGIN =================
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         UserResponse user = userService.getUserByEmail(request.getEmail());
+
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Account not verified. Please check your email.");
+        }
+
         AuthResponse authResponse = AuthResponse.builder()
-                .token("mock-jwt-token") // We will implement real JWT later
+                .token("mock-jwt-token") // TODO: thay bằng JWT thật
                 .user(user)
                 .build();
 
@@ -42,12 +49,107 @@ public class AuthController {
                 .build();
     }
 
+    // ================= REGISTER =================
     @PostMapping("/register")
     public ApiResponse<UserResponse> register(@RequestBody UserRequest request) {
+        if (!rateLimiterService.tryConsume(request.getEmail())) {
+            return ApiResponse.<UserResponse>builder()
+                    .code(HttpStatus.TOO_MANY_REQUESTS.value())
+                    .message("Too many registration requests. Please try again later.")
+                    .data(null)
+                    .build();
+        }
+
+        UserResponse user = userService.createUser(request);
+
+        try {
+            String token = UUID.randomUUID().toString();
+
+            // lưu token vào DB (bạn cần tự implement)
+            userService.saveVerificationToken(user.getEmail(), token);
+
+            mailService.sendVerificationEmail(user.getEmail(), token);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return ApiResponse.<UserResponse>builder()
                 .code(HttpStatus.CREATED.value())
-                .message("User registered successfully")
-                .data(userService.createUser(request))
+                .message("Register successful. Please check your email to verify.")
+                .data(user)
                 .build();
+    }
+
+    // ================= VERIFY EMAIL =================
+    @GetMapping("/verify")
+    public ApiResponse<String> verifyEmail(@RequestParam String token) {
+        boolean isValid = userService.verifyEmail(token);
+
+        if (!isValid) {
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message("Invalid or expired token")
+                    .data(null)
+                    .build();
+        }
+
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Email verified successfully")
+                .data(null)
+                .build();
+    }
+
+    // ================= FORGOT PASSWORD =================
+    @PostMapping("/forgot-password")
+    public ApiResponse<String> forgotPassword(@RequestBody AuthRequest request) {
+        try {
+            String token = UUID.randomUUID().toString();
+
+            userService.saveResetPasswordToken(request.getEmail(), token);
+
+            String resetLink = "http://localhost:8080/api/v1/auth/reset-password?token=" + token;
+
+            mailService.sendPasswordResetEmail(request.getEmail(), resetLink);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("If email exists, reset link has been sent")
+                .data(null)
+                .build();
+    }
+
+    // ================= RESET PASSWORD =================
+    @PostMapping("/reset-password")
+    public ApiResponse<String> resetPassword(
+            @RequestParam String token,
+            @RequestParam String newPassword) {
+        boolean success = userService.resetPassword(token, newPassword);
+
+        if (!success) {
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message("Invalid or expired token")
+                    .data(null)
+                    .build();
+        }
+
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Password reset successful")
+                .data(null)
+                .build();
+    }
+
+    // ================= TEST MAIL =================
+    @GetMapping("/test-mail")
+    public String testMail() {
+        mailService.sendVerificationEmail("krissv659@gmail.com", "123456");
+        return "Sent!";
     }
 }

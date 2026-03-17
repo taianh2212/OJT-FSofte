@@ -30,12 +30,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         log.info("User found: {}, password hash exists: {}", user.getEmail(), (user.getPasswordHash() != null));
 
+        // Null-safe: nếu role là null thì mặc định là CUSTOMER
+        String roleName = (user.getRole() != null) ? user.getRole().name() : "CUSTOMER";
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
                 user.getIsActive(),
                 true, true, true,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName))
         );
     }
 }

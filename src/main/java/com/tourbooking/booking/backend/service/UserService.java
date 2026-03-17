@@ -6,9 +6,22 @@ import java.util.List;
 
 public interface UserService {
     List<UserResponse> getAllUsers();
+
     UserResponse getUserById(Long id);
+
     UserResponse createUser(UserRequest request);
+
     UserResponse updateUser(Long id, UserRequest request);
+
     void deleteUser(Long id);
+
     UserResponse getUserByEmail(String email);
+
+    void saveVerificationToken(String email, String token);
+
+    boolean verifyEmail(String token);
+
+    void saveResetPasswordToken(String email, String token);
+
+    boolean resetPassword(String token, String newPassword);
 }
