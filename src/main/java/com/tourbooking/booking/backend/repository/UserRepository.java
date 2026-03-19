@@ -9,4 +9,7 @@ import com.tourbooking.booking.backend.model.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    
+    java.util.List<User> findByEnabledFalseAndCreatedAtBefore(java.time.LocalDateTime cutoff);
 }
+

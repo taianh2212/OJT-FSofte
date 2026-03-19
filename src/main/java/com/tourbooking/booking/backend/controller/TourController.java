@@ -45,6 +45,20 @@ public class TourController {
                 .build();
     }
 
+    @GetMapping("/filter")
+    public ApiResponse<List<TourResponse>> filterTours(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) java.math.BigDecimal minPrice,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) java.time.LocalDate startDate) {
+        return ApiResponse.<List<TourResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Filtered tours")
+                .data(tourService.searchToursWithFilters(keyword, minPrice, maxPrice, minRating, startDate))
+                .build();
+    }
+
     @GetMapping("/category/{categoryId}")
     public ApiResponse<List<TourResponse>> getToursByCategory(@PathVariable Long categoryId) {
         return ApiResponse.<List<TourResponse>>builder()
