@@ -15,7 +15,7 @@ public class UserMapper {
         response.setRole(user.getRole());
         response.setAvatarUrl(user.getAvatarUrl());
         response.setIsActive(user.getIsActive());
-        response.setEnabled(user.isEnabled());
+        response.setEnabled(Boolean.TRUE.equals(user.getIsActive()));
         return response;
     }
 

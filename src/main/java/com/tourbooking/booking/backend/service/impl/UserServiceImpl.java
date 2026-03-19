@@ -1,21 +1,23 @@
 package com.tourbooking.booking.backend.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.tourbooking.booking.backend.exception.AppException;
 import com.tourbooking.booking.backend.exception.ErrorCode;
 import com.tourbooking.booking.backend.mapper.UserMapper;
 import com.tourbooking.booking.backend.model.dto.request.UserRequest;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
+import com.tourbooking.booking.backend.model.entity.Token;
 import com.tourbooking.booking.backend.model.entity.User;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import com.tourbooking.booking.backend.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import com.tourbooking.booking.backend.model.entity.Token;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,7 @@ public class UserServiceImpl implements UserService {
         if (user.getRole() == null) {
             user.setRole(com.tourbooking.booking.backend.model.entity.enums.UserRole.CUSTOMER);
         }
+        user.setIsActive(false);
         
         User savedUser = userRepository.save(user);
         return UserMapper.toResponse(savedUser);
@@ -121,7 +124,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(t.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        user.setEnabled(true); // 👈 bạn cần field này trong User
+        user.setIsActive(true);
         userRepository.save(user);
 
         t.setUsed(true);

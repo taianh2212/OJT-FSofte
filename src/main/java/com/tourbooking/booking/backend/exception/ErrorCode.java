@@ -14,7 +14,8 @@ public enum ErrorCode {
     EMAIL_EXISTED(1007, "Email already exists"),
     INVALID_RATING(1008, "Rating must be between 1 and 5"),
     UNAUTHORIZED(1009, "Unauthorized access"),
-    FORBIDDEN(1010, "Access denied");
+    FORBIDDEN(1010, "Access denied"),
+    INVALID_REQUEST(1011, "Invalid request");
 
     private final int code;
     private final String message;

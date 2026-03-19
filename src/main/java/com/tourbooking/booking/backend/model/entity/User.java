@@ -44,6 +44,4 @@ public class User extends Base {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ChatMessages> chatMessages;
-
-    private boolean enabled = false;
 }

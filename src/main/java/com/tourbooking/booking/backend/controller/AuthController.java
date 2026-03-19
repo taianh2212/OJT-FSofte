@@ -5,12 +5,14 @@ import com.tourbooking.booking.backend.model.dto.request.UserRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
 import com.tourbooking.booking.backend.model.dto.response.AuthResponse;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
+import com.tourbooking.booking.backend.security.JwtService;
 import com.tourbooking.booking.backend.service.MailService;
 import com.tourbooking.booking.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -24,6 +26,10 @@ public class AuthController {
     private final UserService userService;
     private final MailService mailService;
     private final com.tourbooking.booking.backend.service.RateLimiterService rateLimiterService;
+    private final JwtService jwtService;
+
+    @Value("${app.public-base-url:http://localhost:8080}")
+    private String publicBaseUrl;
 
     // ================= LOGIN =================
     @PostMapping("/login")
@@ -38,7 +44,7 @@ public class AuthController {
         }
 
         AuthResponse authResponse = AuthResponse.builder()
-                .token("mock-jwt-token") // TODO: thay bằng JWT thật
+                .token(jwtService.generateToken(user))
                 .user(user)
                 .build();
 
@@ -109,7 +115,8 @@ public class AuthController {
 
             userService.saveResetPasswordToken(request.getEmail(), token);
 
-            String resetLink = "http://localhost:8080/api/v1/auth/reset-password?token=" + token;
+            // Link should open a UI page (GET), not the reset API (POST).
+            String resetLink = publicBaseUrl + "/auth/reset-password.html?token=" + token;
 
             mailService.sendPasswordResetEmail(request.getEmail(), resetLink);
 

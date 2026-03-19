@@ -8,11 +8,11 @@ public class ViewController {
 
     @GetMapping("/")
     public String index() {
-        return "redirect:/user/index.html";
+        return "redirect:/pages/index.html";
     }
 
     @GetMapping("/login")
     public String login() {
-        return "redirect:/auth/login.html";
+        return "redirect:/pages/auth/login.html";
     }
 }
