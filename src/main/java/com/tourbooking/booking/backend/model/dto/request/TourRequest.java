@@ -11,5 +11,6 @@ public class TourRequest {
     private Integer duration;
     private String startLocation;
     private String endLocation;
+    private String transportType;
     private Long categoryId;
 }

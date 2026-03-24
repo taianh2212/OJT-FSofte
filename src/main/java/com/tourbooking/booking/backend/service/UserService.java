@@ -24,4 +24,8 @@ public interface UserService {
     void saveResetPasswordToken(String email, String token);
 
     boolean resetPassword(String token, String newPassword);
+
+    String rotateSession(String email);
+
+    void clearSession(String email);
 }

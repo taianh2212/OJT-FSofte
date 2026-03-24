@@ -10,6 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     
-    java.util.List<User> findByEnabledFalseAndCreatedAtBefore(java.time.LocalDateTime cutoff);
+    java.util.List<User> findByIsActiveFalseAndCreatedAtBefore(java.time.LocalDateTime cutoff);
 }
 

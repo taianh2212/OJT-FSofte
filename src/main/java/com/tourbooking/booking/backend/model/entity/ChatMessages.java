@@ -23,6 +23,9 @@ public class ChatMessages extends Base {
     @Column(name = "Message", columnDefinition = "NVARCHAR(MAX)")
     private String message;
 
+    @Column(name = "GuestId", length = 50)
+    private String guestId;
+
     @Column(name = "SentAt")
     private LocalDateTime sentAt;
 

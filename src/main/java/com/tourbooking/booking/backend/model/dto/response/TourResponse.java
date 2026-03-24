@@ -13,5 +13,6 @@ public class TourResponse {
     private String startLocation;
     private String endLocation;
     private Double rating;
+    private String transportType;
 
 }

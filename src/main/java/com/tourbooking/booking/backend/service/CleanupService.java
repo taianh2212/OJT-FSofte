@@ -20,13 +20,12 @@ public class CleanupService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
-    // Chạy mỗi phút (60000 ms)
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void deleteUnverifiedUsers() {
-        // Tìm user tạo trước 180s (3 phút) mà chưa verify
+
         LocalDateTime cutoff = LocalDateTime.now().minusSeconds(180);
-        List<User> unverifiedUsers = userRepository.findByEnabledFalseAndCreatedAtBefore(cutoff);
+        List<User> unverifiedUsers = userRepository.findByIsActiveFalseAndCreatedAtBefore(cutoff);
         
         if (!unverifiedUsers.isEmpty()) {
             for (User user : unverifiedUsers) {

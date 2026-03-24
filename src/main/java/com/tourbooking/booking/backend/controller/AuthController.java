@@ -5,14 +5,18 @@ import com.tourbooking.booking.backend.model.dto.request.UserRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
 import com.tourbooking.booking.backend.model.dto.response.AuthResponse;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
+import com.tourbooking.booking.backend.security.JwtService;
+import com.tourbooking.booking.backend.service.AuthSessionNotificationService;
 import com.tourbooking.booking.backend.service.MailService;
 import com.tourbooking.booking.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -24,6 +28,11 @@ public class AuthController {
     private final UserService userService;
     private final MailService mailService;
     private final com.tourbooking.booking.backend.service.RateLimiterService rateLimiterService;
+    private final AuthSessionNotificationService authSessionNotificationService;
+    private final JwtService jwtService;
+
+    @Value("${app.public-base-url:http://localhost:8080}")
+    private String publicBaseUrl;
 
     // ================= LOGIN =================
     @PostMapping("/login")
@@ -37,15 +46,40 @@ public class AuthController {
             throw new RuntimeException("Account not verified. Please check your email.");
         }
 
+        String sessionId = userService.rotateSession(user.getEmail());
+
         AuthResponse authResponse = AuthResponse.builder()
-                .token("mock-jwt-token") // TODO: thay bằng JWT thật
+                .token(jwtService.generateToken(user, sessionId))
                 .user(user)
                 .build();
+
+        authSessionNotificationService.notifySessionInvalidated(
+                user.getEmail(),
+                "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại.");
 
         return ApiResponse.<AuthResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("Login successful")
                 .data(authResponse)
+                .build();
+    }
+
+    // ================= ME =================
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> me(Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            return ApiResponse.<UserResponse>builder()
+                    .code(HttpStatus.UNAUTHORIZED.value())
+                    .message("Unauthorized")
+                    .data(null)
+                    .build();
+        }
+
+        UserResponse user = userService.getUserByEmail(principal.getName());
+        return ApiResponse.<UserResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Current user")
+                .data(user)
                 .build();
     }
 
@@ -109,7 +143,11 @@ public class AuthController {
 
             userService.saveResetPasswordToken(request.getEmail(), token);
 
-            String resetLink = "http://localhost:8080/api/v1/auth/reset-password?token=" + token;
+            // Link should open a UI page (GET), not the reset API (POST).
+            String baseUrl = publicBaseUrl.endsWith("/")
+                    ? publicBaseUrl.substring(0, publicBaseUrl.length() - 1)
+                    : publicBaseUrl;
+            String resetLink = baseUrl + "/pages/auth/reset-password.html?token=" + token;
 
             mailService.sendPasswordResetEmail(request.getEmail(), resetLink);
 
@@ -146,10 +184,27 @@ public class AuthController {
                 .build();
     }
 
-    // ================= TEST MAIL =================
-    @GetMapping("/test-mail")
-    public String testMail() {
-        mailService.sendVerificationEmail("krissv659@gmail.com", "123456");
-        return "Sent!";
+    // ================= LOGOUT =================
+    @PostMapping("/logout")
+    public ApiResponse<String> logout(Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.UNAUTHORIZED.value())
+                    .message("Unauthorized")
+                    .data(null)
+                    .build();
+        }
+
+        userService.clearSession(principal.getName());
+        authSessionNotificationService.notifySessionInvalidated(
+                principal.getName(),
+                "Phiên đăng nhập đã bị đăng xuất. Vui lòng đăng nhập lại.");
+
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Logout successful")
+                .data(null)
+                .build();
     }
+
 }
