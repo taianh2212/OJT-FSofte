@@ -32,6 +32,10 @@ public class TourSchedule extends Base {
     @Column(name = "Status", length = 50)
     private TourStatus status = TourStatus.OPEN;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GuideID", columnDefinition = "BIGINT")
+    private User guide;
+
     @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Booking> bookings;
 }
