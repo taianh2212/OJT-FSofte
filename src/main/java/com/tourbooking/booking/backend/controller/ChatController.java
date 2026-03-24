@@ -37,13 +37,15 @@ public class ChatController {
                 .build();
     }
 
-    // UC11: get conversation history (userId optional)
+    // UC11: get conversation history (userId or guestId)
     @GetMapping("/messages")
-    public ApiResponse<List<ChatMessageResponse>> history(@RequestParam(required = false) Long userId) {
+    public ApiResponse<List<ChatMessageResponse>> history(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String guestId) {
         return ApiResponse.<List<ChatMessageResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Conversation history")
-                .data(chatService.getConversation(userId))
+                .data(chatService.getConversation(userId, guestId))
                 .build();
     }
 }

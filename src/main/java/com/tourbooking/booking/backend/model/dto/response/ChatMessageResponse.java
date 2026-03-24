@@ -10,6 +10,7 @@ import lombok.Data;
 public class ChatMessageResponse {
     private Long id;
     private Long userId;
+    private String guestId;
     private String senderType;
     private String message;
     private LocalDateTime sentAt;

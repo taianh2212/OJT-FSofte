@@ -2,6 +2,7 @@ package com.tourbooking.booking.backend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -167,5 +168,27 @@ public class UserServiceImpl implements UserService {
         tokenRepository.save(t);
 
         return true;
+    }
+
+    @Override
+    @Transactional
+    public String rotateSession(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        String sessionId = UUID.randomUUID().toString();
+        user.setCurrentSessionId(sessionId);
+        userRepository.save(user);
+        return sessionId;
+    }
+
+    @Override
+    @Transactional
+    public void clearSession(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setCurrentSessionId(null);
+        userRepository.save(user);
     }
 }

@@ -42,10 +42,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Cho phép tất cả các tài nguyên tĩnh
                 .requestMatchers(
-                    "/", "/login", "/error", "/index.html", "/favicon.ico",
+                    "/", "/error", "/index.html", "/favicon.ico",
                     "/css/**", "/js/**", "/images/**", "/assets/**",
                     "/pages/**",
-                    "/auth/**", "/user/**", "/admin/**",
+                    "/user/**", "/admin/**",
                     "/static/**", "/webjars/**"
                 ).permitAll()
                 // Cho phép các API Auth
@@ -56,6 +56,8 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/newsletters").permitAll()
                 // UC11 chat support + UC51 AI chat
                 .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
+                // Admin chat escalation dashboard
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Read-only categories
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 // Everything else requires login (can be refined later)

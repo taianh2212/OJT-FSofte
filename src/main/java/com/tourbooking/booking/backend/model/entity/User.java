@@ -33,6 +33,9 @@ public class User extends Base {
     @Column(name = "IsActive")
     private Boolean isActive = true;
 
+    @Column(name = "CurrentSessionId", length = 64)
+    private String currentSessionId;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Booking> bookings;
 

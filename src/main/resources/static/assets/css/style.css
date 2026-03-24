@@ -209,6 +209,13 @@ textarea {
   box-shadow: none;
 }
 
+.btn-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid rgba(15, 23, 42, 0.13);
+  box-shadow: none;
+}
+
 .input,
 input,
 select,
@@ -452,7 +459,19 @@ label {
 }
 
 .msg.staff {
-  background: rgba(8, 47, 73, 0.1);
+  background: rgba(222, 233, 247, 0.9);
+  color: #0b1723;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
+.chat-panel form input,
+.chat-panel form textarea,
+.chat-box form input,
+.chat-box form textarea,
+#text {
+  color: #0b1723;
+  caret-color: #0b1723;
 }
 
 .tabs {

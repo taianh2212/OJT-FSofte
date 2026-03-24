@@ -7,7 +7,8 @@ import lombok.Data;
 public class AiChatRequest {
     private Long userId; // optional for guest
 
+    private String guestId;
+
     @NotBlank
     private String message;
 }
-

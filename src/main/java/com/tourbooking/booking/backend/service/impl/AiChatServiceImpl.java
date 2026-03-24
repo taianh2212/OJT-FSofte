@@ -38,6 +38,9 @@ public class AiChatServiceImpl implements AiChatService {
         // Save guest/user message
         ChatMessages userMsg = new ChatMessages();
         userMsg.setUser(user);
+        if (user == null && request.getGuestId() != null) {
+            userMsg.setGuestId(request.getGuestId());
+        }
         userMsg.setSenderType(ChatSenderType.GUEST.name());
         userMsg.setMessage(request.getMessage());
         chatRepo.save(userMsg);
@@ -49,6 +52,9 @@ public class AiChatServiceImpl implements AiChatService {
         aiMsg.setUser(user);
         aiMsg.setSenderType(ChatSenderType.AI.name());
         aiMsg.setMessage(reply);
+        if (user == null && request.getGuestId() != null) {
+            aiMsg.setGuestId(request.getGuestId());
+        }
         chatRepo.save(aiMsg);
 
         return AiChatResponse.builder().reply(reply).build();
@@ -62,7 +68,8 @@ public class AiChatServiceImpl implements AiChatService {
 
         List<Tour> matches = tourRepo.findByTourNameContainingIgnoreCase(keyword);
         if (matches.isEmpty()) {
-            return "Mình chưa thấy tour khớp với \"" + keyword + "\". Bạn thử nhập tên địa điểm hoặc loại tour (biển/núi/văn hoá) nhé.";
+            return "Mình chưa thấy tour khớp với \"" + keyword + "\". Bạn thử nhập tên địa điểm hoặc loại tour (biển/núi/văn hoá) nhé."
+                    + " Nếu bạn muốn gặp nhân viên, hãy gõ 'Tôi muốn gặp nhân viên'.";
         }
 
         List<Tour> top = matches.stream()
@@ -78,7 +85,16 @@ public class AiChatServiceImpl implements AiChatService {
                 .map(t -> "- " + t.getTourName() + " (Giá: " + t.getPrice() + ", Rating: " + t.getRating() + ")")
                 .collect(Collectors.joining("\n"));
 
-        return "Mình gợi ý một vài tour phù hợp:\n" + list + "\n\nBạn muốn mình lọc theo ngày khởi hành hoặc khoảng giá không?";
+        String response = "Mình gợi ý một vài tour phù hợp:\n" + list + "\n\nBạn muốn mình lọc theo ngày khởi hành hoặc khoảng giá không?";
+        if (isFrustrated(keyword)) {
+            response += "\n\nNếu bạn muốn gặp nhân viên thật để hỗ trợ thêm, chỉ cần viết 'Tôi muốn gặp nhân viên'.";
+        }
+        return response;
+    }
+
+    private boolean isFrustrated(String message) {
+        if (message == null) return false;
+        String lower = message.toLowerCase();
+        return lower.contains("không") || lower.contains("hết") || lower.contains("bực") || lower.contains("tức");
     }
 }
-

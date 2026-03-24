@@ -10,9 +10,4 @@ public class ViewController {
     public String index() {
         return "redirect:/pages/index.html";
     }
-
-    @GetMapping("/login")
-    public String login() {
-        return "redirect:/pages/auth/login.html";
-    }
 }

@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.crypto.SecretKey;
 
@@ -32,9 +33,10 @@ public class JwtService {
         this.expMinutes = expMinutes;
     }
 
-    public String generateToken(UserResponse user) {
+    public String generateToken(UserResponse user, String sessionId) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(expMinutes * 60L);
+        String activeSessionId = Objects.requireNonNull(sessionId, "sessionId is required");
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
@@ -42,7 +44,8 @@ public class JwtService {
                 .setExpiration(Date.from(exp))
                 .addClaims(Map.of(
                         "userId", user.getId(),
-                        "role", user.getRole() == null ? "CUSTOMER" : user.getRole().name()
+                        "role", user.getRole() == null ? "CUSTOMER" : user.getRole().name(),
+                        "sessionId", activeSessionId
                 ))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -65,4 +68,3 @@ public class JwtService {
         }
     }
 }
-

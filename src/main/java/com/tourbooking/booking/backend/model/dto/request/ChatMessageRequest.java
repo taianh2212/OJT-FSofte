@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class ChatMessageRequest {
     private Long userId; // optional for guest
+    private String guestId; // optional if userId is provided
 
     @NotBlank
     private String senderType; // GUEST / STAFF / AI

@@ -16,12 +16,13 @@ class BookingApplicationTests {
 		user.setEmail("test@example.com");
 		user.setRole(UserRole.CUSTOMER);
 
-		String token = jwtService.generateToken(user);
+		String token = jwtService.generateToken(user, "session-123");
 		Claims claims = jwtService.parseClaims(token);
 
 		org.junit.jupiter.api.Assertions.assertEquals("test@example.com", claims.getSubject());
 		org.junit.jupiter.api.Assertions.assertEquals(1, ((Number) claims.get("userId")).intValue());
 		org.junit.jupiter.api.Assertions.assertEquals("CUSTOMER", claims.get("role"));
+		org.junit.jupiter.api.Assertions.assertEquals("session-123", claims.get("sessionId"));
 	}
 
 }

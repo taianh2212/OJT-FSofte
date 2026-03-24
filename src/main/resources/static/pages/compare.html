@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Compare Tours - TourBooking</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
-    .row { display:grid; gap: 8px; margin-top: 12px; color: var(--text-soft); }
+    body { font-family: 'Outfit', sans-serif; }
+    .compare-grid { display: grid; grid-auto-columns: minmax(300px, 1fr); grid-auto-flow: column; gap: 18px; overflow-x: auto; padding-bottom: 20px; }
+    .compare-col { display: grid; gap: 12px; }
+    .feature-label { font-weight: 800; font-size: 0.82rem; color: var(--text-faint); text-transform: uppercase; margin-top: 14px; }
   </style>
 </head>
 <body>
@@ -17,7 +19,7 @@
       <div class="content-pad">
         <div class="top">
           <a class="back-link" href="./tours.html">← Back to tours</a>
-          <button class="btn btn-secondary" id="clearBtn" type="button">Clear Selection</button>
+          <div id="navActions" class="actions"></div>
         </div>
 
         <div class="hero-grid" style="grid-template-columns:1fr 0.9fr;margin-top:18px;">
