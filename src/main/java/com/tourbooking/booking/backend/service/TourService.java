@@ -20,4 +20,6 @@ public interface TourService {
     TourResponse updateTour(Long id, TourRequest request);
 
     void deleteTour(Long id);
+
+    List<TourResponse> searchToursWithFilters(String keyword, java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Double minRating, java.time.LocalDate startDate);
 }

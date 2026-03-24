@@ -93,4 +93,12 @@ public class TourServiceImpl implements TourService {
         }
         tourRepo.deleteById(id);
     }
+
+    @Override
+    public List<TourResponse> searchToursWithFilters(String keyword, java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Double minRating, java.time.LocalDate startDate) {
+        return tourRepo.searchToursWithFilters(keyword, minPrice, maxPrice, minRating, startDate).stream()
+                .distinct()
+                .map(TourMapper::toResponse)
+                .toList();
+    }
 }
