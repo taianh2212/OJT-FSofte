@@ -32,8 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    )
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         String token = resolveToken(request);
         if (!StringUtils.hasText(token)) {
@@ -47,13 +46,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (email != null && sessionId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var user = userRepository.findByEmail(email).orElse(null);
-                if (user == null || user.getCurrentSessionId() == null || !sessionId.equals(user.getCurrentSessionId())) {
+                if (user == null || user.getCurrentSessionId() == null
+                        || !sessionId.equals(user.getCurrentSessionId())) {
                     sendUnauthorized(response, "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại.");
                     return;
                 }
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
