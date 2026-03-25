@@ -47,9 +47,7 @@ public class NewsletterServiceImpl implements NewsletterService {
     public NewsletterResponse updateNewsletter(Long id, NewsletterRequest request) {
         Newsletter existingNewsletter = newsletterRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NEWSLETTER_NOT_FOUND));
-        
         NewsletterMapper.updateEntityFromRequest(existingNewsletter, request);
-        
         Newsletter updatedNewsletter = newsletterRepo.save(existingNewsletter);
         return NewsletterMapper.toResponse(updatedNewsletter);
     }
