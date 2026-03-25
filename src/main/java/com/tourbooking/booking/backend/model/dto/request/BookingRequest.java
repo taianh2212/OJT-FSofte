@@ -10,5 +10,6 @@ public class BookingRequest {
     private Long scheduleId;
     private Integer numberOfPeople;
     private BigDecimal totalPrice;
+    private String discountCode;
     private BookingStatus status;
 }

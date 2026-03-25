@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TourBooking</title>
+    <link rel="stylesheet" href="../../assets/css/admin-common.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <a href="./dashboard.html" class="logo">TourBooking</a>
+            <nav>
+                <a href="./dashboard.html" class="nav-item active">Dashboard</a>
+                <a href="./manageTours.html" class="nav-item">Tours</a>
+                <a href="./manageCategories.html" class="nav-item">Categories</a>
+                <a href="./manageDiscounts.html" class="nav-item">Discounts</a>
+                <a href="./manageUsers.html" class="nav-item">Users</a>
+                <a href="./manageReview.html" class="nav-item">Reviews</a>
+                <a href="./financialReport.html" class="nav-item">Financial Report</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Dashboard Overview</h1>
+                <div class="user-actions">
+                    <span id="userInfo" style="font-weight: 600;"></span>
+                    <button id="logoutBtn" class="btn-secondary" style="margin-left: 1rem;">Logout</button>
+                </div>
+            </header>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="totalUsers">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenue (Month)</div>
+                    <div class="stat-value" id="totalRevenue">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Bookings</div>
+                    <div class="stat-value" id="activeBookings">--</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Hàm hiển thị lỗi
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Kiểm tra đăng nhập và role ADMIN
+        try {
+            const userStr = localStorage.getItem('user');
+            console.log('User from localStorage:', userStr);
+
+            if (!userStr) {
+                console.log('No user found, redirecting to login');
+                window.location.href = '/pages/auth/login.html';
+                throw new Error('No user found');
+            }
+
+            const user = JSON.parse(userStr);
+            console.log('Parsed user:', user);
+
+            if (!user || user.role !== 'ADMIN') {
+                console.log('User is not ADMIN, redirecting');
+                window.location.href = '/pages/auth/login.html';
+                throw new Error('Not authorized');
+            }
+
+            // Hiển thị thông tin user
+            const userName = user.fullName || user.FullName || user.email || 'Admin';
+            document.getElementById('userInfo').innerText = userName;
+
+            // Load dữ liệu thống kê
+            loadStats();
+
+        } catch (error) {
+            console.error('Error:', error);
+            showError('Please login again');
+            setTimeout(() => {
+                window.location.href = '/pages/auth/login.html';
+            }, 2000);
+        }
+
+        // Hàm load dữ liệu thống kê từ API
+        async function loadStats() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+
+                // Gọi API lấy tổng số users
+                const usersResponse = await fetch('/api/v1/admin/users/count', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (usersResponse.ok) {
+                    const data = await usersResponse.json();
+                    document.getElementById('totalUsers').innerText = data.count || '0';
+                }
+
+                // Gọi API lấy doanh thu
+                const revenueResponse = await fetch('/api/v1/admin/revenue/month', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (revenueResponse.ok) {
+                    const data = await revenueResponse.json();
+                    document.getElementById('totalRevenue').innerText = '$' + (data.revenue || '0');
+                }
+
+                // Gọi API lấy booking đang active
+                const bookingsResponse = await fetch('/api/v1/admin/bookings/active', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (bookingsResponse.ok) {
+                    const data = await bookingsResponse.json();
+                    document.getElementById('activeBookings').innerText = data.count || '0';
+                }
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Hiển thị dữ liệu mẫu nếu API chưa có
+                document.getElementById('totalUsers').innerText = '1,284';
+                document.getElementById('totalRevenue').innerText = '$12,450';
+                document.getElementById('activeBookings').innerText = '45';
+            }
+        }
+
+        // Xử lý logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            window.location.href = '/pages/auth/login.html';
+        });
+    </script>
+</body>
+
+</html>

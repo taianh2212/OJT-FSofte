@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserId(Long userId);
+    List<Booking> findByBookingDateBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+    List<Booking> findByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

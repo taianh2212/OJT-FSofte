@@ -28,4 +28,6 @@ public interface UserService {
     String rotateSession(String email);
 
     void clearSession(String email);
+
+    void toggleUserStatus(Long id, boolean isActive);
 }
