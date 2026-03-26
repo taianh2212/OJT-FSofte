@@ -187,18 +187,12 @@ public class AuthController {
     // ================= LOGOUT =================
     @PostMapping("/logout")
     public ApiResponse<String> logout(Principal principal) {
-        if (principal == null || principal.getName() == null) {
-            return ApiResponse.<String>builder()
-                    .code(HttpStatus.UNAUTHORIZED.value())
-                    .message("Unauthorized")
-                    .data(null)
-                    .build();
+        if (principal != null && principal.getName() != null) {
+            userService.clearSession(principal.getName());
+            authSessionNotificationService.notifySessionInvalidated(
+                    principal.getName(),
+                    "Phiên đăng nhập đã bị đăng xuất. Vui lòng đăng nhập lại.");
         }
-
-        userService.clearSession(principal.getName());
-        authSessionNotificationService.notifySessionInvalidated(
-                principal.getName(),
-                "Phiên đăng nhập đã bị đăng xuất. Vui lòng đăng nhập lại.");
 
         return ApiResponse.<String>builder()
                 .code(HttpStatus.OK.value())

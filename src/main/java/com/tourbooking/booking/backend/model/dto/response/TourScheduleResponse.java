@@ -18,4 +18,7 @@ public class TourScheduleResponse {
     private LocalDate endDate;
     private Integer availableSlots;
     private String status;
+    private String currentProgress;
+    private String reportContent;
+    private java.time.LocalDateTime reportSubmittedAt;
 }

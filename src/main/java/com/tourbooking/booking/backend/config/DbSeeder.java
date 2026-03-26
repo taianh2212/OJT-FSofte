@@ -28,16 +28,8 @@ public class DbSeeder implements CommandLineRunner {
 
     private void seedUser(String fullName, String email, String password, UserRole role) {
         try {
-            Object existing = userRepository.findByEmail(email);
-            boolean exists = false;
-            if (existing != null) {
-                if (existing instanceof Optional) {
-                    exists = ((Optional<?>) existing).isPresent();
-                } else {
-                    exists = true;
-                }
-            }
-            if (!exists) {
+            Optional<User> existingUser = userRepository.findByEmail(email);
+            if (existingUser.isEmpty()) {
                 User user = new User();
                 user.setFullName(fullName);
                 user.setEmail(email);
