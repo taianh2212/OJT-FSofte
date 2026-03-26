@@ -6,6 +6,7 @@ import com.tourbooking.booking.backend.model.dto.response.TourResponse;
 import com.tourbooking.booking.backend.model.entity.Tour;
 import com.tourbooking.booking.backend.model.entity.TourImage;
 import com.tourbooking.booking.backend.model.entity.TourHighlight;
+import com.tourbooking.booking.backend.model.entity.TourSchedule;
 import java.util.stream.Collectors;
 
 public class TourMapper {
@@ -22,6 +23,7 @@ public class TourMapper {
         response.setStartLocation(tour.getStartLocation());
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
+        response.setTransportType(tour.getTransportType());
         return response;
     }
 
@@ -37,6 +39,7 @@ public class TourMapper {
         response.setStartLocation(tour.getStartLocation());
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
+        response.setTransportType(tour.getTransportType());
 
         if (tour.getCategory() != null) {
             response.setCategoryName(tour.getCategory().getCategoryName());
@@ -51,7 +54,21 @@ public class TourMapper {
                     tour.getHighlights().stream().map(TourHighlight::getHighlight).collect(Collectors.toList()));
         }
 
+        if (tour.getSchedules() != null) {
+            response.setSchedules(tour.getSchedules().stream().map(TourMapper::toScheduleSummary).toList());
+        }
+
         return response;
+    }
+
+    private static TourDetailResponse.TourScheduleSummary toScheduleSummary(TourSchedule schedule) {
+        TourDetailResponse.TourScheduleSummary s = new TourDetailResponse.TourScheduleSummary();
+        s.setScheduleId(schedule.getId());
+        s.setStartDate(schedule.getStartDate());
+        s.setEndDate(schedule.getEndDate());
+        s.setAvailableSlots(schedule.getAvailableSlots());
+        s.setStatus(schedule.getStatus() == null ? null : schedule.getStatus().name());
+        return s;
     }
 
     public static Tour toEntity(TourRequest request) {
@@ -71,6 +88,7 @@ public class TourMapper {
         if (request.getDuration() != null) tour.setDuration(request.getDuration());
         if (request.getStartLocation() != null) tour.setStartLocation(request.getStartLocation());
         if (request.getEndLocation() != null) tour.setEndLocation(request.getEndLocation());
+        if (request.getTransportType() != null) tour.setTransportType(request.getTransportType());
         // Category should be handled in the Service layer
     }
 }

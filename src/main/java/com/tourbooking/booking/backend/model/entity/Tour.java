@@ -38,6 +38,9 @@ public class Tour extends Base {
     @Column(name = "Longitude", precision = 9, scale = 6)
     private BigDecimal longitude;
 
+    @Column(name = "TransportType", length = 50)
+    private String transportType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CategoryID", columnDefinition = "BIGINT")
     private Category category;

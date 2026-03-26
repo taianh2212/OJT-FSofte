@@ -2,13 +2,18 @@ package com.tourbooking.booking.backend.controller;
 
 import com.tourbooking.booking.backend.model.dto.request.TourRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
+import com.tourbooking.booking.backend.model.dto.response.PagedResponse;
 import com.tourbooking.booking.backend.model.dto.response.TourDetailResponse;
 import com.tourbooking.booking.backend.model.dto.response.TourResponse;
 import com.tourbooking.booking.backend.service.TourService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -42,6 +47,81 @@ public class TourController {
                 .code(HttpStatus.OK.value())
                 .message("Search results for: " + keyword)
                 .data(tourService.searchTours(keyword))
+                .build();
+    }
+
+    @GetMapping("/filter")
+    public ApiResponse<List<TourResponse>> filterTours(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) java.math.BigDecimal minPrice,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) java.time.LocalDate startDate) {
+        return ApiResponse.<List<TourResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Filtered tours")
+                .data(tourService.searchToursWithFilters(keyword, minPrice, maxPrice, minRating, startDate))
+                .build();
+    }
+
+    // UC01 + UC02 + UC03 + UC04: browse tours with filters + sorting + paging
+    @GetMapping("/browse")
+    public ApiResponse<PagedResponse<TourResponse>> browseTours(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) java.math.BigDecimal minPrice,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) java.time.LocalDate startDate,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String transportType,
+            @RequestParam(required = false) Long cityId,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "price") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        String normalizedSortBy = sortBy == null ? "" : sortBy.trim().toLowerCase();
+
+        // For computed sorts (popularity/distance), sorting happens in SQL
+        Pageable pageable;
+        if (Arrays.asList("popularity", "distance").contains(normalizedSortBy)) {
+            pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
+        } else {
+            Sort sort = Sort.by("price");
+            if (Arrays.asList("price", "rating", "tourname", "createdat").contains(normalizedSortBy)) {
+                String property = switch (normalizedSortBy) {
+                    case "tourname" -> "tourName";
+                    case "createdat" -> "createdAt";
+                    default -> normalizedSortBy;
+                };
+                sort = Sort.by(property);
+            }
+            sort = "desc".equalsIgnoreCase(sortDir) ? sort.descending() : sort.ascending();
+            pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), sort);
+        }
+
+        return ApiResponse.<PagedResponse<TourResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Browse tours")
+                .data(tourService.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, cityId, lat, lng, sortBy, sortDir, pageable))
+                .build();
+    }
+
+    // UC06: compare multiple tours
+    @GetMapping("/compare")
+    public ApiResponse<List<TourDetailResponse>> compareTours(@RequestParam String ids) {
+        List<Long> tourIds = Arrays.stream(ids.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .map(Long::valueOf)
+                .toList();
+
+        return ApiResponse.<List<TourDetailResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Compare tours")
+                .data(tourService.compareTours(tourIds))
                 .build();
     }
 

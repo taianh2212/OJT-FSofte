@@ -4,6 +4,7 @@ import com.tourbooking.booking.backend.model.entity.enums.TourStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -31,6 +32,22 @@ public class TourSchedule extends Base {
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50)
     private TourStatus status = TourStatus.OPEN;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GuideID", columnDefinition = "BIGINT")
+    private User guide;
+
+    @Column(name = "CurrentProgress", columnDefinition = "NVARCHAR(MAX)")
+    private String currentProgress;
+
+    @Column(name = "ReportContent", columnDefinition = "NVARCHAR(MAX)")
+    private String reportContent;
+
+    @Column(name = "ReportSubmittedAt")
+    private LocalDateTime reportSubmittedAt;
+
+    @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TourActivityImage> activityImages;
 
     @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Booking> bookings;

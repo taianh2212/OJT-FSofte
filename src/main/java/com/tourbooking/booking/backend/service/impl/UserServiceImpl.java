@@ -1,19 +1,24 @@
 package com.tourbooking.booking.backend.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.tourbooking.booking.backend.exception.AppException;
 import com.tourbooking.booking.backend.exception.ErrorCode;
 import com.tourbooking.booking.backend.mapper.UserMapper;
 import com.tourbooking.booking.backend.model.dto.request.UserRequest;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
+import com.tourbooking.booking.backend.model.entity.Token;
 import com.tourbooking.booking.backend.model.entity.User;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import com.tourbooking.booking.backend.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.tourbooking.booking.backend.repository.TokenRepository tokenRepository;
 
     @Override
     public List<UserResponse> getAllUsers() {
@@ -43,7 +49,14 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         User user = UserMapper.toEntity(request);
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword())); 
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        
+        // Gán Role mặc định là CUSTOMER khi đăng ký
+        if (user.getRole() == null) {
+            user.setRole(com.tourbooking.booking.backend.model.entity.enums.UserRole.CUSTOMER);
+        }
+        user.setIsActive(false);
+        
         User savedUser = userRepository.save(user);
         return UserMapper.toResponse(savedUser);
     }
@@ -83,5 +96,99 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return UserMapper.toResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public void saveVerificationToken(String email, String token) {
+        Token t = Token.builder()
+                .token(token)
+                .email(email)
+                .type("VERIFY")
+                .used(false)
+                .expiryDate(LocalDateTime.now().plusMinutes(15))
+                .build();
+
+        tokenRepository.save(t);
+    }
+
+    @Override
+    @Transactional
+    public boolean verifyEmail(String token) {
+        Token t = tokenRepository.findByToken(token)
+                .orElse(null);
+
+        if (t == null || t.isUsed() || t.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        User user = userRepository.findByEmail(t.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setIsActive(true);
+        userRepository.save(user);
+
+        t.setUsed(true);
+        tokenRepository.save(t);
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public void saveResetPasswordToken(String email, String token) {
+        Token t = Token.builder()
+                .token(token)
+                .email(email)
+                .type("RESET")
+                .used(false)
+                .expiryDate(LocalDateTime.now().plusMinutes(15))
+                .build();
+
+        tokenRepository.save(t);
+    }
+
+    @Override
+    @Transactional
+    public boolean resetPassword(String token, String newPassword) {
+        Token t = tokenRepository.findByToken(token)
+                .orElse(null);
+
+        if (t == null || t.isUsed() || t.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        User user = userRepository.findByEmail(t.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        t.setUsed(true);
+        tokenRepository.save(t);
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public String rotateSession(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        String sessionId = UUID.randomUUID().toString();
+        user.setCurrentSessionId(sessionId);
+        userRepository.save(user);
+        return sessionId;
+    }
+
+    @Override
+    @Transactional
+    public void clearSession(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setCurrentSessionId(null);
+        userRepository.save(user);
     }
 }
