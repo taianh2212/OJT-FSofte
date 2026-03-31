@@ -18,15 +18,20 @@ import com.tourbooking.booking.backend.model.entity.User;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import com.tourbooking.booking.backend.service.UserService;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final com.tourbooking.booking.backend.repository.TokenRepository tokenRepository;
+
+    public UserServiceImpl(UserRepository userRepository, 
+                           PasswordEncoder passwordEncoder, 
+                           com.tourbooking.booking.backend.repository.TokenRepository tokenRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenRepository = tokenRepository;
+    }
 
     @Override
     public List<UserResponse> getAllUsers() {
@@ -48,15 +53,11 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
+
         User user = UserMapper.toEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        
-        // Gán Role mặc định là CUSTOMER khi đăng ký
-        if (user.getRole() == null) {
-            user.setRole(com.tourbooking.booking.backend.model.entity.enums.UserRole.CUSTOMER);
-        }
-        user.setIsActive(false);
-        
+        user.setIsActive(false); // Require verification
+
         User savedUser = userRepository.save(user);
         return UserMapper.toResponse(savedUser);
     }
@@ -64,21 +65,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse updateUser(Long id, UserRequest request) {
-        User existingUser = userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        if (request.getEmail() != null && !request.getEmail().equals(existingUser.getEmail())) {
-            if (userRepository.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_EXISTED);
-            }
+        UserMapper.updateEntityFromRequest(user, request);
+
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
 
-        UserMapper.updateEntityFromRequest(existingUser, request);
-        if (request.getPassword() != null) {
-            existingUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        }
-
-        User updatedUser = userRepository.save(existingUser);
+        User updatedUser = userRepository.save(user);
         return UserMapper.toResponse(updatedUser);
     }
 
@@ -100,72 +96,62 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void saveVerificationToken(String email, String token) {
-        Token t = Token.builder()
-                .token(token)
-                .email(email)
-                .type("VERIFY")
-                .used(false)
-                .expiryDate(LocalDateTime.now().plusMinutes(15))
-                .build();
-
-        tokenRepository.save(t);
+    public void saveVerificationToken(String email, String tokenValue) {
+        Token token = new Token();
+        token.setEmail(email);
+        token.setToken(tokenValue);
+        token.setExpiryDate(LocalDateTime.now().plusHours(24));
+        token.setType("VERIFY");
+        tokenRepository.save(token);
     }
 
     @Override
     @Transactional
-    public boolean verifyEmail(String token) {
-        Token t = tokenRepository.findByToken(token)
+    public boolean verifyEmail(String tokenValue) {
+        Token token = tokenRepository.findByTokenAndType(tokenValue, "VERIFY")
                 .orElse(null);
 
-        if (t == null || t.isUsed() || t.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if (token == null || token.getExpiryDate().isBefore(LocalDateTime.now())) {
             return false;
         }
 
-        User user = userRepository.findByEmail(t.getEmail())
+        User user = userRepository.findByEmail(token.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         user.setIsActive(true);
         userRepository.save(user);
-
-        t.setUsed(true);
-        tokenRepository.save(t);
+        tokenRepository.delete(token);
 
         return true;
     }
 
     @Override
     @Transactional
-    public void saveResetPasswordToken(String email, String token) {
-        Token t = Token.builder()
-                .token(token)
-                .email(email)
-                .type("RESET")
-                .used(false)
-                .expiryDate(LocalDateTime.now().plusMinutes(15))
-                .build();
-
-        tokenRepository.save(t);
+    public void saveResetPasswordToken(String email, String tokenValue) {
+        Token token = new Token();
+        token.setEmail(email);
+        token.setToken(tokenValue);
+        token.setExpiryDate(LocalDateTime.now().plusHours(1));
+        token.setType("RESET");
+        tokenRepository.save(token);
     }
 
     @Override
     @Transactional
-    public boolean resetPassword(String token, String newPassword) {
-        Token t = tokenRepository.findByToken(token)
+    public boolean resetPassword(String tokenValue, String newPassword) {
+        Token token = tokenRepository.findByTokenAndType(tokenValue, "RESET")
                 .orElse(null);
 
-        if (t == null || t.isUsed() || t.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if (token == null || token.getExpiryDate().isBefore(LocalDateTime.now())) {
             return false;
         }
 
-        User user = userRepository.findByEmail(t.getEmail())
+        User user = userRepository.findByEmail(token.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-
-        t.setUsed(true);
-        tokenRepository.save(t);
+        tokenRepository.delete(token);
 
         return true;
     }
@@ -176,10 +162,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        String sessionId = UUID.randomUUID().toString();
-        user.setCurrentSessionId(sessionId);
+        String newSessionId = UUID.randomUUID().toString();
+        user.setCurrentSessionId(newSessionId);
         userRepository.save(user);
-        return sessionId;
+
+        return newSessionId;
     }
 
     @Override
@@ -190,5 +177,24 @@ public class UserServiceImpl implements UserService {
 
         user.setCurrentSessionId(null);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void toggleUserStatus(Long id, boolean isActive) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        user.setIsActive(isActive);
+        userRepository.save(user);
+    }
+
+    @Override
+    public long countAllUsers() {
+        return userRepository.count();
+    }
+
+    @Override
+    public long countOnlineUsers() {
+        return userRepository.countByCurrentSessionIdIsNotNull();
     }
 }

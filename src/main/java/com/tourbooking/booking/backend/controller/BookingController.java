@@ -4,18 +4,24 @@ import com.tourbooking.booking.backend.model.dto.request.BookingRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
 import com.tourbooking.booking.backend.model.dto.response.BookingResponse;
 import com.tourbooking.booking.backend.service.BookingService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import com.tourbooking.booking.backend.model.dto.response.FinancialReportResponse;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
-@RequiredArgsConstructor
 public class BookingController {
 
     private final BookingService bookingService;
+
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
 
     @GetMapping
     public ApiResponse<List<BookingResponse>> getAllBookings() {
@@ -45,7 +51,7 @@ public class BookingController {
     }
 
     @PostMapping
-    public ApiResponse<BookingResponse> createBooking(@RequestBody BookingRequest request) {
+    public ApiResponse<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request) {
         return ApiResponse.<BookingResponse>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Booking created successfully")

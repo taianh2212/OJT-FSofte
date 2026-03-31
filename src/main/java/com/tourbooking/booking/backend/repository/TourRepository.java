@@ -3,6 +3,7 @@ package com.tourbooking.booking.backend.repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -147,4 +148,16 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                                      @Param("lat") double lat,
                                      @Param("lng") double lng,
                                      Pageable pageable);
+
+    boolean existsByTourNameAndStartLocation(String tourName, String startLocation);
+
+    Optional<Tour> findByExternalId(String externalId);
+
+    boolean existsByExternalId(String externalId);
+
+    boolean existsByTourNameAndStartLocationIgnoreCase(String tourName, String startLocation);
+
+    long countBySourceAndStartLocationIgnoreCase(String source, String startLocation);
+
+    List<Tour> findBySourceOrderByTourName(String source);
 }

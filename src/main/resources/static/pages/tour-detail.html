@@ -4,20 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tour Detail - TourBooking</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
-    body { font-family: 'Outfit', sans-serif; }
     .twoCol { display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; align-items:start; margin-top: 20px; }
     .list { display:grid; gap:12px; }
-    /* .thumb { min-height: 260px; } */
+    .thumb { min-height: 260px; }
     .pillRow { display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
-    .carousel { position: relative; width: 100%; height: 320px; border-radius: 22px; overflow: hidden; background: var(--bg-card); }
-    .carousel-img { width: 100%; height: 100%; object-fit: cover; }
-    .review-card { padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.6); border: 1px solid var(--border); margin-top: 14px; }
     @media (max-width: 960px) {
       .twoCol { grid-template-columns: 1fr; }
     }
+
+    /* Modal Styles */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+    .modal-content { background: #fff; border-radius: 20px; width: 100%; max-width: 500px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
@@ -26,7 +28,7 @@
       <div class="content-pad">
         <div class="top">
           <a class="back-link" href="./tours.html">← Back to tours</a>
-          <div id="navActions" class="actions">
+          <div class="actions">
             <button class="btn btn-secondary" id="addCompareBtn" type="button">Add to compare</button>
             <a class="btn" href="./compare.html">Compare</a>
           </div>
@@ -34,47 +36,98 @@
 
         <div class="twoCol">
           <div class="card panel">
-            <div id="carousel" class="carousel">
-              <div class="thumb">Loading media...</div>
+            <div id="gallery" class="gallery">
+              <div class="thumb">Featured Tour</div>
             </div>
-            <h2 id="title" class="section-title" style="margin-top:24px;"></h2>
+            <h1 id="title" class="headline" style="margin-top:20px; font-size: 2.4rem;"></h1>
             <div class="pillRow" id="pills"></div>
-            <p id="desc" class="section-copy" style="margin-top:14px;"></p>
+            <p id="desc" class="lead" style="margin-top:16px; line-height: 1.7;"></p>
 
-            <h3 class="section-title" style="margin-top:32px;font-size:1.5rem;">Highlights</h3>
-            <div id="highlights" class="list"></div>
-
-            <!-- UC05 Expansion: Reviews -->
-            <h3 class="section-title" style="margin-top:48px;font-size:1.5rem;">Traveler Reviews</h3>
-            <div id="reviews" class="list" style="margin-top:16px;">
-              <div class="card empty-state">No reviews yet. Be the first to join a tour and share!</div>
-            </div>
+            <h3 class="section-title" style="margin-top:28px; font-size:1.6rem;">Highlights</h3>
+            <div id="highlights" class="list" style="margin-top:12px;"></div>
           </div>
 
           <div class="glass-list">
-            <div class="card panel">
-              <div class="eyebrow">Summary</div>
+            <div class="card panel" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
+              <div class="eyebrow">Inventory Summary</div>
               <div class="list" style="margin-top:14px;">
-                <div class="list-item"><strong>Price:</strong> <span id="price"></span></div>
-                <div class="list-item"><strong>Rating:</strong> <span id="rating"></span></div>
+                <div class="list-item"><strong>Price:</strong> <span id="price" style="color:var(--primary); font-weight:800; font-size:1.2rem;"></span></div>
+                <div class="list-item"><strong>Rating:</strong> <span id="rating" style="font-weight:600;"></span></div>
                 <div class="list-item"><strong>Duration:</strong> <span id="duration"></span></div>
                 <div class="list-item"><strong>Route:</strong> <span id="route"></span></div>
-                <div class="list-item"><strong>Category:</strong> <span id="category"></span></div>
-              </div>
-              <div style="margin-top:20px; padding: 14px; border-radius: 14px; background: rgba(15, 118, 110, 0.08); border: 1px dashed var(--accent);">
-                <p style="font-size:0.9rem; margin:0; color:var(--accent-deep); font-weight:700;">Log in or create an account to book your spot on this departure.</p>
+                <div class="list-item"><strong>Category:</strong> <span id="category" class="pill"></span></div>
               </div>
             </div>
 
-            <div class="card panel">
-              <div class="eyebrow">Schedules</div>
-              <div id="schedules" class="list" style="margin-top:14px;"></div>
+            <div class="card panel" style="margin-top:18px;">
+              <div class="eyebrow">Available Schedules</div>
+              <p class="section-copy" style="margin-top:8px; font-size:0.85rem;">Select your preferred dates. Sign in to confirm your booking.</p>
+              <div id="schedules" class="list" style="margin-top:16px;"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <h3 class="section-title">Book Your Tour</h3>
+      <div class="list" style="margin-top:20px;">
+        <div class="list-item">
+          <label class="label">Schedule</label>
+          <div id="selectedSchedule" style="font-weight:700;"></div>
+        </div>
+        <div class="list-item">
+          <label class="label">Number of People</label>
+          <input type="number" id="peopleInput" class="input" value="1" min="1">
+        </div>
+        <div class="list-item">
+          <label class="label">Discount Code</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="discountInput" class="input" placeholder="Enter code">
+            <button class="btn btn-secondary" id="applyDiscountBtn" style="padding: 0 20px;">Apply</button>
+          </div>
+          <div id="discountMsg" style="font-size:0.85rem; margin-top:5px;"></div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border); margin:10px 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.9rem; color:var(--text-soft);">Total Price</div>
+            <div id="finalPrice" style="font-size:1.5rem; font-weight:800; color:var(--accent);"></div>
+          </div>
+          <div id="discountAppliedRow" style="text-align:right; display:none;">
+            <div style="font-size:0.8rem; color:var(--sun); text-decoration:line-through;" id="originalPrice"></div>
+            <div style="font-size:0.85rem; color:var(--accent-deep); font-weight:700;">Discount applied!</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:24px;">
+          <button class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('active')">Cancel</button>
+          <button class="btn" id="confirmBookingBtn">Confirm Booking</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .gallery { 
+      display: grid; 
+      grid-template-columns: 2fr 1fr; 
+      gap: 12px; 
+      min-height: 320px; 
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .gallery img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      transition: transform 0.3s;
+    }
+    .gallery img:hover { transform: scale(1.02); }
+    .gallery-main { grid-row: span 2; }
+    .gallery-item { height: 154px; }
+  </style>
 
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/tour-detail.js"></script>

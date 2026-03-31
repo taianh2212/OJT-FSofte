@@ -59,4 +59,10 @@ public class Tour extends Base {
 
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Review> reviews;
+
+    @Column(name = "Source", length = 50)
+    private String source = "LOCAL";
+
+    @Column(name = "ExternalId", length = 100)
+    private String externalId;
 }

@@ -7,7 +7,8 @@ import com.tourbooking.booking.backend.model.entity.Booking;
 public class BookingMapper {
 
     public static BookingResponse toResponse(Booking booking) {
-        if (booking == null) return null;
+        if (booking == null)
+            return null;
         BookingResponse response = new BookingResponse();
         response.setId(booking.getId());
         if (booking.getUser() != null) {
@@ -23,21 +24,29 @@ public class BookingMapper {
         response.setBookingDate(booking.getBookingDate());
         response.setNumberOfPeople(booking.getNumberOfPeople());
         response.setTotalPrice(booking.getTotalPrice());
+        response.setDiscountAmount(booking.getDiscountAmount());
+        response.setDiscountCode(booking.getDiscountCode());
         response.setStatus(booking.getStatus());
         return response;
     }
 
     public static Booking toEntity(BookingRequest request) {
-        if (request == null) return null;
+        if (request == null)
+            return null;
         Booking booking = new Booking();
         updateEntityFromRequest(booking, request);
         return booking;
     }
 
     public static void updateEntityFromRequest(Booking booking, BookingRequest request) {
+        if (request == null || booking == null)
+            return;
+        if (request.getNumberOfPeople() != null)
+            booking.setNumberOfPeople(request.getNumberOfPeople());
         if (request == null || booking == null) return;
         if (request.getNumberOfPeople() != null) booking.setNumberOfPeople(request.getNumberOfPeople());
         if (request.getTotalPrice() != null) booking.setTotalPrice(request.getTotalPrice());
+        if (request.getDiscountCode() != null) booking.setDiscountCode(request.getDiscountCode());
         if (request.getStatus() != null) booking.setStatus(request.getStatus());
     }
 }

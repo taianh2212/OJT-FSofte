@@ -6,6 +6,15 @@ import com.tourbooking.booking.backend.security.JwtService;
 import org.junit.jupiter.api.Test;
 import io.jsonwebtoken.Claims;
 
+import com.tourbooking.booking.backend.BookingApplication;
+
+@SpringBootTest(classes = BookingApplication.class)
+class BookingApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+}
 class BookingApplicationTests {
 
 	@Test

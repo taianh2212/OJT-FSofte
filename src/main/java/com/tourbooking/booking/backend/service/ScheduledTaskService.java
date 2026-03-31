@@ -1,5 +1,7 @@
 package com.tourbooking.booking.backend.service;
 
+import com.tourbooking.booking.backend.config.OpenTripMapProperties;
+import com.tourbooking.booking.backend.model.dto.response.OpenTripMapFetchSummaryResponse;
 import com.tourbooking.booking.backend.model.entity.Booking;
 import com.tourbooking.booking.backend.model.entity.TourSchedule;
 import com.tourbooking.booking.backend.model.entity.User;
@@ -8,6 +10,7 @@ import com.tourbooking.booking.backend.model.entity.enums.TourStatus;
 import com.tourbooking.booking.backend.model.entity.enums.UserRole;
 import com.tourbooking.booking.backend.repository.BookingRepository;
 import com.tourbooking.booking.backend.repository.TourScheduleRepository;
+import com.tourbooking.booking.backend.repository.TourRepository;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +41,9 @@ public class ScheduledTaskService {
     private final TourScheduleRepository tourScheduleRepository;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final OpenTripMapService openTripMapService;
+    private final OpenTripMapProperties openTripMapProperties;
+    private final TourRepository tourRepository;
 
     // ================================================================
     // UC46: Tự động cập nhật chỗ trống (AvailableSlots) cho TourSchedule
@@ -178,6 +184,40 @@ public class ScheduledTaskService {
                     mailService.sendMonthlyReportEmail(admin.getEmail(), reportContent, monthYear);
                     log.info("[UC50] Đã gửi báo cáo tháng {} cho admin: {}", monthYear, admin.getEmail());
                 });
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void refreshOpenTripMapContent() {
+        List<String> cities = openTripMapProperties.getSchedulerCities();
+        if (cities == null || cities.isEmpty()) {
+            log.debug("[OpenTripMap Scheduler] No cities configured, skipping run.");
+            return;
+        }
+        int limit = Math.min(openTripMapProperties.getSchedulerMaxCitiesPerRun(), cities.size());
+        int processed = 0;
+        for (String city : cities) {
+            if (processed >= limit) {
+                break;
+            }
+            long existing = tourRepository.countBySourceAndStartLocationIgnoreCase("OPENTRIPMAP", city);
+            if (existing > 50) {
+                log.info("[OpenTripMap Scheduler] {} already has {} tours, skipping", city, existing);
+                continue;
+            }
+            try {
+                OpenTripMapFetchSummaryResponse summary = openTripMapService.fetchAndSaveAll(city);
+                log.info("[OpenTripMap Scheduler] {} inserted={} skipped={}", city, summary.getInsertedCount(), summary.getSkippedCount());
+            } catch (Exception ex) {
+                log.error("[OpenTripMap Scheduler] Failed to refresh {}: {}", city, ex.getMessage());
+            }
+            processed++;
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
 
     private String buildReportContent(String monthYear, long total, long confirmed,
