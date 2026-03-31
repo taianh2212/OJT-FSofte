@@ -37,7 +37,22 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     @Transactional
     public NewsletterResponse createNewsletter(NewsletterRequest request) {
+        String email = request == null ? null : request.getEmail();
+        if (email != null) {
+            email = email.trim().toLowerCase();
+        }
+        if (email == null || email.isBlank()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        if (newsletterRepo.existsByEmailIgnoreCase(email)) {
+            // idempotent subscribe: return existing subscription instead of failing
+            Newsletter existing = newsletterRepo.findByEmailIgnoreCase(email)
+                    .orElseThrow(() -> new AppException(ErrorCode.NEWSLETTER_NOT_FOUND));
+            return NewsletterMapper.toResponse(existing);
+        }
+
         Newsletter newsletter = NewsletterMapper.toEntity(request);
+        newsletter.setEmail(email);
         Newsletter savedNewsletter = newsletterRepo.save(newsletter);
         return NewsletterMapper.toResponse(savedNewsletter);
     }

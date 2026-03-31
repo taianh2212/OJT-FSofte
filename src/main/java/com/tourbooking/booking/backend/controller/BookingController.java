@@ -10,14 +10,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import com.tourbooking.booking.backend.model.dto.response.FinancialReportResponse;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
-@RequiredArgsConstructor
 public class BookingController {
 
     private final BookingService bookingService;
+
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
 
     @GetMapping
     public ApiResponse<List<BookingResponse>> getAllBookings() {

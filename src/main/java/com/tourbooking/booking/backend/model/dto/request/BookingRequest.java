@@ -32,3 +32,7 @@ public class BookingRequest {
         throw new UnsupportedOperationException("Unimplemented method 'getStatus'");
     }
 }
+    private BigDecimal totalPrice;
+    private String discountCode;
+    private BookingStatus status;
+}

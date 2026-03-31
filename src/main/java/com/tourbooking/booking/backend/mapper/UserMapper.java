@@ -15,6 +15,7 @@ public class UserMapper {
         response.setRole(user.getRole());
         response.setAvatarUrl(user.getAvatarUrl());
         response.setIsActive(user.getIsActive());
+        response.setEnabled(Boolean.TRUE.equals(user.getIsActive()));
         return response;
     }
 
@@ -32,5 +33,6 @@ public class UserMapper {
         // Password should be handled specifically (encoded) in Service layer
         if (request.getRole() != null) user.setRole(request.getRole());
         if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+        if (request.getIsActive() != null) user.setIsActive(request.getIsActive());
     }
 }

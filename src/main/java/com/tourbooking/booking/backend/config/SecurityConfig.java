@@ -10,10 +10,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.tourbooking.booking.backend.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -31,18 +38,30 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 // Cho phép tất cả các tài nguyên tĩnh
                 .requestMatchers(
-                    "/", "/index.html", "/favicon.ico",
-                    "/css/**", "/js/**", "/images/**",
-                    "/auth/**", "/user/**", "/admin/**",
-                    "/static/**", "/webjars/**"
+                    "/", "/error", "/index.html", "/favicon.ico",
+                    "/css/**", "/js/**", "/images/**", "/assets/**",
+                    "/pages/**",
+                    "/user/**", "/admin/**",
+                    "/static/**", "/webjars/**", "/uploads/**"
                 ).permitAll()
                 // Cho phép các API Auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                // Tất cả các request khác tạm thời permitAll để bạn test giao diện
-                .anyRequest().permitAll() 
+                // Guest UC01-UC06
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/tours/**").permitAll()
+                // UC10 newsletter subscribe
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/newsletters").permitAll()
+                // UC11 chat support + UC51 AI chat
+                .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
+                // Admin chat escalation dashboard
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                // Read-only categories
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                // Everything else requires login (can be refined later)
+                .anyRequest().authenticated()
             );
 
         return http.build();

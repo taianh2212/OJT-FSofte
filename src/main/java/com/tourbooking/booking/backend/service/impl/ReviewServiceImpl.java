@@ -104,6 +104,13 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public List<ReviewResponse> getAllReviews() {
+        return reviewRepo.findAll().stream()
+                .map(ReviewMapper::toResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void deleteReview(Long id) {
         if (!reviewRepo.existsById(id)) {
