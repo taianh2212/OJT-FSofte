@@ -187,4 +187,14 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(isActive);
         userRepository.save(user);
     }
+
+    @Override
+    public long countAllUsers() {
+        return userRepository.count();
+    }
+
+    @Override
+    public long countOnlineUsers() {
+        return userRepository.countByCurrentSessionIdIsNotNull();
+    }
 }

@@ -30,4 +30,8 @@ public interface UserService {
     void clearSession(String email);
 
     void toggleUserStatus(Long id, boolean isActive);
+
+    long countAllUsers();
+
+    long countOnlineUsers();
 }

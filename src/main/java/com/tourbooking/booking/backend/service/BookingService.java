@@ -3,6 +3,7 @@ package com.tourbooking.booking.backend.service;
 import com.tourbooking.booking.backend.model.dto.request.BookingRequest;
 import com.tourbooking.booking.backend.model.dto.response.BookingResponse;
 import com.tourbooking.booking.backend.model.dto.response.FinancialReportResponse;
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface BookingService {
@@ -14,4 +15,8 @@ public interface BookingService {
     void deleteBooking(Long id);
 
     List<FinancialReportResponse> getFinancialReport(String start, String end, String type, String status);
+
+    long countActiveBookings();
+
+    BigDecimal getMonthlyRevenue();
 }

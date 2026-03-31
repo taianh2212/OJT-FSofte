@@ -114,6 +114,13 @@
                 <small>Leave empty if no category</small>
             </div>
 
+            <div class="form-group">
+                <label>Tour Images</label>
+                <input type="file" id="tourImages" class="form-control" multiple accept="image/*" onchange="previewImages(event)">
+                <div id="imagePreviewContainer" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+                <input type="hidden" id="existingImages">
+            </div>
+
             <div class="modal-buttons">
                 <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
                 <button onclick="saveTour()" class="btn btn-primary">Save Tour</button>
@@ -247,6 +254,13 @@
                             <p><strong>Description:</strong></p>
                             <p>${escapeHtml(t.description || 'No description available')}</p>
                         </div>
+                        ${t.imageUrls && t.imageUrls.length > 0 ? `
+                        <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                            <p><strong>Images:</strong></p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                ${t.imageUrls.map(url => `<img src="http://localhost:8080${url}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">`).join('')}
+                            </div>
+                        </div>` : ''}
                     `;
                 })
                 .catch(error => {
@@ -267,6 +281,9 @@
             document.getElementById('endLocation').value = '';
             document.getElementById('description').value = '';
             document.getElementById('categoryId').value = '';
+            document.getElementById('tourImages').value = '';
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            document.getElementById('existingImages').value = '';
             document.getElementById('tourModal').style.display = 'flex';
         }
 
@@ -292,6 +309,26 @@
                     document.getElementById('endLocation').value = t.endLocation || '';
                     document.getElementById('description').value = t.description || '';
                     document.getElementById('categoryId').value = t.categoryId || '';
+                    
+                    document.getElementById('tourImages').value = '';
+                    document.getElementById('existingImages').value = (t.imageUrls && t.imageUrls.length > 0) ? JSON.stringify(t.imageUrls) : '';
+                    
+                    const previewContainer = document.getElementById('imagePreviewContainer');
+                    previewContainer.innerHTML = '';
+                    if (t.imageUrls && t.imageUrls.length > 0) {
+                        t.imageUrls.forEach(url => {
+                            const img = document.createElement('img');
+                            img.src = "http://localhost:8080" + url;
+                            img.className = 'preview-img';
+                            img.style.width = '80px';
+                            img.style.height = '80px';
+                            img.style.objectFit = 'cover';
+                            img.style.borderRadius = '4px';
+                            img.style.border = '1px solid #ddd';
+                            previewContainer.appendChild(img);
+                        });
+                    }
+
                     document.getElementById('tourModal').style.display = 'flex';
                 })
                 .catch(error => {
@@ -300,8 +337,32 @@
                 });
         }
 
+        // PREVIEW IMAGES
+        function previewImages(event) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = ''; // clear for new selection
+            const files = event.target.files;
+            if (files) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-img';
+                        img.style.width = '80px';
+                        img.style.height = '80px';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '4px';
+                        img.style.border = '1px solid #ddd';
+                        container.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
         // SAVE TOUR (CREATE OR UPDATE)
-        function saveTour() {
+        async function saveTour() {
             const tourName = document.getElementById('tourName').value.trim();
             const price = parseFloat(document.getElementById('price').value);
             const duration = parseInt(document.getElementById('duration').value);
@@ -309,11 +370,44 @@
             const endLocation = document.getElementById('endLocation').value.trim();
             const description = document.getElementById('description').value.trim();
             const categoryId = document.getElementById('categoryId').value;
+            const fileInput = document.getElementById('tourImages');
 
             // Validation
             if (!tourName || isNaN(price) || isNaN(duration) || !startLocation || !endLocation) {
                 showToast('Please fill all required fields!', 'error');
                 return;
+            }
+            
+            let finalImageUrls = [];
+            const existingImagesStr = document.getElementById('existingImages').value;
+            if (existingImagesStr) {
+                try {
+                    finalImageUrls = JSON.parse(existingImagesStr);
+                } catch(e) {}
+            }
+
+            // Upload images if new files selected
+            if (fileInput.files && fileInput.files.length > 0) {
+                const formData = new FormData();
+                Array.from(fileInput.files).forEach(f => formData.append("files", f));
+                
+                try {
+                    const uploadRes = await fetch("http://localhost:8080/api/v1/admin/tours/upload", {
+                        method: 'POST',
+                        headers: {
+                            "Authorization": `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: formData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (!uploadRes.ok) throw new Error(uploadData.message || 'Image upload failed');
+                    // Gắn thêm ảnh mới vào danh sách ảnh cũ (nếu có)
+                    finalImageUrls = finalImageUrls.concat(uploadData.data); 
+                } catch(error) {
+                    console.error('Upload error:', error);
+                    showToast('Error uploading images: ' + error.message, 'error');
+                    return;
+                }
             }
 
             const tourData = {
@@ -323,7 +417,8 @@
                 duration: duration,
                 startLocation: startLocation,
                 endLocation: endLocation,
-                categoryId: categoryId ? parseInt(categoryId) : null
+                categoryId: categoryId ? parseInt(categoryId) : null,
+                imageUrls: finalImageUrls.length > 0 ? finalImageUrls : null
             };
 
             let url = API;

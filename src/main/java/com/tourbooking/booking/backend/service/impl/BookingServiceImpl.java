@@ -6,15 +6,17 @@ import com.tourbooking.booking.backend.mapper.BookingMapper;
 import com.tourbooking.booking.backend.model.dto.request.BookingRequest;
 import com.tourbooking.booking.backend.model.dto.response.BookingResponse;
 import com.tourbooking.booking.backend.model.entity.Booking;
+import com.tourbooking.booking.backend.model.entity.Payment;
 import com.tourbooking.booking.backend.model.entity.TourSchedule;
 import com.tourbooking.booking.backend.model.entity.User;
 import com.tourbooking.booking.backend.repository.BookingRepository;
+import com.tourbooking.booking.backend.repository.PaymentRepository;
 import com.tourbooking.booking.backend.repository.TourScheduleRepository;
 import com.tourbooking.booking.backend.repository.DiscountRepository;
 import com.tourbooking.booking.backend.model.entity.Discount;
 import com.tourbooking.booking.backend.model.entity.enums.DiscountType;
+import com.tourbooking.booking.backend.model.entity.enums.PaymentStatus;
 import com.tourbooking.booking.backend.repository.UserRepository;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import com.tourbooking.booking.backend.service.BookingService;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
 import java.util.Locale;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -45,6 +46,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final TourScheduleRepository tourScheduleRepository;
     private final DiscountRepository discountRepository;
+    private final PaymentRepository paymentRepository;
 
     @Override
     public List<BookingResponse> getAllBookings() {
@@ -152,67 +154,99 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime endDateTime = LocalDate.parse(end).atTime(23, 59, 59);
 
         log.info("Generating financial report from {} to {}, type: {}, status: {}", start, end, type, status);
-        List<Booking> allBookings = bookingRepository.findAll();
-        log.info("Total bookings in DB: {}", allBookings.size());
-        
-        List<Booking> filteredBookings = allBookings.stream()
-                .filter(b -> {
-                    LocalDateTime bDate = b.getCreatedAt();
-                    if (bDate == null) bDate = b.getUpdatedAt();
-                    
-                    if (bDate == null) {
-                        log.debug("Booking ID {} has no date, including as 'Unknown'", b.getId());
-                        return true; 
-                    }
-                    return (bDate.isAfter(startDateTime) || bDate.isEqual(startDateTime)) && 
-                           (bDate.isBefore(endDateTime) || bDate.isEqual(endDateTime));
+
+        // Lấy tất cả payments trong khoảng thời gian
+        List<Payment> allPayments = paymentRepository.findAll();
+        log.info("Total payments in DB: {}", allPayments.size());
+
+        // Lọc payments theo ngày thanh toán (paymentDate hoặc createdAt)
+        List<Payment> filteredPayments = allPayments.stream()
+                .filter(p -> {
+                    LocalDateTime pDate = p.getPaymentDate() != null ? p.getPaymentDate() : p.getCreatedAt();
+                    if (pDate == null) return false;
+                    return (pDate.isEqual(startDateTime) || pDate.isAfter(startDateTime)) &&
+                           (pDate.isEqual(endDateTime) || pDate.isBefore(endDateTime));
                 })
-                .filter(b -> {
-                    if (status == null || status.isEmpty() || "all".equalsIgnoreCase(status)) return true;
-                    if (b.getStatus() == null) return false;
-                    return b.getStatus().name().equalsIgnoreCase(status);
+                .filter(p -> {
+                    // Nếu filter status là "all" hoặc không có, lấy tất cả payment SUCCESS
+                    if (status == null || status.isEmpty() || "all".equalsIgnoreCase(status)) {
+                        return p.getStatus() == PaymentStatus.SUCCESS;
+                    }
+                    // Nếu filter là SUCCESS hoặc COMPLETED → lấy payment SUCCESS
+                    if ("SUCCESS".equalsIgnoreCase(status) || "COMPLETED".equalsIgnoreCase(status)) {
+                        return p.getStatus() == PaymentStatus.SUCCESS;
+                    }
+                    // Các trường hợp khác (CANCELLED, CONFIRMED...) → không có revenue từ payment
+                    return false;
                 })
                 .toList();
-        
-        log.info("Filtered bookings count: {}", filteredBookings.size());
 
+        log.info("Filtered payments (SUCCESS) count: {}", filteredPayments.size());
+
+        // Lấy bookings bị CANCELLED trong khoảng thời gian (để tính cancellation rate)
+        List<Booking> cancelledBookings = bookingRepository.findAll().stream()
+                .filter(b -> b.getStatus() == BookingStatus.CANCELLED)
+                .filter(b -> {
+                    LocalDateTime bDate = b.getCreatedAt() != null ? b.getCreatedAt() : b.getUpdatedAt();
+                    if (bDate == null) return false;
+                    return (bDate.isEqual(startDateTime) || bDate.isAfter(startDateTime)) &&
+                           (bDate.isEqual(endDateTime) || bDate.isBefore(endDateTime));
+                })
+                .toList();
+
+        // Formatter theo loại báo cáo
         DateTimeFormatter formatter = switch (type.toLowerCase()) {
-            case "weekly" -> DateTimeFormatter.ofPattern("yyyy-'W'w", Locale.getDefault());
+            case "weekly"  -> DateTimeFormatter.ofPattern("yyyy-'W'ww", Locale.getDefault());
             case "monthly" -> DateTimeFormatter.ofPattern("yyyy-MM");
-            case "yearly" -> DateTimeFormatter.ofPattern("yyyy");
-            default -> DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            case "yearly"  -> DateTimeFormatter.ofPattern("yyyy");
+            default        -> DateTimeFormatter.ofPattern("yyyy-MM-dd");
         };
 
-        Map<String, List<Booking>> groupedData = filteredBookings.stream()
+        // Group payments theo period
+        Map<String, List<Payment>> groupedPayments = filteredPayments.stream()
                 .collect(Collectors.groupingBy(
-                        b -> {
-                            LocalDateTime date = b.getCreatedAt() != null ? b.getCreatedAt() : b.getUpdatedAt();
+                        p -> {
+                            LocalDateTime date = p.getPaymentDate() != null ? p.getPaymentDate() : p.getCreatedAt();
                             return date != null ? date.format(formatter) : "Unknown";
                         },
                         TreeMap::new,
                         Collectors.toList()
                 ));
 
-        return groupedData.entrySet().stream()
+        // Group cancellations theo period
+        Map<String, Long> cancelledByPeriod = cancelledBookings.stream()
+                .collect(Collectors.groupingBy(
+                        b -> {
+                            LocalDateTime date = b.getCreatedAt() != null ? b.getCreatedAt() : b.getUpdatedAt();
+                            return date != null ? date.format(formatter) : "Unknown";
+                        },
+                        Collectors.counting()
+                ));
+
+        // Nếu không có payment nào, trả về danh sách rỗng với log warning
+        if (groupedPayments.isEmpty()) {
+            log.warn("No SUCCESS payments found in range {} - {}", start, end);
+        }
+
+        return groupedPayments.entrySet().stream()
                 .map(entry -> {
                     String period = entry.getKey();
-                    List<Booking> periodBookings = entry.getValue();
-                    
-                    long bookingCount = periodBookings.size();
-                    
-                    // Business Logic: Revenue is based on Amount field, only for SUCCESS or COMPLETED bookings
-                    // or better yet, if a Payment exists and is SUCCESS.
-                    BigDecimal revenue = periodBookings.stream()
-                            .filter(b -> b.getStatus() == BookingStatus.SUCCESS || b.getStatus() == BookingStatus.COMPLETED)
-                            .map(b -> b.getTotalPrice() != null ? b.getTotalPrice() : BigDecimal.ZERO)
+                    List<Payment> periodPayments = entry.getValue();
+
+                    long bookingCount = periodPayments.size();
+
+                    // Revenue = tổng Payment.amount của các payment SUCCESS
+                    BigDecimal revenue = periodPayments.stream()
+                            .map(p -> p.getAmount() != null ? p.getAmount() : BigDecimal.ZERO)
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    
-                    long cancellations = periodBookings.stream()
-                            .filter(b -> b.getStatus() == BookingStatus.CANCELLED)
-                            .count();
-                    
-                    BigDecimal averageValue = (bookingCount - cancellations) > 0 ? 
-                            revenue.divide(BigDecimal.valueOf(bookingCount - cancellations), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+
+                    long cancellations = cancelledByPeriod.getOrDefault(period, 0L);
+
+                    BigDecimal averageValue = bookingCount > 0
+                            ? revenue.divide(BigDecimal.valueOf(bookingCount), 2, RoundingMode.HALF_UP)
+                            : BigDecimal.ZERO;
+
+                    log.info("Period: {}, bookings: {}, revenue: {}, cancellations: {}", period, bookingCount, revenue, cancellations);
 
                     return FinancialReportResponse.builder()
                             .period(period)
@@ -224,5 +258,22 @@ public class BookingServiceImpl implements BookingService {
                 })
                 .sorted((a, b) -> a.getPeriod().compareTo(b.getPeriod()))
                 .toList();
+    }
+
+    @Override
+    public long countActiveBookings() {
+        long confirmed = bookingRepository.countByStatus(BookingStatus.CONFIRMED);
+        long pending = bookingRepository.countByStatus(BookingStatus.PENDING);
+        return confirmed + pending;
+    }
+
+    @Override
+    public BigDecimal getMonthlyRevenue() {
+        YearMonth current = YearMonth.now();
+        LocalDateTime start = current.atDay(1).atStartOfDay();
+        LocalDateTime end = current.atEndOfMonth().atTime(23, 59, 59);
+        BigDecimal revenue = paymentRepository.sumAmountByStatusAndDateBetween(
+                com.tourbooking.booking.backend.model.entity.enums.PaymentStatus.SUCCESS, start, end);
+        return revenue != null ? revenue : BigDecimal.ZERO;
     }
 }

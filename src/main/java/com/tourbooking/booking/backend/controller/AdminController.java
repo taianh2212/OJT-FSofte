@@ -7,12 +7,16 @@ import com.tourbooking.booking.backend.model.dto.response.FinancialReportRespons
 import com.tourbooking.booking.backend.model.dto.response.TourResponse;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
 import com.tourbooking.booking.backend.service.BookingService;
+import com.tourbooking.booking.backend.service.FileService;
 import com.tourbooking.booking.backend.service.TourService;
 import com.tourbooking.booking.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +28,14 @@ public class AdminController {
     private final TourService tourService;
     private final UserService userService;
     private final BookingService bookingService;
+    private final FileService fileService;
 
     @Autowired
-    public AdminController(TourService tourService, UserService userService, BookingService bookingService) {
+    public AdminController(TourService tourService, UserService userService, BookingService bookingService, FileService fileService) {
         this.tourService = tourService;
         this.userService = userService;
         this.bookingService = bookingService;
+        this.fileService = fileService;
     }
 
     @GetMapping("/ping")
@@ -38,6 +44,15 @@ public class AdminController {
     }
 
     // --- TOUR MANAGEMENT ---
+
+    @PostMapping("/tours/upload")
+    public ApiResponse<List<String>> uploadTourImages(@RequestParam("files") List<MultipartFile> files) {
+        return ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Images uploaded successfully")
+                .data(fileService.uploadImages(files))
+                .build();
+    }
 
     @PostMapping("/tours")
     @ResponseStatus(HttpStatus.CREATED)
@@ -135,6 +150,44 @@ public class AdminController {
                 .code(HttpStatus.OK.value())
                 .message("Financial report generated successfully")
                 .data(bookingService.getFinancialReport(start, end, type, status))
+                .build();
+    }
+
+    // --- DASHBOARD STATS ---
+
+    @GetMapping("/users/count")
+    public ApiResponse<Map<String, Long>> getUserCount() {
+        Map<String, Long> data = new HashMap<>();
+        data.put("total", userService.countAllUsers());
+        data.put("online", userService.countOnlineUsers());
+        return ApiResponse.<Map<String, Long>>builder()
+                .code(HttpStatus.OK.value())
+                .message("User count retrieved")
+                .data(data)
+                .build();
+    }
+
+    @GetMapping("/revenue/month")
+    public ApiResponse<Map<String, Object>> getMonthlyRevenue() {
+        BigDecimal revenue = bookingService.getMonthlyRevenue();
+        Map<String, Object> data = new HashMap<>();
+        data.put("revenue", revenue);
+        data.put("month", java.time.YearMonth.now().toString());
+        return ApiResponse.<Map<String, Object>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Monthly revenue retrieved")
+                .data(data)
+                .build();
+    }
+
+    @GetMapping("/bookings/active")
+    public ApiResponse<Map<String, Long>> getActiveBookings() {
+        Map<String, Long> data = new HashMap<>();
+        data.put("count", bookingService.countActiveBookings());
+        return ApiResponse.<Map<String, Long>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Active bookings count retrieved")
+                .data(data)
                 .build();
     }
 }

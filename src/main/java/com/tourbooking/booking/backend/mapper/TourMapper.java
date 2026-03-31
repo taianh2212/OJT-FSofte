@@ -27,6 +27,11 @@ public class TourMapper {
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
         response.setTransportType(tour.getTransportType());
+        
+        if (tour.getImages() != null) {
+            response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
+        }
+        
         return response;
     }
 
