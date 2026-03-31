@@ -187,7 +187,8 @@ Caused by: com.microsoft.sqlserver.jdbc.SQLServerException: The TCP/IP connectio
 	at com.microsoft.sqlserver.jdbc.SQLServerException.makeFromDriverError(SQLServerException.java:250) ~[mssql-jdbc-12.10.2.jre11.jar:na]
 	at com.microsoft.sqlserver.jdbc.SQLServerException.convertConnectExceptionToSQLServerException(SQLServerException.java:316) ~[mssql-jdbc-12.10.2.jre11.jar:na]
 	at com.microsoft.sqlserver.jdbc.SocketFinder.findSocket(IOBuffer.java:2593) ~[mssql-jdbc-12.10.2.jre11.jar:na]
-	at com.microsoft.sqlserver.jdbc.TDSChannel.open(IOBuffer.java:721) ~[mssql-jdbc-12.10.2.jre11.jar:na]
+	at com.microsoft.sqlserver.jdbc.TDSChannel.
+	(IOBuffer.java:721) ~[mssql-jdbc-12.10.2.jre11.jar:na]
 	at com.microsoft.sqlserver.jdbc.SQLServerConnection.connectHelper(SQLServerConnection.java:4079) ~[mssql-jdbc-12.10.2.jre11.jar:na]
 	at com.microsoft.sqlserver.jdbc.SQLServerConnection.login(SQLServerConnection.java:3695) ~[mssql-jdbc-12.10.2.jre11.jar:na]
 	at com.microsoft.sqlserver.jdbc.SQLServerConnection.connectInternal(SQLServerConnection.java:3504) ~[mssql-jdbc-12.10.2.jre11.jar:na]
