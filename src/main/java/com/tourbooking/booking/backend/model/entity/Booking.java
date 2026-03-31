@@ -53,4 +53,5 @@ public class Booking extends Base {
             bookingDate = LocalDateTime.now();
         }
     }
+
 }

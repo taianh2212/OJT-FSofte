@@ -13,11 +13,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@AttributeOverride(name = "id", column = @Column(name = "PaymentID", nullable = false, unique = true, columnDefinition = "BIGINT"))
+@AttributeOverride(name = "id", column = @Column(name = "PaymentID", nullable = false, unique = true))
 public class Payment extends Base {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "BookingID", columnDefinition = "BIGINT")
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ FIX
+    @JoinColumn(name = "BookingID")
     private Booking booking;
 
     @Column(name = "Amount", precision = 10, scale = 2)
@@ -36,7 +36,7 @@ public class Payment extends Base {
     @Column(name = "Status", length = 50)
     private PaymentStatus status;
 
-    @OneToMany(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<PaymentLog> paymentLogs;
 
     @PrePersist
