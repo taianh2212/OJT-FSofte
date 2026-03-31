@@ -46,7 +46,7 @@ public class SecurityConfig {
                     "/css/**", "/js/**", "/images/**", "/assets/**",
                     "/pages/**",
                     "/user/**", "/admin/**",
-                    "/static/**", "/webjars/**"
+                    "/static/**", "/webjars/**", "/uploads/**"
                 ).permitAll()
                 // Cho phép các API Auth
                 .requestMatchers("/api/v1/auth/**").permitAll()

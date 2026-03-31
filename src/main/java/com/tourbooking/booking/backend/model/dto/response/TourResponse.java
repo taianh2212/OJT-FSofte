@@ -2,6 +2,7 @@ package com.tourbooking.booking.backend.model.dto.response;
 
 import lombok.Data;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class TourResponse {
@@ -14,5 +15,6 @@ public class TourResponse {
     private String endLocation;
     private Double rating;
     private String transportType;
+    private List<String> imageUrls;
 
 }

@@ -1,12 +1,15 @@
 package com.tourbooking.booking.backend.mapper;
 
 import com.tourbooking.booking.backend.model.dto.request.TourRequest;
+import com.tourbooking.booking.backend.model.dto.request.TourScheduleRequest;
 import com.tourbooking.booking.backend.model.dto.response.TourDetailResponse;
 import com.tourbooking.booking.backend.model.dto.response.TourResponse;
 import com.tourbooking.booking.backend.model.entity.Tour;
 import com.tourbooking.booking.backend.model.entity.TourImage;
 import com.tourbooking.booking.backend.model.entity.TourHighlight;
 import com.tourbooking.booking.backend.model.entity.TourSchedule;
+import com.tourbooking.booking.backend.model.entity.enums.TourStatus;
+
 import java.util.stream.Collectors;
 
 public class TourMapper {
@@ -24,6 +27,11 @@ public class TourMapper {
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
         response.setTransportType(tour.getTransportType());
+        
+        if (tour.getImages() != null) {
+            response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
+        }
+        
         return response;
     }
 
@@ -79,6 +87,16 @@ public class TourMapper {
         return tour;
     }
 
+    public static TourSchedule toScheduleEntity(TourScheduleRequest request) {
+        if (request == null) return null;
+        TourSchedule schedule = new TourSchedule();
+        schedule.setStartDate(request.getStartDate());
+        schedule.setEndDate(request.getEndDate());
+        schedule.setAvailableSlots(request.getAvailableSlots());
+        schedule.setStatus(TourStatus.OPEN);
+        return schedule;
+    }
+
     public static void updateEntityFromRequest(Tour tour, TourRequest request) {
         if (request == null || tour == null)
             return;
@@ -89,6 +107,6 @@ public class TourMapper {
         if (request.getStartLocation() != null) tour.setStartLocation(request.getStartLocation());
         if (request.getEndLocation() != null) tour.setEndLocation(request.getEndLocation());
         if (request.getTransportType() != null) tour.setTransportType(request.getTransportType());
-        // Category should be handled in the Service layer
+        // Category and other collections should be handled in the Service layer
     }
 }

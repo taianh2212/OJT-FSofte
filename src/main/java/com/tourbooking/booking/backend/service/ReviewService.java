@@ -14,6 +14,8 @@ public interface ReviewService {
             String sortBy,
             String direction);
 
+    List<ReviewResponse> getAllReviews();
+
     ReviewResponse createReview(ReviewRequest request);
 
     ReviewResponse updateReview(Long id, ReviewRequest request);
