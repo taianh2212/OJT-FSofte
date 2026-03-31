@@ -24,37 +24,74 @@
     el('pills').innerHTML = pills.map(p => `<span class="pill">${escapeHtml(p)}</span>`).join('');
   }
 
+  function renderGallery(images) {
+    const root = el('gallery');
+    if (!images || images.length === 0) {
+      root.innerHTML = '<div class="thumb" style="grid-column: span 2;">Featured Tour</div>';
+      return;
+    }
+    // Main image + small thumbs
+    const main = images[0];
+    const others = images.slice(1, 3);
+    let html = `<div class="gallery-main"><img src="${main}" alt="Tour image" /></div>`;
+    others.forEach(img => {
+      html += `<div class="gallery-item"><img src="${img}" alt="Tour image small" /></div>`;
+    });
+    // Fill remaining if needed
+    if (others.length < 2) {
+      for (let i = 0; i < 2 - others.length; i++) {
+        html += `<div class="gallery-item" style="background:var(--bg-soft);display:flex;align-items:center;justify-content:center;color:var(--text-faint);">More images coming</div>`;
+      }
+    }
+    root.innerHTML = html;
+  }
+
   function renderHighlights(list) {
     const root = el('highlights');
     if (!list || list.length === 0) {
-      root.innerHTML = '<div style="color:var(--text-muted);">No highlights.</div>';
+      root.innerHTML = '<div class="section-copy" style="color:var(--text-faint);">No highlights listed for this route yet.</div>';
       return;
     }
-    root.innerHTML = list.map(h => `<div>• ${escapeHtml(h)}</div>`).join('');
+    root.innerHTML = list.map(h => `
+      <div class="list-item" style="background:rgba(255,255,255,0.02); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+        ${escapeHtml(h)}
+      </div>
+    `).join('');
   }
 
   function renderSchedules(list) {
     const root = el('schedules');
     if (!list || list.length === 0) {
-      root.innerHTML = '<div style="color:var(--text-muted);">No schedules.</div>';
+      root.innerHTML = '<div class="section-copy" style="color:var(--text-faint);">No upcoming departures found.</div>';
       return;
     }
-    root.innerHTML = list.map(s => `
-      <div class="card" style="box-shadow:none;">
-        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-          <div><strong>${escapeHtml(s.startDate || '')}</strong> → ${escapeHtml(s.endDate || '')}</div>
-          <div class="pill">${escapeHtml(s.status || '')}</div>
+    root.innerHTML = list.map(s => {
+      const isAvailable = String(s.status || '').toUpperCase() === 'AVAILABLE';
+      return `
+        <div class="card panel" style="box-shadow:none; border: 1px solid rgba(255,255,255,0.05); padding: 14px;">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+            <div>
+              <div style="font-weight:700;">${escapeHtml(s.startDate || '')}</div>
+              <div style="font-size:0.8rem; color:var(--text-soft);">Ends ${escapeHtml(s.endDate || '')}</div>
+            </div>
+            <div class="pill ${isAvailable ? '' : 'btn-secondary'}" style="font-size:0.7rem;">${escapeHtml(s.status || 'N/A')}</div>
+          </div>
+          <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:flex-end;">
+            <div style="font-size:0.85rem; color:var(--text-soft);">
+              Available: <strong style="color:var(--text);">${escapeHtml(s.availableSlots ?? 0)}</strong>
+            </div>
+          </div>
         </div>
-        <div style="margin-top:8px;color:var(--text-muted);">Available slots: <strong>${escapeHtml(s.availableSlots ?? '')}</strong></div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function addToCompare(tourId) {
     const set = new Set(JSON.parse(localStorage.getItem('compareIds') || '[]'));
     set.add(Number(tourId));
     localStorage.setItem('compareIds', JSON.stringify(Array.from(set)));
-    alert('Added to compare.');
+    // Subtle notification instead of alert could be better, but keeping for now per original
+    alert('Tour successfully added to your comparison list.');
   }
 
   el('addCompareBtn').onclick = () => addToCompare(id);
@@ -64,12 +101,13 @@
     const t = res.data;
     el('title').textContent = t.tourName || '';
     el('desc').textContent = t.description || '';
-    el('price').textContent = t.price ?? '';
-    el('rating').textContent = t.rating ?? '';
-    el('duration').textContent = t.duration ?? '';
-    el('route').textContent = `${t.startLocation || ''} → ${t.endLocation || ''}`;
-    el('category').textContent = t.categoryName || '';
+    el('price').textContent = t.price ? `$${t.price}` : 'TBA';
+    el('rating').textContent = t.rating ? `⭐ ${t.rating.toFixed(1)}` : 'No rating';
+    el('duration').textContent = t.duration ? `${t.duration} days` : 'TBA';
+    el('route').textContent = (t.startLocation && t.endLocation) ? `${t.startLocation} → ${t.endLocation}` : 'TBA';
+    el('category').textContent = t.categoryName || 'General';
 
+    renderGallery(t.imageUrls);
     renderPills(t);
     renderHighlights(t.highlights);
     renderSchedules(t.schedules);

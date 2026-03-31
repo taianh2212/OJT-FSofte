@@ -9,6 +9,74 @@
     href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    /* Floating AI Chat Button */
+    #aiChatFab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #1a7a5e, #0f4c35);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fabPop 0.4s ease;
+    }
+
+    #aiChatFab:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    #aiChatFab .fab-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    #aiChatFab .fab-badge {
+      background: #ff4d4d;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      font-weight: 800;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes fabPop {
+      from {
+        opacity: 0;
+        transform: scale(0.7) translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -37,7 +105,7 @@
             </div>
             <div class="actions">
               <a class="btn" href="./tours.html">Explore Tours</a>
-              <a class="btn btn-secondary" href="/pages/auth/login.html">Sign In</a>
+              <!-- <a class="btn btn-secondary" href="/pages/auth/login.html">Sign In</a> -->
               <a class="btn btn-secondary" href="./newsletter.html">Join Newsletter</a>
             </div>
             <div class="stats">
@@ -103,13 +171,18 @@
               <a class="btn btn-secondary" href="./compare.html">Compare Tours</a>
             </div>
           </article>
-          <article class="card">
-            <div class="eyebrow">Support</div>
-            <h2 class="section-title">Keep help close when travelers get stuck.</h2>
-            <p class="section-copy">The support page now matches the rest of the product instead of feeling bolted on.
+          <article class="card"
+            style="border: 1.5px solid rgba(26,122,94,0.4); background: linear-gradient(135deg, rgba(26,122,94,0.08), rgba(15,76,53,0.04));">
+            <div class="eyebrow"
+              style="background:rgba(26,122,94,0.15); border-color:rgba(26,122,94,0.3); color:#1a7a5e;">🤖 AI Powered
+            </div>
+            <h2 class="section-title">Tư vấn tour với trợ lý AI Gemini.</h2>
+            <p class="section-copy">Cho AI biết bạn muốn đi đâu, thời tiết như nào, ngân sách bao nhiêu — AI sẽ gợi ý
+              tour phù hợp nhất từ hệ thống.
             </p>
             <div class="actions" style="margin-top:18px;">
-              <a class="btn btn-secondary" href="./chat.html">Open Chat</a>
+              <a class="btn" href="./chat.html" style="background: linear-gradient(135deg, #1a7a5e, #0f4c35);">💬 Chat
+                với AI ngay</a>
             </div>
           </article>
         </section>
@@ -117,19 +190,15 @@
     </div>
   </div>
 
-  <script>
-    async function logout() {
-      try {
-        await TB.apiFetch('/api/v1/auth/logout', { method: 'POST' });
-      } catch (_) {
-        // If the session is already gone, we still clear local state below.
-      } finally {
-        TB.clearAuthState();
-        localStorage.removeItem('compareIds');
-        window.location.href = '/pages/auth/login.html';
-      }
-    }
+  <!-- Floating AI Chat Button -->
+  <a id="aiChatFab" href="./chat.html">
+    <span class="fab-icon">🤖</span>
+    <span>Tư vấn AI</span>
+    <span class="fab-badge">LIVE</span>
+  </a>
 
+  <script src="../assets/js/api.js"></script>
+  <script>
     const navRight = document.getElementById('navRight');
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
     if (user) {
@@ -140,7 +209,10 @@
       navRight.innerHTML = `<span class="pill">Hello, ${user.fullName || user.email}</span>
       ${adminLink}
       <button class="btn btn-secondary" id="logoutBtn" type="button">Logout</button>`;
-      document.getElementById('logoutBtn').onclick = () => logout();
+      document.getElementById('logoutBtn').onclick = () => {
+        localStorage.removeItem('compareIds');
+        TB.logout();
+      };
     } else {
       navRight.innerHTML = `<a class="btn" href="/pages/auth/login.html">Login</a>`;
     }

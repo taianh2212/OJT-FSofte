@@ -21,6 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -57,6 +58,8 @@ public class AuthController {
 
         if (!user.getIsActive()) {
             throw new RuntimeException("Tài khoản của bạn chưa được xác thực hoặc đã bị khóa. Vui lòng liên hệ Admin.");
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Account not verified. Please check your email.");
         }
 
         String sessionId = userService.rotateSession(user.getEmail());
@@ -109,6 +112,48 @@ public class AuthController {
 
         UserResponse user = userService.createUser(request);
 
+        try {
+            String token = UUID.randomUUID().toString();
+
+            // lưu token vào DB (bạn cần tự implement)
+            userService.saveVerificationToken(user.getEmail(), token);
+
+            mailService.sendVerificationEmail(user.getEmail(), token);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ApiResponse.<UserResponse>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Register successful. Please check your email to verify.")
+                .data(user)
+                .build();
+    }
+
+    // ================= VERIFY EMAIL =================
+    @GetMapping("/verify")
+    public ApiResponse<String> verifyEmail(@RequestParam String token) {
+        boolean isValid = userService.verifyEmail(token);
+
+        if (!isValid) {
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .message("Invalid or expired token")
+                    .data(null)
+                    .build();
+        }
+
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Email verified successfully")
+                .data(null)
+                .build();
+    }
+
+    // ================= FORGOT PASSWORD =================
+    @PostMapping("/forgot-password")
+    public ApiResponse<String> forgotPassword(@RequestBody AuthRequest request) {
         try {
             String token = UUID.randomUUID().toString();
             userService.saveVerificationToken(user.getEmail(), token);
@@ -191,18 +236,12 @@ public class AuthController {
     // ================= LOGOUT =================
     @PostMapping("/logout")
     public ApiResponse<String> logout(Principal principal) {
-        if (principal == null || principal.getName() == null) {
-            return ApiResponse.<String>builder()
-                    .code(HttpStatus.UNAUTHORIZED.value())
-                    .message("Unauthorized")
-                    .data(null)
-                    .build();
+        if (principal != null && principal.getName() != null) {
+            userService.clearSession(principal.getName());
+            authSessionNotificationService.notifySessionInvalidated(
+                    principal.getName(),
+                    "Phiên đăng nhập đã bị đăng xuất. Vui lòng đăng nhập lại.");
         }
-
-        userService.clearSession(principal.getName());
-        authSessionNotificationService.notifySessionInvalidated(
-                principal.getName(),
-                "Phiên đăng nhập đã bị đăng xuất. Vui lòng đăng nhập lại.");
 
         return ApiResponse.<String>builder()
                 .code(HttpStatus.OK.value())

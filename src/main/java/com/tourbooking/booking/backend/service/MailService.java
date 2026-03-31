@@ -42,4 +42,39 @@ public class MailService {
             e.printStackTrace();
         }
     }
+
+    // UC48: Gửi email thông báo hủy booking tự động do chưa thanh toán
+    public void sendBookingCancelledEmail(String toEmail, String customerName, Long bookingId, java.math.BigDecimal amount) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("krissv659@gmail.com");
+            message.setTo(toEmail);
+            message.setSubject("[TourBooking] Booking #" + bookingId + " đã bị hủy");
+            message.setText(
+                "Xin chào " + customerName + ",\n\n" +
+                "Booking #" + bookingId + " của bạn (tổng tiền: " + amount + " VND) " +
+                "đã bị hủy tự động vì không có thanh toán trong vòng 24 giờ.\n\n" +
+                "Nếu bạn vẫn muốn đặt tour, vui lòng truy cập lại website.\n\n" +
+                "Trân trọng,\nĐội ngũ TourBooking"
+            );
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // UC50: Gửi báo cáo tháng cho admin
+    public void sendMonthlyReportEmail(String toEmail, String reportContent, String monthYear) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("krissv659@gmail.com");
+            message.setTo(toEmail);
+            message.setSubject("[TourBooking] Báo cáo tháng " + monthYear);
+            message.setText(reportContent);
+            mailSender.send(message);
+            System.out.println("SEND MONTHLY REPORT SUCCESS");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

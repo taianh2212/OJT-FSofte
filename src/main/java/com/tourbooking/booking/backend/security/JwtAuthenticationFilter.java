@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,10 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    )
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
         String token = resolveToken(request);
         if (!StringUtils.hasText(token)) {
@@ -47,31 +45,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (email != null && sessionId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var user = userRepository.findByEmail(email).orElse(null);
-                if (user == null || user.getCurrentSessionId() == null || !sessionId.equals(user.getCurrentSessionId())) {
-                    sendUnauthorized(response, "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại.");
-                    return;
+                // Chỉ set Authentication nếu user tồn tại và sessionId khớp
+                if (user != null && user.getCurrentSessionId() != null && sessionId.equals(user.getCurrentSessionId())) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ignored) {
-            sendUnauthorized(response, "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
-            return;
+            // Token không hợp lệ hoặc hết hạn -> Không set Authentication, 
+            // các endpoint yêu cầu login sẽ tự bị chặn ở SecurityFilterChain
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-        response.getWriter().write("""
-                {"code":401,"message":"%s","data":null}
-                """.formatted(message.replace("\"", "\\\"").replace("\n", " ")).trim());
     }
 
     private String resolveToken(HttpServletRequest request) {

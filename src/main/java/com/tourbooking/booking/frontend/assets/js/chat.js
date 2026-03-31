@@ -83,10 +83,18 @@
     const div = document.createElement('div');
     div.className = 'msg ai';
     div.innerHTML = `
-      <div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">Assistant</div>
-      <div>Hi there! I'm your TourBooking assistant. Looking for a mountain escape or a city break? I can help you find the perfect route!</div>
+      <div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">🤖 Trợ lý AI</div>
+      <div>${formatAiText('👋 Xin chào! Tôi là trợ lý tư vấn tour du lịch của TourBooking.\n\nBạn muốn đi đâu? Hãy cho tôi biết về:\n📍 Địa điểm mong muốn (Đà Nẵng, Phú Quốc...)\n🌤️ Thời tiết bạn thích (nắng, mát, lạnh...)\n💰 Ngân sách (dưới 5 triệu, 5-10 triệu...)\n🕐 Thời gian (3 ngày 2 đêm, 1 tuần...)\n\nTôi sẽ gợi ý tour phù hợp nhất cho bạn! 😊')}</div>
     `;
     box.appendChild(div);
+  }
+
+  // Format AI text: xuống dòng, in đậm **text**
+  function formatAiText(text) {
+    if (!text) return '';
+    return escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
   }
 
   async function load() {
@@ -131,23 +139,41 @@
   };
 
   async function getAiResponse(userMsg) {
+    // Hiện typing indicator
+    const typingEl = document.createElement('div');
+    typingEl.className = 'msg ai';
+    typingEl.id = 'typing-indicator';
+    typingEl.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">🤖 Trợ lý AI</div><div style="opacity:0.6;">⏳ Đang soạn tin nhắn...</div>`;
+    box.appendChild(typingEl);
+    box.scrollTop = box.scrollHeight;
+
     try {
       const res = await TB.apiFetch('/api/v1/ai/chat', {
         method: 'POST',
         body: JSON.stringify({
           message: userMsg,
-          userId: isGuest ? null : user.id,
+          userId: isGuest ? null : user?.id ?? null,
           guestId: isGuest ? guestId : null
         })
       });
-      const aiContent = res.data?.response || "I'm here to help with any questions!";
+      // Xoá typing indicator
+      document.getElementById('typing-indicator')?.remove();
+
+      // Lấy đúng field reply từ backend
+      const aiContent = res.data?.reply || res.data?.response || 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại!';
       const aiMsg = document.createElement('div');
       aiMsg.className = 'msg ai';
-      aiMsg.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">Assistant</div><div>${escapeHtml(aiContent)}</div>`;
+      aiMsg.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">🤖 Trợ lý AI</div><div>${formatAiText(aiContent)}</div>`;
       box.appendChild(aiMsg);
       box.scrollTop = box.scrollHeight;
     } catch (err) {
+      document.getElementById('typing-indicator')?.remove();
       console.error('AI error', err);
+      const errMsg = document.createElement('div');
+      errMsg.className = 'msg ai';
+      errMsg.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">🤖 Trợ lý AI</div><div>Xin lỗi, hiện tại tôi không thể trả lời. Vui lòng thử lại sau!</div>`;
+      box.appendChild(errMsg);
+      box.scrollTop = box.scrollHeight;
     }
   }
 

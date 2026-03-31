@@ -9,33 +9,29 @@
     selected: new Set(JSON.parse(localStorage.getItem('compareIds') || '[]'))
   };
 
-  const loginActions = loginState.parentElement;
   function setLoginState() {
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-    if (user) {
-      loginState.textContent = `Hi, ${user.fullName || user.email}`;
-      const logoutBtn = document.createElement('button');
-      logoutBtn.className = 'btn btn-secondary';
-      logoutBtn.textContent = 'Logout';
-      logoutBtn.onclick = () => TB.logout();
-      loginActions.appendChild(logoutBtn);
-    } else {
-      loginState.textContent = 'Guest';
-    }
+    loginState.textContent = user ? `Hi, ${user.fullName || user.email}` : 'Guest';
+  }
+
+  async function loadCategories() {
+    try {
+      const res = await TB.apiFetch('/api/v1/categories');
+      const combo = document.getElementById('categoryId');
+      if (res.data) {
+        res.data.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.categoryName;
+          combo.appendChild(opt);
+        });
+      }
+    } catch (_) {}
   }
 
   function readFilters() {
     const get = (id) => document.getElementById(id)?.value;
     const numOrNull = (v) => v === '' ? null : Number(v);
-    
-    // UC03: Filter by Category from URL (Home Page Link)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlCatId = urlParams.get('categoryId');
-    if (urlCatId && !get('categoryId')) {
-      const catInput = document.getElementById('categoryId');
-      if (catInput) catInput.value = urlCatId;
-    }
-
     return {
       keyword: get('keyword') || null,
       minPrice: get('minPrice') || null,
@@ -149,6 +145,7 @@
 
   // wire events
   setLoginState();
+  loadCategories();
   renderCompareCount();
 
   document.getElementById('applyBtn').onclick = () => { state.page = 0; load().catch(showErr); };
