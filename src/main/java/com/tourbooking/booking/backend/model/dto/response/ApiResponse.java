@@ -30,4 +30,11 @@ public class ApiResponse<T> {
                 .message("Success")
                 .build();
     }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return ApiResponse.<T>builder()
+                .code(400)
+                .message(message)
+                .build();
+    }
 }

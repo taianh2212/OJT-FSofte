@@ -14,6 +14,21 @@
     loginState.textContent = user ? `Hi, ${user.fullName || user.email}` : 'Guest';
   }
 
+  async function loadCategories() {
+    try {
+      const res = await TB.apiFetch('/api/v1/categories');
+      const combo = document.getElementById('categoryId');
+      if (res.data) {
+        res.data.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.categoryName;
+          combo.appendChild(opt);
+        });
+      }
+    } catch (_) {}
+  }
+
   function readFilters() {
     const get = (id) => document.getElementById(id)?.value;
     const numOrNull = (v) => v === '' ? null : Number(v);
@@ -130,6 +145,7 @@
 
   // wire events
   setLoginState();
+  loadCategories();
   renderCompareCount();
 
   document.getElementById('applyBtn').onclick = () => { state.page = 0; load().catch(showErr); };

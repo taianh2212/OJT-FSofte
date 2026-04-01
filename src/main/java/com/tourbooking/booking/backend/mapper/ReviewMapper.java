@@ -12,11 +12,16 @@ public class ReviewMapper {
         ReviewResponse response = new ReviewResponse();
         response.setReviewId(review.getId());
         if (review.getUser() != null) {
+            response.setUserId(review.getUser().getId());
             response.setUserName(review.getUser().getFullName());
+        }
+        if (review.getTour() != null) {
+            response.setTourId(review.getTour().getId());
+            response.setTourName(review.getTour().getTourName());
         }
         response.setRating(review.getRating());
         response.setComment(review.getComment());
-        response.setCreatedAt(review.getCreatedAt()); // Inherited from Base
+        response.setCreatedAt(review.getCreatedAt());
         return response;
     }
 

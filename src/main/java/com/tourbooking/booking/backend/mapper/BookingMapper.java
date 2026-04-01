@@ -24,6 +24,8 @@ public class BookingMapper {
         response.setBookingDate(booking.getBookingDate());
         response.setNumberOfPeople(booking.getNumberOfPeople());
         response.setTotalPrice(booking.getTotalPrice());
+        response.setDiscountAmount(booking.getDiscountAmount());
+        response.setDiscountCode(booking.getDiscountCode());
         response.setStatus(booking.getStatus());
         return response;
     }
@@ -41,5 +43,10 @@ public class BookingMapper {
             return;
         if (request.getNumberOfPeople() != null)
             booking.setNumberOfPeople(request.getNumberOfPeople());
+        if (request == null || booking == null) return;
+        if (request.getNumberOfPeople() != null) booking.setNumberOfPeople(request.getNumberOfPeople());
+        if (request.getTotalPrice() != null) booking.setTotalPrice(request.getTotalPrice());
+        if (request.getDiscountCode() != null) booking.setDiscountCode(request.getDiscountCode());
+        if (request.getStatus() != null) booking.setStatus(request.getStatus());
     }
 }

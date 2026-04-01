@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.tourbooking.booking.backend.model.entity.Booking;
+import com.tourbooking.booking.backend.model.entity.enums.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +14,9 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserId(Long userId);
+    List<Booking> findByBookingDateBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+    List<Booking> findByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+    long countByStatus(BookingStatus status);
 
     // UC47: Tìm booking PENDING chưa có payment thành công, đã quá hạn (tạo trước cutoff)
     @Query("SELECT b FROM Booking b WHERE b.status = 'PENDING' AND b.createdAt < :cutoff " +

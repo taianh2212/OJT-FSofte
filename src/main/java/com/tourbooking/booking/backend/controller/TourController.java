@@ -18,10 +18,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/tours")
-@RequiredArgsConstructor
 public class TourController {
 
     private final TourService tourService;
+
+    public TourController(TourService tourService) {
+        this.tourService = tourService;
+    }
 
     @GetMapping
     public ApiResponse<List<TourResponse>> getAllTours() {

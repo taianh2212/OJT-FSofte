@@ -67,7 +67,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-
 		<!-- Test (JUnit + SpringBootTest) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -113,7 +112,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
 	<build>
 		<plugins>
@@ -161,7 +159,6 @@
 							<version>1.18.38</version>
 						</path>
 					</annotationProcessorPaths>
-
                 <annotationProcessorPaths>
                     <path>
                         <groupId>org.projectlombok</groupId>

@@ -17,6 +17,9 @@ import com.tourbooking.booking.backend.model.dto.response.TourResponse;
 import com.tourbooking.booking.backend.model.entity.City;
 import com.tourbooking.booking.backend.model.entity.Category;
 import com.tourbooking.booking.backend.model.entity.Tour;
+import com.tourbooking.booking.backend.model.entity.TourHighlight;
+import com.tourbooking.booking.backend.model.entity.TourImage;
+import com.tourbooking.booking.backend.model.entity.TourSchedule;
 import com.tourbooking.booking.backend.repository.CategoryRepository;
 import com.tourbooking.booking.backend.repository.CityRepository;
 import com.tourbooking.booking.backend.repository.TourRepository;
@@ -25,12 +28,17 @@ import com.tourbooking.booking.backend.service.TourService;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class TourServiceImpl implements TourService {
 
     private final TourRepository tourRepo;
     private final CategoryRepository categoryRepo;
     private final CityRepository cityRepository;
+
+    public TourServiceImpl(TourRepository tourRepo, CategoryRepository categoryRepo, CityRepository cityRepository) {
+        this.tourRepo = tourRepo;
+        this.categoryRepo = categoryRepo;
+        this.cityRepository = cityRepository;
+    }
 
     @Override
     public List<TourResponse> getAllTours() {
@@ -72,6 +80,41 @@ public class TourServiceImpl implements TourService {
             tour.setCategory(category);
         }
 
+        // Handle Highlights
+        if (request.getHighlights() != null) {
+            List<TourHighlight> highlights = request.getHighlights().stream()
+                    .map(h -> {
+                        TourHighlight highlight = new TourHighlight();
+                        highlight.setHighlight(h);
+                        highlight.setTour(tour);
+                        return highlight;
+                    }).toList();
+            tour.setHighlights(highlights);
+        }
+
+        // Handle Images
+        if (request.getImageUrls() != null) {
+            List<TourImage> images = request.getImageUrls().stream()
+                    .map(url -> {
+                        TourImage image = new TourImage();
+                        image.setImageUrl(url);
+                        image.setTour(tour);
+                        return image;
+                    }).toList();
+            tour.setImages(images);
+        }
+
+        // Handle Schedules
+        if (request.getSchedules() != null) {
+            List<TourSchedule> schedules = request.getSchedules().stream()
+                    .map(sReq -> {
+                        TourSchedule schedule = TourMapper.toScheduleEntity(sReq);
+                        schedule.setTour(tour);
+                        return schedule;
+                    }).toList();
+            tour.setSchedules(schedules);
+        }
+
         Tour savedTour = tourRepo.save(tour);
         return TourMapper.toResponse(savedTour);
     }
@@ -89,6 +132,38 @@ public class TourServiceImpl implements TourService {
             Category category = categoryRepo.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
             existingTour.setCategory(category);
+        }
+
+        // Update Highlights
+        if (request.getHighlights() != null) {
+            existingTour.getHighlights().clear();
+            request.getHighlights().forEach(h -> {
+                TourHighlight highlight = new TourHighlight();
+                highlight.setHighlight(h);
+                highlight.setTour(existingTour);
+                existingTour.getHighlights().add(highlight);
+            });
+        }
+
+        // Update Images
+        if (request.getImageUrls() != null) {
+            existingTour.getImages().clear();
+            request.getImageUrls().forEach(url -> {
+                TourImage image = new TourImage();
+                image.setImageUrl(url);
+                image.setTour(existingTour);
+                existingTour.getImages().add(image);
+            });
+        }
+
+        // Update Schedules
+        if (request.getSchedules() != null) {
+            existingTour.getSchedules().clear();
+            request.getSchedules().forEach(sReq -> {
+                TourSchedule schedule = TourMapper.toScheduleEntity(sReq);
+                schedule.setTour(existingTour);
+                existingTour.getSchedules().add(schedule);
+            });
         }
 
         Tour updatedTour = tourRepo.save(existingTour);
