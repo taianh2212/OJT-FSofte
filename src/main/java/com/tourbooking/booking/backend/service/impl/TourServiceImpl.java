@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TourServiceImpl implements TourService {
 
     private final TourRepository tourRepo;
@@ -34,14 +35,14 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public List<TourResponse> getAllTours() {
-        return tourRepo.findAll().stream()
+        return tourRepo.findAllWithBasicDetails().stream()
                 .map(TourMapper::toResponse)
                 .toList();
     }
 
     @Override
     public TourDetailResponse getTourById(Long id) {
-        Tour tour = tourRepo.findById(id)
+        Tour tour = tourRepo.findByIdWithDetails(id)
                 .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
         return TourMapper.toDetailResponse(tour);
     }
@@ -123,6 +124,10 @@ public class TourServiceImpl implements TourService {
                                                   Long cityId,
                                                   Double lat,
                                                   Double lng,
+                                                  Boolean hasPickup,
+                                                  Boolean hasLunch,
+                                                  Boolean isDaily,
+                                                  Boolean isInstantConfirmation,
                                                   String sortBy,
                                                   String sortDir,
                                                   Pageable pageable) {
@@ -130,12 +135,12 @@ public class TourServiceImpl implements TourService {
 
         Page<Tour> page;
         if ("popularity".equals(normalizedSortBy)) {
-            page = tourRepo.browseToursByPopularity(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, pageable);
+            page = tourRepo.browseToursByPopularity(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, hasPickup, hasLunch, isDaily, isInstantConfirmation, pageable);
         } else if ("distance".equals(normalizedSortBy)) {
             double[] coords = resolveCoords(cityId, lat, lng);
-            page = tourRepo.browseToursByDistance(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, coords[0], coords[1], pageable);
+            page = tourRepo.browseToursByDistance(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, hasPickup, hasLunch, isDaily, isInstantConfirmation, coords[0], coords[1], pageable);
         } else {
-            page = tourRepo.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, pageable);
+            page = tourRepo.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, hasPickup, hasLunch, isDaily, isInstantConfirmation, pageable);
         }
         return PagedResponse.<TourResponse>builder()
                 .content(page.getContent().stream().map(TourMapper::toResponse).toList())

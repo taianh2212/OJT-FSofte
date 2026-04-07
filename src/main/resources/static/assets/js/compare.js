@@ -3,9 +3,10 @@
   const empty = document.getElementById('empty');
   const navActions = document.getElementById('navActions');
   const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const clearBtn = document.createElement('button');
 
   // Actions in top bar
-  const clearBtn = document.createElement('button');
+  clearBtn.id = 'clearBtn'; // Set ID so line 99 works
   clearBtn.className = 'btn btn-secondary';
   clearBtn.textContent = 'Clear All';
   clearBtn.onclick = () => {
@@ -51,26 +52,62 @@
 
   function render(tours) {
     grid.innerHTML = '';
+    // Use a CSS grid with specific columns for comparison
+    grid.style.display = 'grid';
+    grid.style.gridAutoColumns = 'minmax(300px, 1fr)';
+    grid.style.gridAutoFlow = 'column';
+    grid.style.gap = '20px';
+    grid.style.overflowX = 'auto';
+
     tours.forEach(t => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="title">${escapeHtml(t.tourName || '')}</div>
-        <div class="row">
-          <div><strong>Price:</strong> ${escapeHtml(t.price ?? '')}</div>
-          <div><strong>Rating:</strong> ${escapeHtml(t.rating ?? '')}</div>
-          <div><strong>Duration:</strong> ${escapeHtml(t.duration ?? '')}</div>
-          <div><strong>Route:</strong> ${escapeHtml((t.startLocation||'') + ' → ' + (t.endLocation||''))}</div>
-          <div><strong>Transport:</strong> ${escapeHtml(t.transportType ?? '')}</div>
-          <div><strong>Category:</strong> ${escapeHtml(t.categoryName ?? '')}</div>
+      const col = document.createElement('div');
+      col.className = 'card panel';
+      col.style.minWidth = '300px';
+      
+      col.innerHTML = `
+        <div style="margin-bottom:20px;">
+          <div class="eyebrow">${escapeHtml(t.categoryName || 'Tour')}</div>
+          <h3 style="font-size:1.4rem; color:var(--primary); margin-top:8px;">${escapeHtml(t.tourName || '')}</h3>
         </div>
-        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-          <a class="btn" href="./tour-detail.html?id=${encodeURIComponent(t.id)}" style="text-decoration:none;display:inline-block;">Detail</a>
-          <button class="btn" type="button" data-remove="${t.id}">Remove</button>
+
+        <div class="list" style="gap:15px;">
+          <div class="list-item">
+            <label style="display:block; font-size:0.75rem; color:var(--text-faint); text-transform:uppercase; font-weight:700;">Price</label>
+            <div style="font-size:1.2rem; font-weight:800; color:var(--text);">${t.price ? Number(t.price).toLocaleString() : 'N/A'} VND</div>
+          </div>
+          
+          <div class="list-item">
+            <label style="display:block; font-size:0.75rem; color:var(--text-faint); text-transform:uppercase; font-weight:700;">Rating</label>
+            <div style="font-weight:600; color:#fbbf24;">⭐ ${(t.rating || 0).toFixed(1)}</div>
+          </div>
+
+          <div class="list-item">
+            <label style="display:block; font-size:0.75rem; color:var(--text-faint); text-transform:uppercase; font-weight:700;">Features</label>
+            <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
+              ${t.hasPickup ? '<span class="pill" style="font-size:0.7rem; background:#e0f2fe; color:#0369a1;">🚐 Pickup</span>' : ''}
+              ${t.hasLunch ? '<span class="pill" style="font-size:0.7rem; background:#fef3c7; color:#92400e;">🍱 Lunch</span>' : ''}
+              ${t.isInstantConfirmation ? '<span class="pill" style="font-size:0.7rem; background:#dcfce7; color:#166534;">⚡ Instant</span>' : ''}
+            </div>
+          </div>
+
+          <div class="list-item">
+            <label style="display:block; font-size:0.75rem; color:var(--text-faint); text-transform:uppercase; font-weight:700;">Suitable For</label>
+            <div style="font-size:0.9rem;">${escapeHtml(t.suitableAges || 'All ages')}</div>
+          </div>
+
+          <div class="list-item">
+            <label style="display:block; font-size:0.75rem; color:var(--text-faint); text-transform:uppercase; font-weight:700;">Duration & Route</label>
+            <div style="font-size:0.9rem;">${t.duration} days | ${escapeHtml(t.startLocation || '')} → ${escapeHtml(t.endLocation || '')}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:30px; display:flex; gap:10px;">
+          <a class="btn" href="./tour-detail.html?id=${encodeURIComponent(t.id)}" style="flex:1; text-align:center;">View Details</a>
+          <button class="btn btn-secondary" type="button" data-remove="${t.id}" style="padding:10px;">✕</button>
         </div>
       `;
-      card.querySelector('[data-remove]').onclick = () => removeId(t.id);
-      grid.appendChild(card);
+      col.querySelector('[data-remove]').onclick = () => removeId(t.id);
+      grid.appendChild(col);
     });
   }
 
@@ -96,11 +133,5 @@
     grid.innerHTML = `<div class="card" style="border-color:#fecaca;color:#991b1b;">${escapeHtml(err.message || 'Error')}</div>`;
   }
 
-  document.getElementById('clearBtn').onclick = () => {
-    localStorage.removeItem('compareIds');
-    load().catch(showErr);
-  };
-
   load().catch(showErr);
 })();
-

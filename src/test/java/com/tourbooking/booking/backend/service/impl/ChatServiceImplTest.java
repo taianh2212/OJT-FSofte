@@ -34,14 +34,16 @@ class ChatServiceImplTest {
     private ChatSessionRepository sessionRepo;
     @Mock
     private UserRepository userRepo;
+    @Mock
+    private com.tourbooking.booking.backend.service.ChatNotificationService notificationService;
 
     @InjectMocks
     private ChatServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sessionRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.lenient().when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.lenient().when(sessionRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -96,7 +98,7 @@ class ChatServiceImplTest {
     void getActiveSessionsForStaff_returnsWaiting() {
         ChatSession session = new ChatSession();
         session.setStatus(ChatSessionStatus.WAITING_STAFF);
-        when(sessionRepo.findByStatusOrderByLastMessageAtDesc(ChatSessionStatus.WAITING_STAFF)).thenReturn(List.of(session));
+        org.mockito.Mockito.lenient().when(sessionRepo.findByStatusInOrderByLastMessageAtDesc(any())).thenReturn(List.of(session));
 
         List<ChatSession> list = service.getActiveSessionsForStaff();
         assertEquals(1, list.size());

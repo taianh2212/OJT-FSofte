@@ -43,8 +43,8 @@ class ChatEscalationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        when(escalationRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.lenient().when(escalationRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.lenient().when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test

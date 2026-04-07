@@ -16,6 +16,6 @@ public class TourHighlight extends Base {
     @JoinColumn(name = "TourID", columnDefinition = "BIGINT")
     private Tour tour;
 
-    @Column(name = "Highlight", length = 255)
+    @Column(name = "Highlight", columnDefinition = "NVARCHAR(255)")
     private String highlight;
 }
