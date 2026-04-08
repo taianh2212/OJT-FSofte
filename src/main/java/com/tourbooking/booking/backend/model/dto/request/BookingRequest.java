@@ -1,10 +1,10 @@
 package com.tourbooking.booking.backend.model.dto.request;
 
 import java.math.BigDecimal;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import com.tourbooking.booking.backend.model.entity.enums.BookingStatus;
 
 @Data
 public class BookingRequest {
@@ -21,17 +21,7 @@ public class BookingRequest {
 
     // optional (UC15)
     private String voucherCode;
-
-    public BigDecimal getTotalPrice() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTotalPrice'");
-    }
-
-    public Object getStatus() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatus'");
-    }
-}
+    
     private BigDecimal totalPrice;
     private String discountCode;
     private BookingStatus status;

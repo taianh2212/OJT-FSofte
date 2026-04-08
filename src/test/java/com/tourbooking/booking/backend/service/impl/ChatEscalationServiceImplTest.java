@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.Optional;
 
@@ -43,8 +44,8 @@ class ChatEscalationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        when(escalationRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(escalationRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test

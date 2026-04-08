@@ -37,7 +37,16 @@
         localStorage.setItem('user', JSON.stringify(res.data.user));
         msgEl.style.color = 'green';
         msgEl.textContent = 'Login successful!';
-        setTimeout(() => window.location.href = '/pages/index.html', 700);
+        setTimeout(() => {
+          const role = res.data.user.role;
+          if (role === 'ADMIN' || role === 'STAFF') {
+            window.location.href = '/pages/admin/dashboard.html';
+          } else if (role === 'GUIDE') {
+            window.location.href = '/pages/guide/dashboard.html';
+          } else {
+            window.location.href = '/pages/index.html';
+          }
+        }, 700);
       } catch (err) {
         msgEl.style.color = 'red';
         msgEl.textContent = err.message || 'Login failed';

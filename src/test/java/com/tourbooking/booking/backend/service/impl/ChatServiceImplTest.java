@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import com.tourbooking.booking.backend.model.entity.enums.ChatSessionStatus;
 import com.tourbooking.booking.backend.repository.ChatMessagesRepository;
 import com.tourbooking.booking.backend.repository.ChatSessionRepository;
 import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.service.ChatNotificationService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,14 +36,16 @@ class ChatServiceImplTest {
     private ChatSessionRepository sessionRepo;
     @Mock
     private UserRepository userRepo;
+    @Mock
+    private ChatNotificationService notificationService;
 
     @InjectMocks
     private ChatServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(sessionRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(sessionRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -96,7 +100,7 @@ class ChatServiceImplTest {
     void getActiveSessionsForStaff_returnsWaiting() {
         ChatSession session = new ChatSession();
         session.setStatus(ChatSessionStatus.WAITING_STAFF);
-        when(sessionRepo.findByStatusOrderByLastMessageAtDesc(ChatSessionStatus.WAITING_STAFF)).thenReturn(List.of(session));
+        when(sessionRepo.findByStatusInOrderByLastMessageAtDesc(any())).thenReturn(List.of(session));
 
         List<ChatSession> list = service.getActiveSessionsForStaff();
         assertEquals(1, list.size());

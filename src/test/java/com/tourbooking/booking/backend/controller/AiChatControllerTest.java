@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tourbooking.booking.backend.model.dto.request.AiChatRequest;
 import com.tourbooking.booking.backend.model.dto.response.AiChatResponse;
 import com.tourbooking.booking.backend.security.JwtService;
+import com.tourbooking.booking.backend.repository.ChatSessionRepository;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import com.tourbooking.booking.backend.service.AiChatService;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class AiChatControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private ChatSessionRepository chatSessionRepository;
 
     @Test
     void chatReturnsCreatedResponse() throws Exception {

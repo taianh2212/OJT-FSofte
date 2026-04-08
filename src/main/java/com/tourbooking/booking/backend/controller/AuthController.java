@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -34,19 +35,7 @@ public class AuthController {
     @Value("${app.public-base-url:http://localhost:8080}")
     private String publicBaseUrl;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          UserService userService,
-                          MailService mailService,
-                          RateLimiterService rateLimiterService,
-                          AuthSessionNotificationService authSessionNotificationService,
-                          JwtService jwtService) {
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
-        this.mailService = mailService;
-        this.rateLimiterService = rateLimiterService;
-        this.authSessionNotificationService = authSessionNotificationService;
-        this.jwtService = jwtService;
-    }
+
 
     // ================= LOGIN =================
     @PostMapping("/login")
@@ -58,6 +47,7 @@ public class AuthController {
 
         if (!user.getIsActive()) {
             throw new RuntimeException("Tài khoản của bạn chưa được xác thực hoặc đã bị khóa. Vui lòng liên hệ Admin.");
+        }
         if (!user.isEnabled()) {
             throw new RuntimeException("Account not verified. Please check your email.");
         }
@@ -151,43 +141,6 @@ public class AuthController {
                 .build();
     }
 
-    // ================= FORGOT PASSWORD =================
-    @PostMapping("/forgot-password")
-    public ApiResponse<String> forgotPassword(@RequestBody AuthRequest request) {
-        try {
-            String token = UUID.randomUUID().toString();
-            userService.saveVerificationToken(user.getEmail(), token);
-            mailService.sendVerificationEmail(user.getEmail(), token);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ApiResponse.<UserResponse>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Register successful. Please check your email to verify.")
-                .data(user)
-                .build();
-    }
-
-    // ================= VERIFY EMAIL =================
-    @GetMapping("/verify")
-    public ApiResponse<String> verifyEmail(@RequestParam String token) {
-        boolean isValid = userService.verifyEmail(token);
-
-        if (!isValid) {
-            return ApiResponse.<String>builder()
-                    .code(HttpStatus.BAD_REQUEST.value())
-                    .message("Invalid or expired token")
-                    .data(null)
-                    .build();
-        }
-
-        return ApiResponse.<String>builder()
-                .code(HttpStatus.OK.value())
-                .message("Email verified successfully")
-                .data(null)
-                .build();
-    }
 
     // ================= FORGOT PASSWORD =================
     @PostMapping("/forgot-password")

@@ -72,7 +72,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+
         <!-- Mail -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -154,16 +154,9 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.38</version>
+							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
-                <annotationProcessorPaths>
-                    <path>
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                        <version>${lombok.version}</version>
-                    </path>
-                </annotationProcessorPaths>
 				</configuration>
 			</plugin>
 

@@ -110,8 +110,6 @@ public class BookingServiceImpl implements BookingService {
 
         tourScheduleRepository.save(schedule);
 
-        return BookingMapper.toResponse(saved);
-
         // Handle Discount
         if (request.getDiscountCode() != null && !request.getDiscountCode().isEmpty()) {
             Discount discount = discountRepository.findByCode(request.getDiscountCode())
@@ -256,7 +254,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.REFUND_REQUESTED);
     }
-}
+
     @Override
     public List<FinancialReportResponse> getFinancialReport(String start, String end, String type, String status) {
         LocalDateTime startDateTime = LocalDate.parse(start).atStartOfDay();
