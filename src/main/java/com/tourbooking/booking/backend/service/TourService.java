@@ -35,6 +35,10 @@ public interface TourService {
                                            Long cityId,
                                            Double lat,
                                            Double lng,
+                                           Boolean hasPickup,
+                                           Boolean hasLunch,
+                                           Boolean isDaily,
+                                           Boolean isInstantConfirmation,
                                            String sortBy,
                                            String sortDir,
                                            Pageable pageable);

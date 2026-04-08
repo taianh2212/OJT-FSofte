@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.tourbooking.booking.backend.model.entity.TourSchedule;
+import com.tourbooking.booking.backend.model.entity.Tour;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface TourScheduleRepository extends JpaRepository<TourSchedule, Long
     List<TourSchedule> findAllOpen();
 
     List<TourSchedule> findByGuideId(Long guideId);
+
+    void deleteAllByTour(Tour tour);
 }
