@@ -12,10 +12,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reviews")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
+
+    @GetMapping
+    public ApiResponse<List<ReviewResponse>> getAllReviews() {
+        return ApiResponse.<List<ReviewResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Successfully retrieved all reviews")
+                .data(reviewService.getAllReviews())
+                .build();
+    }
 
     @GetMapping("/tour/{tourId}")
     public ApiResponse<List<ReviewResponse>> getReviewsByTour(

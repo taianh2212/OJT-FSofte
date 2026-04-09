@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 public class ReviewResponse {
 
     private Long reviewId;
-
+    private Long userId;
     private String userName;
-
+    private Long tourId;
+    private String tourName;
     private Integer rating;
-
     private String comment;
-
     private LocalDateTime createdAt;
 
 }

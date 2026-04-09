@@ -85,7 +85,7 @@ public class ChatEscalationServiceImpl implements ChatEscalationService {
         User staff = requireAdmin(staffId);
 
         ChatMessages staffMsg = new ChatMessages();
-        staffMsg.setUser(escalation.getCustomer());
+        staffMsg.setUser(staff);
         staffMsg.setGuestId(escalation.getGuestId());
         staffMsg.setSenderType(ChatSenderType.STAFF.name());
         staffMsg.setMessage(request.getMessage().trim());

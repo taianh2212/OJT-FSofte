@@ -15,5 +15,7 @@ public class BookingResponse {
     private LocalDateTime bookingDate;
     private Integer numberOfPeople;
     private BigDecimal totalPrice;
+    private BigDecimal discountAmount;
+    private String discountCode;
     private BookingStatus status;
 }

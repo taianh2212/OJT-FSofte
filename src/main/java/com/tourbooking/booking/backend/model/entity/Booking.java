@@ -32,6 +32,12 @@ public class Booking extends Base {
     @Column(name = "TotalPrice", precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
+    @Column(name = "DiscountAmount", precision = 10, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "DiscountCode", length = 50)
+    private String discountCode;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50)
     private BookingStatus status = BookingStatus.PENDING;
@@ -47,4 +53,5 @@ public class Booking extends Base {
             bookingDate = LocalDateTime.now();
         }
     }
+
 }
