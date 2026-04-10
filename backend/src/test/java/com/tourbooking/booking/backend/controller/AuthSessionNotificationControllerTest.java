@@ -1,3 +1,6 @@
+package com.tourbooking.booking.backend.controller;
+
+import com.tourbooking.booking.backend.service.AuthSessionNotificationService;
 package com.tourbooking.booking.controller;
 
 import com.tourbooking.booking.service.AuthSessionNotificationService;
@@ -6,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.security.JwtService;
 import com.tourbooking.booking.repository.UserRepository;
 import com.tourbooking.booking.security.JwtService;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;

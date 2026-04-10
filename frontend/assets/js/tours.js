@@ -93,6 +93,10 @@
       card.className = 'card';
       const checked = state.selected.has(t.id);
       card.innerHTML = `
+        <div class="thumb">Tour</div>
+        <div class="tour-title">${escapeHtml(t.tourName || '')}</div>
+        <div class="meta">
+          <span><strong>${t.price ?? ''}</strong></span>
         <div class="thumb">
           ${t.imageUrl ? `<img src="${t.imageUrl}" alt="${escapeHtml(t.tourName)}" loading="lazy">` : 
             t.imageUrls && t.imageUrls.length > 0 ? `<img src="${t.imageUrls[0]}" alt="${escapeHtml(t.tourName)}" loading="lazy">` : 

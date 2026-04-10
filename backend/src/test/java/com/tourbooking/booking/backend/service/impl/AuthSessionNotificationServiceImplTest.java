@@ -1,3 +1,8 @@
+package com.tourbooking.booking.backend.service.impl;
+
+import com.tourbooking.booking.backend.model.entity.User;
+import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.security.JwtService;
 package com.tourbooking.booking.service.impl;
 
 import com.tourbooking.booking.model.entity.User;
@@ -40,6 +45,10 @@ class AuthSessionNotificationServiceImplTest {
         assertEquals(1, service.createdEmitters);
 
         service.notifySessionInvalidated("test@example.com",
+                "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại.");
+
+        assertEquals(1, service.lastEmitter.sentMessages.size());
+        assertEquals("Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại.",
                 "TÃƒÆ’Ã‚Â i khoÃƒÂ¡Ã‚ÂºÃ‚Â£n Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â£ Ãƒâ€žÃ¢â‚¬ËœÃƒâ€ Ã‚Â°ÃƒÂ¡Ã‚Â»Ã‚Â£c Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng nhÃƒÂ¡Ã‚ÂºÃ‚Â­p ÃƒÂ¡Ã‚Â»Ã…Â¸ nÃƒâ€ Ã‚Â¡i khÃƒÆ’Ã‚Â¡c. Vui lÃƒÆ’Ã‚Â²ng Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng nhÃƒÂ¡Ã‚ÂºÃ‚Â­p lÃƒÂ¡Ã‚ÂºÃ‚Â¡i.");
 
         assertEquals(1, service.lastEmitter.sentMessages.size());
