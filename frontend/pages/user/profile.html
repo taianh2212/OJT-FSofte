@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hồ Sơ Của Tôi - TourBooking</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
   <style>
     .layout { display:grid; grid-template-columns: 240px 1fr; gap: 24px; align-items:start; margin-top: 20px; }
     .sidebar-menu { display: flex; flex-direction: column; gap: 8px; }
@@ -21,7 +21,7 @@
 </head>
 <body>
   <div class="container"><div class="page-shell"><div class="content-pad">
-    <div class="topbar"><a class="brand" href="../pages/index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a></div>
+    <div class="topbar"><a class="brand" href="../index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a></div>
     <div class="layout">
       <div class="card panel"><nav class="sidebar-menu"><a href="profile.html" class="active">Tài khoản của tôi</a><a href="history.html">Lịch sử đặt tour</a><a href="#">Thông báo</a></nav></div>
       <div>
@@ -37,7 +37,7 @@
       </div>
     </div>
   </div></div></div>
-  <script src="../assets/js/api.js"></script>
+  <script src="../../assets/js/api.js"></script>
   <script>
     const $=(id)=>document.getElementById(id);
     function calcTier(points){const p=Number(points||0); if(p>=5000)return 'Kim cương (Diamond)'; if(p>=2000)return 'Bạch kim (Platinum)'; if(p>=1000)return 'Vàng (Gold)'; if(p>=300)return 'Bạc (Silver)'; return 'Thành viên (Member)';}

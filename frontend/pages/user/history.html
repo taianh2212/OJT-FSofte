@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lịch Sử Đặt Tour - TourBooking</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
   <style>
     .layout { display:grid; grid-template-columns: 240px 1fr; gap: 24px; align-items:start; margin-top: 20px; }
     .sidebar-menu { display: flex; flex-direction: column; gap: 8px; }
@@ -25,7 +25,7 @@
 </head>
 <body>
   <div class="container"><div class="page-shell"><div class="content-pad">
-    <div class="topbar"><a class="brand" href="../pages/index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a></div>
+    <div class="topbar"><a class="brand" href="../index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a></div>
     <div class="layout">
       <div class="card panel"><nav class="sidebar-menu"><a href="profile.html">Tài khoản của tôi</a><a href="history.html" class="active">Lịch sử đặt tour</a><a href="#">Thông báo</a></nav></div>
       <div class="card panel">
@@ -42,7 +42,7 @@
   </div></div></div>
   <div class="modal-overlay" id="cancelModal"><div class="modal-box"><h3 style="margin-top:0;">Hủy Đặt Tour (UC20)</h3><p style="font-size:0.9rem; color:var(--text-faint);">Bạn có chắc chắn muốn hủy đặt tour <strong id="cancelCode"></strong> không?</p><div style="margin-top:16px; padding:12px; background:#f0f9ff; border-radius:8px; border:1px solid #bae6fd;"><strong>Yêu Cầu Hoàn Tiền (UC21)</strong><p style="font-size:0.85rem; margin:4px 0 0;">Vui lòng nhập tài khoản ngân hàng để nhận lại tiền.</p><textarea rows="2" placeholder="Tên NH - Số TK - Chủ Tài Khoản" id="refundInfo"></textarea></div><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button class="btn btn-secondary" onclick="closeModals()">Đóng</button><button class="btn" style="background:#ef4444; color:white;" onclick="confirmCancel()">Xác nhận Hủy</button></div></div></div>
   <div class="modal-overlay" id="reviewModal"><div class="modal-box"><h3 style="margin-top:0;">Viết Đánh Giá (UC23)</h3><p style="font-size:0.9rem; color:var(--text-faint);">Chia sẻ trải nghiệm về mã tour <strong id="reviewCode"></strong>.</p><div style="margin-top:12px;"><label style="font-weight:600; font-size:0.9rem;">Điểm hài lòng:</label><select id="reviewRating" style="width:100%; padding:8px; margin-top:4px; border-radius:6px; border:1px solid rgba(0,0,0,0.1);"><option value="5">⭐⭐⭐⭐⭐ Tuyệt vời</option><option value="4">⭐⭐⭐⭐ Tốt</option><option value="3">⭐⭐⭐ Bình thường</option><option value="2">⭐⭐ Tệ</option><option value="1">⭐ Rất tệ</option></select></div><textarea rows="4" id="reviewComment" placeholder="Viết cảm nhận của bạn..."></textarea><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button class="btn btn-secondary" onclick="closeModals()">Đóng</button><button class="btn" onclick="submitReview()">Gửi Đánh Giá</button></div></div></div>
-  <script src="../assets/js/api.js"></script>
+  <script src="../../assets/js/api.js"></script>
   <script>
     let allBookings = []; let currentBooking = null; const $ = (id) => document.getElementById(id);
     function formatCurrency(v){return Number(v||0).toLocaleString('vi-VN')+' ₫';}

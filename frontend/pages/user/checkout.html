@@ -7,7 +7,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
   <style>
     .layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; margin-top: 20px; }
     .form-group { margin-bottom: 16px; }
@@ -26,7 +26,7 @@
 <body>
   <div class="container"><div class="page-shell"><div class="content-pad">
     <div class="topbar">
-      <a class="brand" href="../pages/index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a>
+      <a class="brand" href="../index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a>
     </div>
     <div class="layout">
       <div class="card panel">
@@ -78,7 +78,7 @@
       </div>
     </div>
   </div></div></div>
-  <script src="../assets/js/api.js"></script>
+  <script src="../../assets/js/api.js"></script>
   <script>
     let basePrice = 3500000;
     let discount = 0;
@@ -107,6 +107,7 @@
       const scheduleSelect = document.getElementById('scheduleId');
       const params = new URLSearchParams(window.location.search);
       const tourIdParam = Number(params.get('tourId') || 0);
+      const preselectedScheduleId = params.get('scheduleId');
       try {
         let tourId = tourIdParam;
         if (!tourId) {
@@ -138,6 +139,14 @@
           op.textContent = `${s.startDate} - Còn ${s.availableSlots} chỗ trống`;
           scheduleSelect.appendChild(op);
         });
+
+        if (preselectedScheduleId) {
+          const matched = schedules.find(s => String(s.scheduleId) === String(preselectedScheduleId));
+          if (matched) {
+            scheduleSelect.value = String(matched.scheduleId);
+            checkAvailability();
+          }
+        }
       } catch (e) {
         alert(e?.message || 'Không tải được lịch trình từ server.');
       } finally {

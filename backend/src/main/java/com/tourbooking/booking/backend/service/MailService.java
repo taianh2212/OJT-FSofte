@@ -102,6 +102,25 @@ public class MailService {
         }
     }
 
+    public void sendBookingConfirmedEmail(String toEmail, String customerName, Long bookingId, java.math.BigDecimal amount) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(resolveFromAddress());
+            message.setTo(toEmail);
+            message.setSubject("[TourBooking] Booking #" + bookingId + " da duoc xac nhan");
+            message.setText(
+                    "Xin chao " + customerName + ",\n\n" +
+                            "Booking #" + bookingId + " cua ban da duoc xac nhan.\n" +
+                            "Tong tien: " + amount + " VND.\n\n" +
+                            "Cam on ban da su dung TourBooking."
+            );
+            mailSender.send(message);
+            log.info("Booking confirmation email sent for booking {} to {}", bookingId, toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send booking confirmation email for booking {}: {}", bookingId, e.getMessage(), e);
+        }
+    }
+
     private String resolveFromAddress() {
         if (mailFrom == null || mailFrom.isBlank() || mailFrom.contains("your-gmail")) {
             throw new IllegalStateException("spring.mail.username is not configured with a real Gmail address");

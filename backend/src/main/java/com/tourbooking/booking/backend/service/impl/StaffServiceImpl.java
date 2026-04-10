@@ -12,6 +12,7 @@ import com.tourbooking.booking.backend.repository.BookingRepository;
 import com.tourbooking.booking.backend.repository.RefundRequestRepository;
 import com.tourbooking.booking.backend.repository.TourScheduleRepository;
 import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.service.MailService;
 import com.tourbooking.booking.backend.service.StaffService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class StaffServiceImpl implements StaffService {
     private final TourScheduleRepository tourScheduleRepository;
     private final UserRepository userRepository;
     private final RefundRequestRepository refundRequestRepository;
+    private final MailService mailService;
 
     @Override
     @Transactional
@@ -38,6 +40,15 @@ public class StaffServiceImpl implements StaffService {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
+
+        if (booking.getUser() != null && booking.getUser().getEmail() != null) {
+            mailService.sendBookingConfirmedEmail(
+                    booking.getUser().getEmail(),
+                    booking.getUser().getFullName(),
+                    booking.getId(),
+                    booking.getTotalPrice()
+            );
+        }
     }
 
     @Override
