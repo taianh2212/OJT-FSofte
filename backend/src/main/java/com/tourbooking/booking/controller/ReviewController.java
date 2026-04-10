@@ -1,0 +1,71 @@
+package com.tourbooking.booking.controller;
+
+import com.tourbooking.booking.model.dto.request.ReviewRequest;
+import com.tourbooking.booking.model.dto.response.ApiResponse;
+import com.tourbooking.booking.model.dto.response.ReviewResponse;
+import com.tourbooking.booking.service.ReviewService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/reviews")
+@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
+public class ReviewController {
+
+    private final ReviewService reviewService;
+
+    @GetMapping
+    public ApiResponse<List<ReviewResponse>> getAllReviews() {
+        return ApiResponse.<List<ReviewResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Successfully retrieved all reviews")
+                .data(reviewService.getAllReviews())
+                .build();
+    }
+
+    @GetMapping("/tour/{tourId}")
+    public ApiResponse<List<ReviewResponse>> getReviewsByTour(
+            @PathVariable Long tourId,
+            @RequestParam(required = false) Integer minRating,
+            @RequestParam(required = false) Integer maxRating,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        return ApiResponse.<List<ReviewResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Successfully retrieved reviews for tour: " + tourId)
+                .data(reviewService.getReviewsByTour(tourId, minRating, maxRating, sortBy, direction))
+                .build();
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<ReviewResponse> createReview(@RequestBody ReviewRequest request) {
+        return ApiResponse.<ReviewResponse>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Review created successfully")
+                .data(reviewService.createReview(request))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<ReviewResponse> updateReview(@PathVariable Long id, @RequestBody ReviewRequest request) {
+        return ApiResponse.<ReviewResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Review updated successfully")
+                .data(reviewService.updateReview(id, request))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteReview(@PathVariable Long id) {
+        reviewService.deleteReview(id);
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message("Review deleted successfully")
+                .build();
+    }
+}
