@@ -1,6 +1,8 @@
 package com.tourbooking.booking.service.impl;
 
+import com.tourbooking.booking.model.dto.response.BookingResponse;
 import com.tourbooking.booking.model.dto.response.RefundResponse;
+import com.tourbooking.booking.model.dto.response.UserResponse;
 import com.tourbooking.booking.model.entity.Booking;
 import com.tourbooking.booking.model.entity.RefundRequest;
 import com.tourbooking.booking.model.entity.TourSchedule;
@@ -81,5 +83,47 @@ public class StaffServiceImpl implements StaffService {
         refund.setStaffNote(staffNote);
         refund.setProcessedAt(LocalDateTime.now());
         refundRequestRepository.save(refund);
+    }
+
+    @Override
+    public List<UserResponse> listGuides() {
+        return userRepository.findByRole(UserRole.GUIDE).stream()
+                .map(u -> {
+                    UserResponse res = new UserResponse();
+                    res.setId(u.getId());
+                    res.setFullName(u.getFullName());
+                    res.setEmail(u.getEmail());
+                    res.setRole(u.getRole());
+                    res.setIsActive(u.getIsActive());
+                    return res;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingResponse> listBookings(String status) {
+        List<Booking> bookings;
+        if (status != null) {
+            bookings = bookingRepository.findByStatus(BookingStatus.valueOf(status.toUpperCase()));
+        } else {
+            bookings = bookingRepository.findAll();
+        }
+
+        return bookings.stream()
+                .map(b -> {
+                    BookingResponse res = new BookingResponse();
+                    res.setId(b.getId());
+                    res.setUserId(b.getUser() != null ? b.getUser().getId() : null);
+                    res.setUserFullName(b.getUser() != null ? b.getUser().getFullName() : "Guest");
+                    res.setScheduleId(b.getSchedule() != null ? b.getSchedule().getId() : null);
+                    res.setTourName(b.getSchedule() != null && b.getSchedule().getTour() != null ? 
+                                    b.getSchedule().getTour().getTourName() : "N/A");
+                    res.setBookingDate(b.getBookingDate());
+                    res.setNumberOfPeople(b.getNumberOfPeople());
+                    res.setTotalPrice(b.getTotalPrice());
+                    res.setStatus(b.getStatus());
+                    return res;
+                })
+                .collect(Collectors.toList());
     }
 }

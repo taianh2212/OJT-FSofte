@@ -1,7 +1,9 @@
 package com.tourbooking.booking.controller;
 
 import com.tourbooking.booking.model.dto.response.ApiResponse;
+import com.tourbooking.booking.model.dto.response.BookingResponse;
 import com.tourbooking.booking.model.dto.response.RefundResponse;
+import com.tourbooking.booking.model.dto.response.UserResponse;
 import com.tourbooking.booking.model.entity.enums.RefundStatus;
 import com.tourbooking.booking.service.StaffService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,16 @@ public class StaffController {
 
     private final StaffService staffService;
 
+    @GetMapping("/bookings")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<List<BookingResponse>> listBookings(@RequestParam(required = false) String status) {
+        return ApiResponse.<List<BookingResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Bookings retrieved successfully")
+                .data(staffService.listBookings(status))
+                .build();
+    }
+
     @PatchMapping("/bookings/{id}/confirm")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<String> confirmBooking(@PathVariable Long id) {
@@ -26,6 +38,16 @@ public class StaffController {
                 .code(HttpStatus.OK.value())
                 .message("Booking confirmed successfully")
                 .data(null)
+                .build();
+    }
+
+    @GetMapping("/guides")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<List<UserResponse>> listGuides() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Guides retrieved successfully")
+                .data(staffService.listGuides())
                 .build();
     }
 

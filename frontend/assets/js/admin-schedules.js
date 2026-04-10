@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userStr = localStorage.getItem('user');
     if (!userStr) window.location.href = '/pages/auth/login.html';
     const user = JSON.parse(userStr);
-    if (user.role !== 'ADMIN') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    if (user.role !== 'ADMIN' && user.role !== 'STAFF') {
+        window.location.href = '/pages/index.html';
+        return;
+    }
     document.getElementById('userInfo').innerText = user.fullName || user.email;
 
     await loadSchedules();
@@ -13,7 +16,7 @@ let currentScheduleId = null;
 async function loadSchedules() {
     const tbody = document.querySelector('#schedulesTable tbody');
     try {
-        const res = await TB.apiFetch('/api/v1/schedules'); // Generic endpoint
+        const res = await TB.apiFetch('/api/v1/schedules'); 
         const data = res.data || [];
         tbody.innerHTML = '';
         data.forEach(s => {
@@ -29,17 +32,7 @@ async function loadSchedules() {
             tbody.appendChild(row);
         });
     } catch (e) {
-        // Fallback UI
-        tbody.innerHTML = `
-            <tr>
-                <td>SD-15</td>
-                <td>Hoi An Cultural Heritage</td>
-                <td>2026-05-10 - 2026-05-12</td>
-                <td><span style="color:#d97706">Unassigned</span></td>
-                <td>OPEN</td>
-                <td><button class="action-btn" onclick="openAssignModal(15)">Assign</button></td>
-            </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="6" style="color:red">Error: ${e.message}</td></tr>`;
     }
 }
 
@@ -48,23 +41,20 @@ window.openAssignModal = async function(scheduleId) {
     document.getElementById('targetScheduleId').innerText = 'Selected Schedule: SD-' + scheduleId;
     document.getElementById('assignModal').classList.add('active');
     
-    // Load Guides
     const select = document.getElementById('guideSelect');
     select.innerHTML = '<option>Loading guides...</option>';
     try {
-        const res = await TB.apiFetch('/api/v1/admin/users?role=GUIDE');
+        const res = await TB.apiFetch('/api/v1/staff/guides');
         select.innerHTML = '';
-        // If guides exist
         if (res.data && res.data.length) {
             res.data.forEach(g => {
                 select.innerHTML += `<option value="${g.id}">${g.fullName} (${g.email})</option>`;
             });
+        } else {
+            select.innerHTML = '<option>No guides found</option>';
         }
     } catch (e) {
-        select.innerHTML = `
-            <option value="2">Tran Van Guide</option>
-            <option value="5">Le Thi Guide</option>
-        `;
+         select.innerHTML = '<option style="color:red">Error loading guides</option>';
     }
 };
 

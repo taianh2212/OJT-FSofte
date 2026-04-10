@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!userStr) window.location.href = '/pages/auth/login.html';
     const user = JSON.parse(userStr);
     
-    if (user.role !== 'ADMIN') {
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    if (user.role !== 'ADMIN' && user.role !== 'STAFF') {
+        window.location.href = '/pages/index.html';
+        return;
     }
     document.getElementById('userInfo').innerText = user.fullName || user.email;
 
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadBookings() {
     const tbody = document.querySelector('#bookingsTable tbody');
     try {
-        const res = await TB.apiFetch('/api/v1/bookings');
+        const res = await TB.apiFetch('/api/v1/staff/bookings');
         const bookings = res.data || [];
         
         tbody.innerHTML = '';
@@ -28,7 +29,7 @@ async function loadBookings() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>#${b.id}</td>
-                <td>${b.userName || 'Guest'}</td>
+                <td>${b.userFullName || 'Guest'}</td>
                 <td>SD-${b.scheduleId}</td>
                 <td>$${b.totalPrice}</td>
                 <td><span class="status-badge ${statusClass}">${b.status}</span></td>
@@ -39,19 +40,7 @@ async function loadBookings() {
             tbody.appendChild(row);
         });
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:red">Failed to load bookings or you do not have permission. Wait... let me fallback to a standard fetch if you changed URLs.</td></tr>';
-        
-        // Let's create dummy items for the UI demo if the API doesn't exist yet
-        tbody.innerHTML = `
-            <tr>
-                <td>#1001</td>
-                <td>Nguyễn Văn A</td>
-                <td>SD-25</td>
-                <td>$1,200.00</td>
-                <td><span class="status-badge status-pending">PENDING</span></td>
-                <td><button class="action-btn" onclick="confirmBooking(1001)">Confirm</button></td>
-            </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="6" style="color:red">Error: ${error.message}</td></tr>`;
     }
 }
 

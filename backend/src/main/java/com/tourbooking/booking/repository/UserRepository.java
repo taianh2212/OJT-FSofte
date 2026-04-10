@@ -10,6 +10,7 @@ import com.tourbooking.booking.model.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    java.util.List<User> findByRole(com.tourbooking.booking.model.entity.enums.UserRole role);
     
     java.util.List<User> findByIsActiveFalseAndCreatedAtBefore(java.time.LocalDateTime cutoff);
 
