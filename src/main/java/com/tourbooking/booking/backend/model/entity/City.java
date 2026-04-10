@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @AttributeOverride(name = "id", column = @Column(name = "CityID", nullable = false, unique = true, columnDefinition = "BIGINT"))
 public class City extends Base {
 
-    @Column(name = "CityName", length = 100, nullable = false, unique = true)
+    @Column(name = "CityName", columnDefinition = "NVARCHAR(100)", nullable = false, unique = true)
     private String cityName;
 
     @Column(name = "CenterLatitude", precision = 9, scale = 6, nullable = false)

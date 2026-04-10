@@ -80,6 +80,10 @@ public class TourController {
             @RequestParam(required = false) Long cityId,
             @RequestParam(required = false) Double lat,
             @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) Boolean hasPickup,
+            @RequestParam(required = false) Boolean hasLunch,
+            @RequestParam(required = false) Boolean isDaily,
+            @RequestParam(required = false) Boolean isInstantConfirmation,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "price") String sortBy,
@@ -108,7 +112,7 @@ public class TourController {
         return ApiResponse.<PagedResponse<TourResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Browse tours")
-                .data(tourService.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, cityId, lat, lng, sortBy, sortDir, pageable))
+                .data(tourService.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, cityId, lat, lng, hasPickup, hasLunch, isDaily, isInstantConfirmation, sortBy, sortDir, pageable))
                 .build();
     }
 

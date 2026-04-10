@@ -1,0 +1,38 @@
+{
+  "externalId": "THAN_TAI_2DAY_RELAX",
+  "tourName": "Núi Thần Tài 2 ngày 1 đêm - Nghỉ dưỡng khoáng nóng",
+  "description": "Kết hợp nghỉ dưỡng khoáng nóng, Onsen Nhật Bản, tắm bùn và tham quan văn hóa tại Núi Thần Tài cho gia đình và nhóm bạn tìm sự thư giãn.",
+  "price": 2690000,
+  "originalPrice": 3090000,
+  "duration": 2,
+  "startLocation": "Đà Nẵng",
+  "endLocation": "Núi Thần Tài",
+  "categoryName": "Tour Nghỉ Dưỡng",
+  "transportType": "Xe limousine + Xe điện trong khu",
+  "itinerary": "[DAY 1]\n08:00 Đón khách, di chuyển đến suối khoáng nóng.\n09:30 Tắm khoáng nóng và Onsen kiểu Nhật Bản.\n12:00 Buffet trưa nhà hàng.\n14:00 Thử công viên nước và tắm bùn khoáng.\n17:00 Nhận phòng nghỉ dưỡng, thư giãn.\n19:30 BBQ tối đặc sản biển.\n[DAY 2]\n07:00 Ăn sáng và tập thiền tại đỉnh.\n08:30 Viếng đền Thần Tài và khám phá trekking nhẹ.\n10:00 Tắm khoáng lần 2 và nước khoáng cá nhân.\n12:00 Buffet trưa, trả phòng.\n13:30 Về lại Đà Nẵng.",
+  "highlights": [
+    "Onsen và tắm khoáng nóng",
+    "Tắm bùn, spa và công viên nước",
+    "Nhận phòng với nước khoáng riêng",
+    "Ẩm thực đặc sản biển và BBQ",
+    "Tĩnh tâm tại đền Thần Tài"
+  ],
+  "images": [
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80"
+  ],
+  "schedules": [
+    {
+      "startDate": "2026-04-13",
+      "availableSlots": 10,
+      "status": "OPEN"
+    },
+    {
+      "startDate": "2026-04-20",
+      "availableSlots": 12,
+      "status": "OPEN"
+    }
+  ]
+}

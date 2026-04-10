@@ -12,12 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Token {
+@EqualsAndHashCode(callSuper = true)
+public class Token extends Base {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @Column(name = "Token", length = 500)
     private String token;
 
     private String email;

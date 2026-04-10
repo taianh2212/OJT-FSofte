@@ -1,0 +1,43 @@
+{
+    "externalId": "BANA_HILLS_2D1N_PREMIUM",
+    "tourName": "Bà Nà Hills 2 ngày 1 đêm - Nghỉ dưỡng Mercure French Village",
+    "description": "Tour nghỉ dưỡng cao cấp tại Bà Nà Hills với 1 đêm Mercure French Village, săn mây và trải nghiệm Cầu Vàng, Fantasy Park và đền linh thiêng trong không gian châu Âu trên đỉnh núi.",
+    "price": 2990000,
+    "originalPrice": 3390000,
+    "duration": 2,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Bà Nà Hills",
+    "categoryName": "Tour Nghỉ Dưỡng",
+    "transportType": "Xe du lịch + Cáp treo",
+    "itinerary": "[DAY 1]\n08:00 Xe đón tại khách sạn trung tâm Đà Nẵng.\n09:30 Đi cáp treo, check-in Cầu Vàng.\n11:30 Tham quan làng Pháp, hầm rượu Debay và vườn hoa tình yêu.\n13:00 Buffet trưa Beer Plaza.\n14:30 Fantasy Park và tàu leo núi.\n16:30 Nhận phòng Mercure French Village, nghỉ ngơi.\n19:00 Buffet tối tại khách sạn và dạo quảng trường.\n[DAY 2]\n06:00 Săn mây Cầu Vàng, chụp ảnh bình minh.\n08:00 Buffet sáng Mercure.\n09:30 Thăm khu tâm linh và chùa Linh Ứng.\n11:00 Vui chơi cuối cùng tại Fantasy Park.\n12:30 Trả phòng, xuống núi về lại Đà Nẵng.",
+    "highlights": [
+        "Nghỉ đêm Mercure French Village chuẩn 4 sao",
+        "Săn mây Cầu Vàng bình minh",
+        "Fantasy Park đa trò chơi",
+        "Buffet Beer Plaza 80+ món Á Âu",
+        "Không gian châu Âu giữa đỉnh núi"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "schedules": [
+        {
+            "startDate": "2026-04-12",
+            "availableSlots": 10,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-13",
+            "availableSlots": 8,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-18",
+            "availableSlots": 9,
+            "status": "OPEN"
+        }
+    ]
+}

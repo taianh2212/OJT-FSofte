@@ -40,6 +40,9 @@ class AiChatControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private com.tourbooking.booking.backend.repository.ChatSessionRepository sessionRepository;
+
     @Test
     void chatReturnsCreatedResponse() throws Exception {
         AiChatResponse aiChatResponse = AiChatResponse.builder().reply("test reply").build();

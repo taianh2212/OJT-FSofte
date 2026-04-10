@@ -13,10 +13,10 @@ import java.util.List;
 @AttributeOverride(name = "id", column = @Column(name = "CategoryID", nullable = false, unique = true, columnDefinition = "BIGINT"))
 public class Category extends Base {
 
-    @Column(name = "CategoryName", nullable = false, length = 100)
+    @Column(name = "CategoryName", nullable = false, columnDefinition = "NVARCHAR(100)")
     private String categoryName;
 
-    @Column(name = "Description", length = 255)
+    @Column(name = "Description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
