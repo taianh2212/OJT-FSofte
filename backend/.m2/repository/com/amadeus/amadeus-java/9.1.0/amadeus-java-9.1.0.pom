@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- This module was also published with a richer model, Gradle metadata,  -->
+  <!-- which should be used instead. Do not delete the following line which  -->
+  <!-- is to indicate to Gradle or any Gradle module metadata file consumer  -->
+  <!-- that they should prefer consuming it instead. -->
+  <!-- do_not_remove: published-with-gradle-metadata -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.amadeus</groupId>
+  <artifactId>amadeus-java</artifactId>
+  <version>9.1.0</version>
+  <name>amadeus-java</name>
+  <description>Amadeus Java Bindings</description>
+  <url>https://github.com/amadeus4dev/amadeus-java</url>
+  <licenses>
+    <license>
+      <name>The MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>amadeus</id>
+      <name>Amadeus</name>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git@github.com:amadeus4dev/amadeus-java.git</connection>
+    <developerConnection>scm:git:git@github.com:amadeus4dev/amadeus-java.git</developerConnection>
+    <url>git@github.com:amadeus4dev/amadeus-java.git</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.9.0</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+</project>

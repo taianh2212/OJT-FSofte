@@ -1,49 +1,869 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compare Tours - TourBooking</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>So Sánh Tour - TourBooking</title>
+  <meta name="description"
+    content="So sánh chi tiết các tour du lịch: đặc điểm, giá cả, thời điểm lý tưởng và đối tượng phù hợp." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
-    .row { display:grid; gap: 8px; margin-top: 12px; color: var(--text-soft); }
+    /* ── Compare layout ── */
+    .cmp-grid {
+      display: grid;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    /* row label column + tour columns */
+    .cmp-table {
+      display: grid;
+      gap: 0;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(31, 41, 51, 0.1);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* ── Section header rows ── */
+    .cmp-section-header {
+      display: grid;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      color: white;
+      padding: 14px 20px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cmp-section-header .icon {
+      font-size: 1.1rem;
+    }
+
+    /* data rows */
+    .cmp-row {
+      display: grid;
+      border-bottom: 1px solid rgba(31, 41, 51, 0.07);
+      background: var(--bg-card);
+    }
+
+    .cmp-row:last-child {
+      border-bottom: none;
+    }
+
+    .cmp-row:nth-child(even) {
+      background: var(--bg-card-strong);
+    }
+
+    .cmp-label {
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-soft);
+      background: rgba(255, 255, 255, 0.6);
+      border-right: 1px solid rgba(31, 41, 51, 0.07);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 150px;
+    }
+
+    .cmp-cell {
+      padding: 14px 18px;
+      font-size: 0.92rem;
+      color: var(--text-main);
+      border-right: 1px solid rgba(31, 41, 51, 0.07);
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cmp-cell:last-child {
+      border-right: none;
+    }
+
+    /* Tour header card */
+    .tour-header-strip {
+      display: grid;
+      border-bottom: 2px solid rgba(31, 41, 51, 0.1);
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .tour-header-cell {
+      padding: 20px 18px;
+      border-right: 1px solid rgba(31, 41, 51, 0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tour-header-cell:first-child {
+      background: rgba(255, 255, 255, 0.6);
+      border-right: 1px solid rgba(31, 41, 51, 0.07);
+    }
+
+    .tour-header-cell:last-child {
+      border-right: none;
+    }
+
+    .tour-name {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .tour-category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--accent-deep);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    /* Score bar */
+    .score-bar-wrap {
+      width: 100%;
+    }
+
+    .score-bar-track {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(31, 41, 51, 0.08);
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--sun));
+      transition: width 0.6s ease;
+    }
+
+    .score-label {
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Badge chips */
+    .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid rgba(31, 41, 51, 0.08);
+    }
+
+    .badge-green {
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--accent-deep);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: #92400e;
+    }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1e40af;
+    }
+
+    .badge-rose {
+      background: rgba(244, 63, 94, 0.1);
+      color: #9f1239;
+    }
+
+    .badge-violet {
+      background: rgba(139, 92, 246, 0.1);
+      color: #5b21b6;
+    }
+
+    .badge-gray {
+      background: rgba(31, 41, 51, 0.06);
+      color: var(--text-soft);
+    }
+
+    /* Timing indicator */
+    .timing-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .timing-good {
+      background: #10b981;
+    }
+
+    .timing-ok {
+      background: var(--sun);
+    }
+
+    .timing-caution {
+      background: #f43f5e;
+    }
+
+    /* Price value meter */
+    .value-meter {
+      width: 100%;
+    }
+
+    .value-stars {
+      color: var(--sun);
+      font-size: 1rem;
+      letter-spacing: 2px;
+    }
+
+    /* Winner highlight */
+    .winner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* responsive: stack on small screens */
+    @media (max-width: 700px) {
+
+      .cmp-row,
+      .tour-header-strip,
+      .cmp-section-header {
+        grid-template-columns: 1fr !important;
+      }
+
+      .cmp-label {
+        border-right: none;
+        border-bottom: 1px solid rgba(31, 41, 51, 0.07);
+      }
+
+      .cmp-cell {
+        border-right: none;
+        border-bottom: 1px solid rgba(31, 41, 51, 0.04);
+      }
+    }
+
+    /* empty state */
+    #emptyState {
+      display: none;
+      margin-top: 24px;
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    #emptyState .big-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    #emptyState p {
+      color: var(--text-soft);
+      font-size: 1rem;
+    }
+
+    /* actions strip */
+    .actions-strip {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+
+    /* loading skeleton */
+    .skeleton-row {
+      height: 52px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(31, 41, 51, 0.05) 0%, rgba(31, 41, 51, 0.1) 50%, rgba(31, 41, 51, 0.05) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      margin-bottom: 8px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .top {
+      margin-bottom: 6px;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="page-shell">
       <div class="content-pad">
+
+        <!-- Top bar -->
         <div class="top">
-          <a class="back-link" href="./tours.html">← Back to tours</a>
-          <button class="btn btn-secondary" id="clearBtn" type="button">Clear Selection</button>
+          <a class="back-link" href="./tours.html">← Quay lại danh sách tour</a>
+          <button class="btn btn-secondary" id="clearBtn" type="button">🗑 Xoá tất cả</button>
         </div>
 
-        <div class="hero-grid" style="grid-template-columns:1fr 0.9fr;margin-top:18px;">
+        <!-- Hero -->
+        <div class="hero-grid" style="grid-template-columns:1fr 0.85fr; margin-top:20px;">
           <div class="card panel">
-            <div class="eyebrow">Compare Picks</div>
-            <h1 class="headline" style="font-size:clamp(2rem, 4vw, 3.4rem);margin-top:12px;">See strengths, trade-offs, and pricing side by side.</h1>
-            <p class="lead" style="margin-top:14px;">Keep at least two tours selected to make this page useful. Remove weaker options as you narrow down.</p>
+            <div class="eyebrow">So Sánh Tour</div>
+            <h1 class="headline" style="font-size:clamp(1.8rem,4vw,3rem); margin-top:12px;">
+              Chọn tour phù hợp với hành trình của bạn.
+            </h1>
+            <p class="lead" style="margin-top:12px;">
+              So sánh chi tiết đặc điểm nổi bật, thời điểm lý tưởng, giá trị tiền bạc và đối tượng phù hợp — tất cả
+              trong một cái nhìn tổng quan.
+            </p>
           </div>
           <div class="card hero-art">
             <div class="stack">
-              <h3>Selection tip</h3>
-              <p>Compare tours with similar duration or route profile first. It makes pricing and transport differences easier to judge.</p>
+              <h3>💡 Bạn nên biết</h3>
+              <p>Chọn tour có <strong>thời điểm phù hợp</strong> với ngày bạn dự định đi là yếu tố quan trọng nhất. Giá
+                tốt mà sai mùa sẽ ảnh hưởng đến trải nghiệm.</p>
             </div>
           </div>
         </div>
 
-        <div id="empty" class="card empty-state" style="display:none;margin-top:20px;">
-          No tours selected. Go back and choose at least 2 tours to compare.
+        <!-- Loading state -->
+        <div id="loadingState" style="margin-top:24px; display:none;">
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row" style="width:85%;"></div>
+          <div class="skeleton-row" style="width:70%;"></div>
         </div>
 
-        <div id="grid" class="grid"></div>
+        <!-- Empty state -->
+        <div id="emptyState" class="card empty-state">
+          <div class="big-icon">🗺️</div>
+          <p>Chưa có tour nào được chọn.<br>Quay lại và thêm ít nhất <strong>2 tour</strong> để so sánh.</p>
+          <a href="./tours.html" class="btn" style="margin-top:16px; text-decoration:none;">Xem danh sách tour</a>
+        </div>
+
+        <!-- Compare table -->
+        <div id="compareArea" style="display:none;">
+
+          <br></br>
+          <div id="cmpTable" class="cmp-table"></div>
+
+          <!-- Action buttons per tour -->
+          <div id="tourActions" class="actions-strip"></div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <script src="../assets/js/api.js"></script>
-  <script src="../assets/js/compare.js"></script>
+  <script>
+    (() => {
+      // ── Utilities ──────────────────────────────────────────────────────────
+      function esc(s) {
+        return String(s ?? '')
+          .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+      }
+
+      function getIds() {
+        const raw = JSON.parse(localStorage.getItem('compareIds') || '[]');
+        return Array.from(new Set(raw.map(Number).filter(Number.isFinite)));
+      }
+
+      function removeId(id) {
+        const ids = getIds().filter(x => x !== Number(id));
+        localStorage.setItem('compareIds', JSON.stringify(ids));
+        load();
+      }
+
+      // ── Analysis helpers ───────────────────────────────────────────────────
+
+      /** Derive suitability traits from tour data */
+      function getSuitabilityTraits(t) {
+        const traits = [];
+        const cat = (t.categoryName || '').toLowerCase();
+        const dur = Number(t.duration) || 0;
+        const price = Number(t.price) || 0;
+        const transport = (t.transportType || '').toLowerCase();
+
+        if (dur <= 1) traits.push({ label: 'Trong ngày', cls: 'badge-green', icon: '⚡' });
+        if (dur >= 5) traits.push({ label: 'Hành trình dài', cls: 'badge-blue', icon: '🗓' });
+        if (dur >= 3 && dur < 5) traits.push({ label: 'Ngắn ngày', cls: 'badge-amber', icon: '📅' });
+
+        if (cat.includes('family') || cat.includes('gia đình'))
+          traits.push({ label: 'Thân thiện gia đình', cls: 'badge-green', icon: '👨‍👩‍👧' });
+        if (cat.includes('adventure') || cat.includes('phiêu lưu'))
+          traits.push({ label: 'Mạo hiểm', cls: 'badge-rose', icon: '🧗' });
+        if (cat.includes('culture') || cat.includes('văn hóa'))
+          traits.push({ label: 'Văn hóa / Lịch sử', cls: 'badge-violet', icon: '🏛' });
+        if (cat.includes('beach') || cat.includes('biển'))
+          traits.push({ label: 'Biển & Nghỉ dưỡng', cls: 'badge-blue', icon: '🏖' });
+        if (cat.includes('mountain') || cat.includes('núi') || cat.includes('highland'))
+          traits.push({ label: 'Núi & Trekking', cls: 'badge-amber', icon: '⛰' });
+        if (cat.includes('food') || cat.includes('ẩm thực'))
+          traits.push({ label: 'Ẩm thực', cls: 'badge-amber', icon: '🍜' });
+        if (cat.includes('eco') || cat.includes('sinh thái'))
+          traits.push({ label: 'Sinh thái', cls: 'badge-green', icon: '🌿' });
+
+        if (transport.includes('flight') || transport.includes('máy bay'))
+          traits.push({ label: 'Bay thẳng', cls: 'badge-blue', icon: '✈️' });
+        if (transport.includes('bus') || transport.includes('xe'))
+          traits.push({ label: 'Di chuyển linh hoạt', cls: 'badge-gray', icon: '🚌' });
+
+        if (price < 1000000)
+          traits.push({ label: 'Tiết kiệm', cls: 'badge-green', icon: '💰' });
+        else if (price >= 5000000)
+          traits.push({ label: 'Cao cấp', cls: 'badge-violet', icon: '💎' });
+
+        if (t.rating && Number(t.rating) >= 4.5)
+          traits.push({ label: 'Được đánh giá cao', cls: 'badge-amber', icon: '⭐' });
+
+        if (traits.length === 0)
+          traits.push({ label: 'Đa dạng trải nghiệm', cls: 'badge-gray', icon: '🌍' });
+
+        return traits;
+      }
+
+      /** Best travel timing analysis based on current month */
+      function getTimingAnalysis(t) {
+        const now = new Date();
+        const month = now.getMonth() + 1; // 1-12
+        const cat = (t.categoryName || '').toLowerCase();
+        const start = (t.startLocation || '').toLowerCase();
+        const end = (t.endLocation || '').toLowerCase();
+        const combined = cat + ' ' + start + ' ' + end;
+
+        // Beach / coastal
+        if (combined.includes('beach') || combined.includes('biển') ||
+          combined.includes('đà nẵng') || combined.includes('phú quốc') ||
+          combined.includes('nha trang') || combined.includes('vũng tàu')) {
+          if (month >= 3 && month <= 8)
+            return { cls: 'timing-good', label: 'Thời điểm lý tưởng 🌞', note: 'Tháng ' + month + ' là cao điểm của mùa biển. Nắng đẹp, ít mưa — rất phù hợp để đi ngay bây giờ.' };
+          else
+            return { cls: 'timing-caution', label: 'Ngoài mùa cao điểm 🌧', note: 'Mùa này có thể có mưa nhiều ở vùng biển miền Trung. Nên cân nhắc kỹ.' };
+        }
+
+        // Mountain / highland
+        if (combined.includes('mountain') || combined.includes('núi') ||
+          combined.includes('sapa') || combined.includes('sa pa') ||
+          combined.includes('hà giang') || combined.includes('highland')) {
+          if (month >= 9 && month <= 11)
+            return { cls: 'timing-good', label: 'Mùa đẹp nhất 🍂', note: 'Tháng ' + month + ' là mùa lúa chín vàng trên thang ruộng bậc thang. Cực kỳ lý tưởng!' };
+          if (month >= 3 && month <= 5)
+            return { cls: 'timing-ok', label: 'Khá tốt 🌸', note: 'Mùa xuân có hoa nở đẹp, thời tiết mát mẻ. Phù hợp để trekking.' };
+          if (month === 12 || month <= 2)
+            return { cls: 'timing-ok', label: 'Mùa lạnh ❄️', note: 'Nhiệt độ thấp, có thể có sương mù. Cần mang theo áo ấm.' };
+          return { cls: 'timing-caution', label: 'Mùa mưa ⛈', note: 'Tháng ' + month + ' hay có mưa và sương ở vùng cao. Đường trơn trượt, cần cẩn thận.' };
+        }
+
+        // Culture / City tour
+        if (combined.includes('culture') || combined.includes('văn hóa') ||
+          combined.includes('hà nội') || combined.includes('hội an') ||
+          combined.includes('huế') || combined.includes('city')) {
+          if (month >= 10 && month <= 4)
+            return { cls: 'timing-good', label: 'Thời tiết dễ chịu ✅', note: 'Tháng ' + month + ' mát mẻ, ít mưa — lý tưởng để khám phá văn hoá và di tích.' };
+          return { cls: 'timing-ok', label: 'Nóng nhưng vẫn được 🌤', note: 'Mùa hè có thể nóng, nên lên kế hoạch tham quan buổi sáng sớm và chiều muộn.' };
+        }
+
+        // Eco / nature
+        if (combined.includes('eco') || combined.includes('sinh thái') ||
+          combined.includes('rừng') || combined.includes('forest')) {
+          if (month >= 11 || month <= 4)
+            return { cls: 'timing-good', label: 'Mùa khô lý tưởng 🌿', note: 'Mùa khô, dễ di chuyển trong rừng và quan sát động thực vật.' };
+          return { cls: 'timing-ok', label: 'Mùa mưa – cần chuẩn bị 🌧', note: 'Rừng xanh tốt hơn nhưng đường đi khó khăn hơn. Nên đi với hướng dẫn viên.' };
+        }
+
+        // Default
+        if (month >= 11 || month <= 4)
+          return { cls: 'timing-good', label: 'Thích hợp đi vào lúc này ✅', note: 'Thời tiết đang ở giai đoạn thuận lợi cho du lịch nói chung.' };
+        return { cls: 'timing-ok', label: 'Có thể đi, nên chuẩn bị kỹ 🧳', note: 'Mùa này phụ thuộc điểm đến cụ thể — kiểm tra thêm thông tin thời tiết địa phương.' };
+      }
+
+      /** Who is this tour best for */
+      function getTargetAudience(t) {
+        const audiences = [];
+        const cat = (t.categoryName || '').toLowerCase();
+        const dur = Number(t.duration) || 0;
+        const price = Number(t.price) || 0;
+
+        if (dur <= 1) audiences.push({ label: 'Người bận việc', icon: '💼' });
+        if (dur >= 5) audiences.push({ label: 'Du khách có nhiều thời gian', icon: '🗓' });
+
+        if (price < 1500000) audiences.push({ label: 'Sinh viên / ngân sách thấp', icon: '🎓' });
+        if (price >= 5000000) audiences.push({ label: 'Du khách hạng sang', icon: '💎' });
+        if (price >= 1500000 && price < 5000000) audiences.push({ label: 'Gia đình trung lưu', icon: '👨‍👩‍👧' });
+
+        if (cat.includes('adventure') || cat.includes('phiêu lưu') || cat.includes('mountain') || cat.includes('núi'))
+          audiences.push({ label: 'Người thích mạo hiểm', icon: '🧗' });
+        if (cat.includes('family') || cat.includes('gia đình'))
+          audiences.push({ label: 'Gia đình có trẻ em', icon: '👶' });
+        if (cat.includes('culture') || cat.includes('văn hóa'))
+          audiences.push({ label: 'Yêu lịch sử & nghệ thuật', icon: '🏛' });
+        if (cat.includes('beach') || cat.includes('biển'))
+          audiences.push({ label: 'Người yêu biển & thư giãn', icon: '🏖' });
+        if (cat.includes('food') || cat.includes('ẩm thực'))
+          audiences.push({ label: 'Foodie / Yêu ẩm thực', icon: '🍜' });
+        if (cat.includes('eco') || cat.includes('sinh thái'))
+          audiences.push({ label: 'Người yêu thiên nhiên', icon: '🌿' });
+        if (cat.includes('honeymoon') || cat.includes('trăng mật') || cat.includes('romantic'))
+          audiences.push({ label: 'Cặp đôi / Trăng mật', icon: '💕' });
+
+        if (audiences.length === 0)
+          audiences.push({ label: 'Phù hợp mọi đối tượng', icon: '🌍' });
+
+        return audiences;
+      }
+
+      /** Price value rating (1–5 stars) */
+      function getPriceValue(t, allTours) {
+        const price = Number(t.price) || 0;
+        const dur = Number(t.duration) || 1;
+        const rating = Number(t.rating) || 3;
+        const pricePerDay = price / dur;
+
+        // Compare against group average
+        const avgPricePerDay = allTours.reduce((s, x) => s + ((Number(x.price) || 0) / Math.max(Number(x.duration) || 1, 1)), 0) / allTours.length;
+        const ratio = avgPricePerDay > 0 ? pricePerDay / avgPricePerDay : 1;
+
+        let stars = 3;
+        if (ratio < 0.6) stars = 5;
+        else if (ratio < 0.85) stars = 4;
+        else if (ratio > 1.5) stars = 2;
+        else if (ratio > 2.2) stars = 1;
+
+        // Boost by rating
+        if (rating >= 4.5 && stars < 5) stars = Math.min(5, stars + 1);
+
+        const labels = ['', 'Đắt so với chất lượng', 'Hơi đắt', 'Tương xứng', 'Đáng đồng tiền', 'Xuất sắc – Rất đáng!'];
+        return { stars, label: labels[stars] };
+      }
+
+      /** Format price VND */
+      function fmtPrice(p) {
+        const n = Number(p);
+        if (!n) return 'Liên hệ';
+        return n.toLocaleString('vi-VN') + ' ₫';
+      }
+
+      /** Rating stars */
+      function ratingStars(r) {
+        const n = Number(r) || 0;
+        if (!n) return '<span style="color:var(--text-faint)">Chưa có đánh giá</span>';
+        const full = Math.floor(n);
+        const half = n - full >= 0.5 ? '½' : '';
+        return '⭐'.repeat(full) + half + ` <strong>${n.toFixed(1)}</strong>`;
+      }
+
+      // ── Render ─────────────────────────────────────────────────────────────
+      function render(tours) {
+        const table = document.getElementById('cmpTable');
+        const actions = document.getElementById('tourActions');
+        const N = tours.length;
+
+        // Grid columns: label + N tour columns
+        const colTemplate = `140px repeat(${N}, minmax(220px, 1fr))`;
+
+        function makeRow(cells, extraClass = '') {
+          const row = document.createElement('div');
+          row.className = 'cmp-row ' + extraClass;
+          row.style.gridTemplateColumns = colTemplate;
+          row.innerHTML = cells.join('');
+          return row;
+        }
+
+        function sectionHeader(icon, title) {
+          const div = document.createElement('div');
+          div.className = 'cmp-section-header';
+          div.style.gridTemplateColumns = '1fr';
+          div.innerHTML = `<span class="icon">${icon}</span> ${title}`;
+          return div;
+        }
+
+        table.innerHTML = '';
+
+        // ── Tour header strip ──
+        const headerStrip = document.createElement('div');
+        headerStrip.className = 'tour-header-strip';
+        headerStrip.style.gridTemplateColumns = colTemplate;
+        let headerCells = `<div class="tour-header-cell" style="background:rgba(255,255,255,0.5);"><span style="font-size:0.8rem;color:var(--text-faint);font-weight:700;">TOUR</span></div>`;
+        tours.forEach(t => {
+          headerCells += `
+          <div class="tour-header-cell">
+            <div class="tour-name">${esc(t.tourName || 'N/A')}</div>
+            <span class="tour-category-badge">${esc(t.categoryName || 'General')}</span>
+          </div>`;
+        });
+        headerStrip.innerHTML = headerCells;
+        table.appendChild(headerStrip);
+
+        // ── Section 1: Thông tin cơ bản ──
+        table.appendChild(sectionHeader('📋', 'Thông tin cơ bản'));
+
+        // Price
+        table.appendChild(makeRow([
+          `<div class="cmp-label">💰 Giá tour</div>`,
+          ...tours.map(t => `<div class="cmp-cell"><strong style="font-size:1.05rem;color:var(--accent-deep)">${fmtPrice(t.price)}</strong></div>`)
+        ]));
+
+        // Duration
+        table.appendChild(makeRow([
+          `<div class="cmp-label">⏱ Thời gian</div>`,
+          ...tours.map(t => `<div class="cmp-cell">${t.duration ? `<strong>${t.duration}</strong> ngày` : 'Chưa rõ'}</div>`)
+        ]));
+
+        // Rating
+        table.appendChild(makeRow([
+          `<div class="cmp-label">⭐ Đánh giá</div>`,
+          ...tours.map(t => `<div class="cmp-cell">${ratingStars(t.rating)}</div>`)
+        ]));
+
+        // Route
+        table.appendChild(makeRow([
+          `<div class="cmp-label">🗺 Lộ trình</div>`,
+          ...tours.map(t => `<div class="cmp-cell">${t.startLocation && t.endLocation ? `${esc(t.startLocation)} → ${esc(t.endLocation)}` : '<span style="color:var(--text-faint)">Chưa cập nhật</span>'}</div>`)
+        ]));
+
+        // Transport
+        table.appendChild(makeRow([
+          `<div class="cmp-label">🚌 Phương tiện</div>`,
+          ...tours.map(t => `<div class="cmp-cell">${esc(t.transportType || 'Đa dạng')}</div>`)
+        ]));
+
+        // ── Section 2: Đặc điểm nổi bật ──
+        table.appendChild(sectionHeader('✨', 'Đặc điểm & Tính năng nổi bật'));
+
+        table.appendChild(makeRow([
+          `<div class="cmp-label">🏷 Đặc điểm</div>`,
+          ...tours.map(t => {
+            const traits = getSuitabilityTraits(t);
+            return `<div class="cmp-cell">
+            <div class="badge-list">
+              ${traits.map(tr => `<span class="badge ${tr.cls}">${tr.icon} ${esc(tr.label)}</span>`).join('')}
+            </div>
+          </div>`;
+          })
+        ]));
+
+        // Highlights count
+        table.appendChild(makeRow([
+          `<div class="cmp-label">📌 Điểm nhấn</div>`,
+          ...tours.map(t => {
+            const cnt = (t.highlights || []).length;
+            return `<div class="cmp-cell">
+            ${cnt > 0
+                ? `<strong>${cnt}</strong> điểm nhấn nổi bật`
+                : '<span style="color:var(--text-faint)">Chưa có thông tin</span>'}
+          </div>`;
+          })
+        ]));
+
+        // ── Section 3: Thời điểm đi ──
+        table.appendChild(sectionHeader('🌤', 'Thời điểm đi – Đánh giá tháng ' + (new Date().getMonth() + 1)));
+
+        table.appendChild(makeRow([
+          `<div class="cmp-label">📅 Mức độ phù hợp</div>`,
+          ...tours.map(t => {
+            const timing = getTimingAnalysis(t);
+            return `<div class="cmp-cell">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div class="timing-dot ${timing.cls}" style="margin-top:5px;"></div>
+              <div>
+                <div style="font-weight:700;font-size:0.88rem;">${timing.label}</div>
+                <div style="font-size:0.8rem;color:var(--text-soft);margin-top:4px;line-height:1.5;">${timing.note}</div>
+              </div>
+            </div>
+          </div>`;
+          })
+        ]));
+
+        // Best months pills
+        table.appendChild(makeRow([
+          `<div class="cmp-label">🗓 Gợi ý mùa</div>`,
+          ...tours.map(t => {
+            const cat = (t.categoryName || '').toLowerCase();
+            const loc = ((t.startLocation || '') + ' ' + (t.endLocation || '')).toLowerCase();
+            let bestMonths = '';
+            if (loc.includes('biển') || loc.includes('beach') || loc.includes('đà nẵng') || loc.includes('phú quốc') || loc.includes('nha trang'))
+              bestMonths = 'Tháng 3–8 (mùa khô, biển đẹp)';
+            else if (loc.includes('sapa') || loc.includes('hà giang') || cat.includes('mountain') || cat.includes('núi'))
+              bestMonths = 'Tháng 9–11 (lúa chín), Tháng 3–5 (hoa nở)';
+            else if (cat.includes('culture') || loc.includes('hội an') || loc.includes('huế'))
+              bestMonths = 'Tháng 10–4 (mát mẻ, ít mưa)';
+            else
+              bestMonths = 'Tháng 11–4 (mùa khô, ổn định)';
+            return `<div class="cmp-cell"><span style="font-size:0.85rem;color:var(--text-soft);">🗒 ${bestMonths}</span></div>`;
+          })
+        ]));
+
+        // ── Section 4: Giá trị đồng tiền ──
+        table.appendChild(sectionHeader('💎', 'Xứng đáng giá trị'));
+
+        // Value rating
+        table.appendChild(makeRow([
+          `<div class="cmp-label">📊 Nhận xét giá</div>`,
+          ...tours.map(t => {
+            const val = getPriceValue(t, tours);
+            return `<div class="cmp-cell">
+            <div class="value-stars">${'★'.repeat(val.stars)}${'☆'.repeat(5 - val.stars)}</div>
+            <div style="font-size:0.8rem;color:var(--text-soft);margin-top:2px;">${esc(val.label)}</div>
+          </div>`;
+          })
+        ]));
+
+        // Price per day
+        table.appendChild(makeRow([
+          `<div class="cmp-label">📉 Giá/ngày</div>`,
+          ...tours.map(t => {
+            const price = Number(t.price) || 0;
+            const dur = Number(t.duration) || 1;
+            const ppd = price > 0 ? Math.round(price / dur) : 0;
+            return `<div class="cmp-cell">${ppd ? `<strong>${ppd.toLocaleString('vi-VN')} ₫</strong>/ngày` : '<span style="color:var(--text-faint)">—</span>'}</div>`;
+          })
+        ]));
+
+        // Best value winner
+        const bestValueTour = tours.reduce((best, t) => {
+          const v = getPriceValue(t, tours);
+          const bv = getPriceValue(best, tours);
+          return v.stars > bv.stars ? t : best;
+        }, tours[0]);
+
+        table.appendChild(makeRow([
+          `<div class="cmp-label">🏆 Giá trị nhất</div>`,
+          ...tours.map(t => {
+            const isBest = t.id === bestValueTour.id;
+            return `<div class="cmp-cell">
+            ${isBest ? '<span class="winner-badge">🏆 Giá trị nhất</span>' : '<span style="color:var(--text-faint);font-size:0.85rem;">—</span>'}
+          </div>`;
+          })
+        ]));
+
+        // ── Section 5: Đối tượng phù hợp ──
+        table.appendChild(sectionHeader('👥', 'Phù hợp với ai?'));
+
+        table.appendChild(makeRow([
+          `<div class="cmp-label">🎯 Đối tượng</div>`,
+          ...tours.map(t => {
+            const audiences = getTargetAudience(t);
+            return `<div class="cmp-cell">
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              ${audiences.map(a => `<span style="font-size:0.85rem;">${a.icon} ${esc(a.label)}</span>`).join('')}
+            </div>
+          </div>`;
+          })
+        ]));
+
+        // Suitability score bar (computed from timing + value + rating)
+        table.appendChild(makeRow([
+          `<div class="cmp-label">📈 Điểm phù hợp</div>`,
+          ...tours.map(t => {
+            const timing = getTimingAnalysis(t);
+            const val = getPriceValue(t, tours);
+            const rating = Math.min(Number(t.rating) || 3, 5);
+            // timing score
+            const tscore = timing.cls === 'timing-good' ? 5 : timing.cls === 'timing-ok' ? 3 : 1;
+            // weighted average
+            const total = Math.round((tscore * 2 + val.stars * 2 + rating) / 5 * 20);
+            const pct = Math.min(total, 100);
+            const color = pct >= 70 ? 'var(--accent)' : pct >= 45 ? 'var(--sun)' : '#f43f5e';
+            return `<div class="cmp-cell" style="width:100%;">
+            <div class="score-label"><span style="font-weight:700;color:${color}">${pct}/100</span><span>${pct >= 70 ? 'Rất phù hợp' : pct >= 45 ? 'Khá phù hợp' : 'Cân nhắc thêm'}</span></div>
+            <div class="score-bar-track" style="margin-top:6px;">
+              <div class="score-bar-fill" style="width:${pct}%;background:${color};"></div>
+            </div>
+          </div>`;
+          })
+        ]));
+
+        // ── Tour Action buttons ──
+        actions.innerHTML = tours.map(t => `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <a class="btn" href="./tour-detail.html?id=${encodeURIComponent(t.id)}" style="text-decoration:none;">
+            Chi tiết: ${esc(t.tourName || 'Tour')}
+          </a>
+          <button class="btn btn-secondary" type="button" data-remove="${t.id}">✕ Xoá</button>
+        </div>
+      `).join('');
+
+        actions.querySelectorAll('[data-remove]').forEach(btn => {
+          btn.onclick = () => removeId(btn.dataset.remove);
+        });
+      }
+
+      // ── Load & orchestrate ─────────────────────────────────────────────────
+      async function load() {
+        const ids = getIds();
+
+        document.getElementById('emptyState').style.display = ids.length < 2 ? 'flex' : 'none';
+        document.getElementById('compareArea').style.display = ids.length >= 2 ? 'block' : 'none';
+        if (ids.length < 2) return;
+
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('compareArea').style.display = 'none';
+        try {
+          const res = await TB.apiFetch(`/api/v1/tours/compare?ids=${encodeURIComponent(ids.join(','))}`);
+          const tours = res.data || [];
+          document.getElementById('loadingState').style.display = 'none';
+          if (tours.length < 2) {
+            document.getElementById('emptyState').style.display = 'flex';
+            return;
+          }
+          document.getElementById('compareArea').style.display = 'block';
+          render(tours);
+        } catch (err) {
+          document.getElementById('loadingState').style.display = 'none';
+          document.getElementById('compareArea').style.display = 'block';
+          document.getElementById('cmpTable').innerHTML = `<div class="card" style="border-color:#fecaca;color:#991b1b;padding:20px;">⚠️ ${err.message || 'Lỗi tải dữ liệu'}</div>`;
+        }
+      }
+
+      document.getElementById('clearBtn').onclick = () => {
+        localStorage.removeItem('compareIds');
+        load();
+      };
+
+      // Fix empty-state flex display
+      const es = document.getElementById('emptyState');
+      es.style.flexDirection = 'column';
+      es.style.alignItems = 'center';
+
+      load();
+    })();
+  </script>
 </body>
+
 </html>

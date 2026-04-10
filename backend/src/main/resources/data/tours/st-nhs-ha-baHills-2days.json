@@ -1,0 +1,38 @@
+{
+    "externalId": "SON_TRA_NHS_HOI_AN_BANA_2D1N",
+    "tourName": "Sơn Trà - Ngũ Hành Sơn - Hội An - Bà Nà Hills 2 ngày 1 đêm",
+    "description": "Hành trình premium 2N1Đ kết hợp bán đảo Sơn Trà hùng vĩ, Ngũ Hành Sơn linh thiêng, Hội An lung linh đèn lồng và Bà Nà Hills giải trí.",
+    "price": 2490000,
+    "originalPrice": 2890000,
+    "duration": 2,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Bà Nà Hills",
+    "categoryName": "Tour Trọn Gói",
+    "transportType": "Xe limousine 16 chỗ + Cáp treo",
+    "itinerary": "[DAY 1]\n07:30 Đón khách đi bán đảo Sơn Trà, thăm chùa Linh Ứng.\n10:00 Khởi hành đến Ngũ Hành Sơn, khám phá động Huyền Không.\n12:00 Ăn trưa đặc sản và ghé làng đá Non Nước.\n14:00 Di chuyển đến Hội An, tham quan phố cổ và thả đèn.\n19:00 Nghỉ đêm tại khách sạn Đà Nẵng 3 sao.\n[DAY 2]\n07:00 Ăn sáng buffet.\n08:30 Lên Bà Nà Hills bằng cáp treo, check-in Cầu Vàng.\n11:30 Tự do chơi Fantasy Park và tham quan làng Pháp.\n13:00 Buffet trưa Mercure French Village.\n15:00 Xuống núi, về Đà Nẵng và kết thúc tour.",
+    "highlights": [
+        "Sơn Trà và Linh Ứng ngắm toàn cảnh Đà Nẵng",
+        "Ngũ Hành Sơn cùng nghệ nhân làng đá",
+        "Hội An đèn lồng và ẩm thực",
+        "Cầu Vàng và Fantasy Park Bà Nà",
+        "Xe limousine kèm cáp treo và hướng dẫn viên"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "schedules": [
+        {
+            "startDate": "2026-04-12",
+            "availableSlots": 8,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-18",
+            "availableSlots": 6,
+            "status": "OPEN"
+        }
+    ]
+}
