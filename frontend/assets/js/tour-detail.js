@@ -73,6 +73,8 @@
       const isSelectable = isAvailable && Number(s.availableSlots || 0) > 0;
       return `
         <div class="card panel ${isSelectable ? 'schedule-card' : ''}" data-schedule-id="${escapeHtml(s.scheduleId || '')}" style="box-shadow:none; border: 1px solid rgba(255,255,255,0.05); padding: 14px; ${isSelectable ? 'cursor:pointer;' : ''}">
+      return `
+        <div class="card panel" style="box-shadow:none; border: 1px solid rgba(255,255,255,0.05); padding: 14px;">
           <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
             <div>
               <div style="font-weight:700;">${escapeHtml(s.startDate || '')}</div>

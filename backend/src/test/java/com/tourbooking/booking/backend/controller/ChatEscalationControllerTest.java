@@ -1,4 +1,5 @@
 package com.tourbooking.booking.backend.controller;
+package com.tourbooking.booking.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,13 @@ import com.tourbooking.booking.backend.security.JwtAuthenticationFilter;
 import com.tourbooking.booking.backend.security.JwtService;
 import com.tourbooking.booking.backend.service.ChatEscalationService;
 import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.model.dto.response.ChatEscalationResponse;
+import com.tourbooking.booking.model.entity.enums.ChatEscalationStatus;
+import com.tourbooking.booking.config.SecurityConfig;
+import com.tourbooking.booking.security.JwtAuthenticationFilter;
+import com.tourbooking.booking.security.JwtService;
+import com.tourbooking.booking.service.ChatEscalationService;
+import com.tourbooking.booking.repository.UserRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

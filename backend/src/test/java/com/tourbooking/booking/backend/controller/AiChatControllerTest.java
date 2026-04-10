@@ -7,6 +7,15 @@ import com.tourbooking.booking.backend.security.JwtService;
 import com.tourbooking.booking.backend.repository.ChatSessionRepository;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import com.tourbooking.booking.backend.service.AiChatService;
+package com.tourbooking.booking.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tourbooking.booking.model.dto.request.AiChatRequest;
+import com.tourbooking.booking.model.dto.response.AiChatResponse;
+import com.tourbooking.booking.security.JwtService;
+import com.tourbooking.booking.repository.ChatSessionRepository;
+import com.tourbooking.booking.repository.UserRepository;
+import com.tourbooking.booking.service.AiChatService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -45,6 +54,7 @@ class AiChatControllerTest {
 
     @MockitoBean
     private ChatSessionRepository sessionRepository;
+    private ChatSessionRepository chatSessionRepository;
 
     @Test
     void chatReturnsCreatedResponse() throws Exception {

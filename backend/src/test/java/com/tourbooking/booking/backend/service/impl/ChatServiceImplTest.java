@@ -1,4 +1,5 @@
 package com.tourbooking.booking.backend.service.impl;
+package com.tourbooking.booking.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,6 +7,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +22,14 @@ import com.tourbooking.booking.backend.repository.ChatMessagesRepository;
 import com.tourbooking.booking.backend.repository.ChatSessionRepository;
 import com.tourbooking.booking.backend.repository.UserRepository;
 import com.tourbooking.booking.backend.service.ChatNotificationService;
+import com.tourbooking.booking.model.dto.request.ChatMessageRequest;
+import com.tourbooking.booking.model.entity.ChatSession;
+import com.tourbooking.booking.model.entity.User;
+import com.tourbooking.booking.model.entity.enums.ChatSessionStatus;
+import com.tourbooking.booking.repository.ChatMessagesRepository;
+import com.tourbooking.booking.repository.ChatSessionRepository;
+import com.tourbooking.booking.repository.UserRepository;
+import com.tourbooking.booking.service.ChatNotificationService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +84,7 @@ class ChatServiceImplTest {
         ChatMessageRequest request = new ChatMessageRequest();
         request.setUserId(2L);
         request.setMessage("Tôi muốn gặp nhân viên");
+        request.setMessage("TÃƒÆ’Ã‚Â´i muÃƒÂ¡Ã‚Â»Ã¢â‚¬Ëœn gÃƒÂ¡Ã‚ÂºÃ‚Â·p nhÃƒÆ’Ã‚Â¢n viÃƒÆ’Ã‚Âªn");
 
         when(sessionRepo.findTopByUser_IdOrderByLastMessageAtDesc(eq(2L))).thenReturn(Optional.empty());
         User user = new User();

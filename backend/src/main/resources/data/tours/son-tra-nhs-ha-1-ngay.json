@@ -1,0 +1,38 @@
+{
+    "externalId": "SONTRA_NHS_HA",
+    "tourName": "Sơn Trà - Ngũ Hành Sơn - Hội An 1 ngày",
+    "description": "Tour gia đình 1 ngày kết hợp biển xanh, tâm linh và di sản khi đi qua Sơn Trà, Ngũ Hành Sơn rồi ngắm phố cổ Hội An trong buổi chiều.",
+    "price": 1790000,
+    "originalPrice": 1990000,
+    "duration": 1,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Hội An",
+    "categoryName": "Tour Tự chọn",
+    "transportType": "Xe du lịch máy lạnh",
+    "itinerary": "[DAY 1]\n07:30 Khởi hành khám phá bán đảo Sơn Trà, thăm chùa Linh Ứng.\\n10:00 Ngắm biển Mỹ Khê từ đỉnh Mã Pí Lèng của Đà Nẵng.\\n12:00 Ăn trưa tại nhà hàng ven biển.\\n13:30 Tham quan Ngũ Hành Sơn, động Tàng Chơn.\\n16:00 Di chuyển đến Hội An, dạo phố cổ và chụp đèn lồng.\\n19:00 Ăn tối cơm gà và cao lầu, trở về Đà Nẵng.",
+    "highlights": [
+        "Bán đảo Sơn Trà và Linh Ứng",
+        "Ngũ Hành Sơn và chùa động",
+        "Phố cổ Hội An buổi chiều",
+        "Ăn tối cơm gà & cao lầu",
+        "Hướng dẫn viên địa phương thân thiện"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1487412720507-e7ef71caa4c4?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "schedules": [
+        {
+            "startDate": "2026-04-11",
+            "availableSlots": 14,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-17",
+            "availableSlots": 12,
+            "status": "OPEN"
+        }
+    ]
+}
