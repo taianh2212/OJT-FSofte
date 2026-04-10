@@ -39,8 +39,10 @@
         msgEl.textContent = 'Login successful!';
         setTimeout(() => {
           const role = res.data.user.role;
-          if (role === 'ADMIN' || role === 'STAFF') {
+          if (role === 'ADMIN') {
             window.location.href = '/pages/admin/dashboard.html';
+          } else if (role === 'STAFF') {
+            window.location.href = '/pages/staff/dashboard.html';
           } else if (role === 'GUIDE') {
             window.location.href = '/pages/guide/dashboard.html';
           } else {

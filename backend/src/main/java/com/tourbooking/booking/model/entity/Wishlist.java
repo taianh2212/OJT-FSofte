@@ -1,28 +1,5 @@
-<<<<<<<< Updated upstream:backend/src/main/java/com/tourbooking/booking/model/entity/Wishlist.java
-﻿package com.tourbooking.booking.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
-@Entity
-@Table(name = "Wishlist", uniqueConstraints = { @UniqueConstraint(columnNames = { "UserID", "TourID" }) })
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@AttributeOverride(name = "id", column = @Column(name = "WishlistID", nullable = false, unique = true))
-public class Wishlist extends Base {
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserID")
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TourID")
-    private Tour tour;
-}
-========
-package com.tourbooking.booking.backend.model.entity;
+package com.tourbooking.booking.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,4 +21,3 @@ public class Wishlist extends Base {
     @JoinColumn(name = "TourID", columnDefinition = "BIGINT")
     private Tour tour;
 }
->>>>>>>> Stashed changes:backend/src/main/java/com/tourbooking/booking/backend/model/entity/Wishlist.java

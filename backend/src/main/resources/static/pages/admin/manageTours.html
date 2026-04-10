@@ -5,64 +5,393 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Tours - TourBooking Admin</title>
-    <link rel="stylesheet" href="../../assets/css/admin-common.css">
-    <script src="../../assets/js/toast.js"></script>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--text-main);
+            color: white;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar .logo {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 5%;
+            background-color: #f1f5f9;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .tours-table {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .detail-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .detail-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .detail-content {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .detail-content p {
+            margin: 0.5rem 0;
+        }
+
+        .detail-content strong {
+            color: var(--text-main);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .price-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-input input {
+            flex: 1;
+        }
+
+        .price-input span {
+            color: var(--text-muted);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+    </style>
 </head>
 
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="./dashboard.html" class="logo">TourBooking</a>
+            <a href="./dashboard.html" class="logo"><strong>TourBooking</strong> Admin</a>
             <nav>
                 <a href="./dashboard.html" class="nav-item">Dashboard</a>
-                <a href="./manageTours.html" class="nav-item active">Tours</a>
-                <a href="./manageCategories.html" class="nav-item">Categories</a>
-                <a href="./manageDiscounts.html" class="nav-item">Discounts</a>
-                <a href="./manageUsers.html" class="nav-item">Users</a>
-                <a href="./manageReview.html" class="nav-item">Reviews</a>
+                <a href="./manageTours.html" class="nav-item active">Manager Tours</a>
+                <a href="./manageCatelories.html" class="nav-item">Manager Categories</a>
+                <a href="./manageUsers.html" class="nav-item">Manager User</a>
+                <a href="./manageReview.html" class="nav-item">Manager Review</a>
                 <a href="./financialReport.html" class="nav-item">Financial Report</a>
             </nav>
         </aside>
 
         <main class="main-content">
             <header>
-                <h1>Tours</h1>
+                <h1>Manage Tours</h1>
                 <div class="user-actions">
                     <span id="userInfo" style="font-weight: 600;"></span>
-                    <button id="logoutBtn" class="btn btn-secondary" style="margin-left: 1rem;">Logout</button>
+                    <button id="logoutBtn" class="btn-secondary" style="margin-left: 1rem;">Logout</button>
                 </div>
             </header>
 
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2>Tour List</h2>
-                    <button onclick="showCreateModal()" class="btn btn-primary">Create New Tour</button>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Tour Name</th>
-                                <th>Price</th>
-                                <th>Duration (Days)</th>
-                                <th>Location</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tourTable">
-                            <tr>
-                                <td colspan="6" style="text-align: center; padding: 2rem;">Loading tours...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="page-header">
+                <h2>Tour List</h2>
+                <button onclick="showCreateModal()" class="btn-primary">+ Create New Tour</button>
             </div>
 
-            <div class="card" style="margin-top: 2rem;">
+            <div class="tours-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tour Name</th>
+                            <th>Price</th>
+                            <th>Duration (Days)</th>
+                            <th>Location</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tourTable">
+                        <tr>
+                            <td colspan="6" class="loading">Loading tours...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="detail-section">
                 <h3>Tour Details</h3>
-                <div id="detail" style="background: var(--bg-light); padding: 1.5rem; border-radius: 0.5rem; margin-top: 1rem;">
+                <div id="detail" class="detail-content">
                     <p style="color: var(--text-muted);">Select a tour to view details</p>
                 </div>
             </div>
@@ -77,90 +406,71 @@
 
             <div class="form-group">
                 <label>Tour Name *</label>
-                <input type="text" id="tourName" class="form-control" placeholder="Enter tour name">
+                <input type="text" id="tourName" placeholder="Enter tour name">
             </div>
 
             <div class="form-group">
-                <label>Price * (VND)</label>
-                <input type="number" id="price" class="form-control" placeholder="0" step="1000">
+                <label>Price *</label>
+                <div class="price-input">
+                    <input type="number" id="price" placeholder="0" step="1000">
+                    <span>VND</span>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Duration (Days) *</label>
-                <input type="number" id="duration" class="form-control" placeholder="Number of days" step="1">
+                <input type="number" id="duration" placeholder="Number of days" step="1">
                 <small>Enter the number of days for this tour</small>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-row">
                 <div class="form-group">
                     <label>Start Location *</label>
-                    <input type="text" id="startLocation" class="form-control" placeholder="e.g., Hanoi, Ho Chi Minh">
+                    <input type="text" id="startLocation" placeholder="e.g., Hanoi, Ho Chi Minh">
                 </div>
 
                 <div class="form-group">
                     <label>End Location *</label>
-                    <input type="text" id="endLocation" class="form-control" placeholder="e.g., Da Nang, Nha Trang">
+                    <input type="text" id="endLocation" placeholder="e.g., Da Nang, Nha Trang">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Description</label>
-                <textarea id="description" class="form-control" rows="4" placeholder="Enter tour description"></textarea>
+                <textarea id="description" rows="4" placeholder="Enter tour description"></textarea>
             </div>
 
             <div class="form-group">
                 <label>Category ID (Optional)</label>
-                <input type="number" id="categoryId" class="form-control" placeholder="Category ID">
+                <input type="number" id="categoryId" placeholder="Category ID">
                 <small>Leave empty if no category</small>
             </div>
 
-            <div class="form-group">
-                <label>Tour Images</label>
-                <input type="file" id="tourImages" class="form-control" multiple accept="image/*" onchange="previewImages(event)">
-                <div id="imagePreviewContainer" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
-                <input type="hidden" id="existingImages">
-            </div>
-
             <div class="modal-buttons">
-                <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
-                <button onclick="saveTour()" class="btn btn-primary">Save Tour</button>
+                <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+                <button onclick="saveTour()" class="btn-primary">Save</button>
             </div>
         </div>
     </div>
 
     <script>
+        // API endpoint - ĐÃ SỬA ĐÚNG VỚI BACKEND
         const API = "http://localhost:8080/api/v1/admin/tours";
         const PUBLIC_API = "http://localhost:8080/api/v1/tours";
 
         // Kiểm tra quyền ADMIN
-        function checkAuth() {
-            try {
-                const userStr = localStorage.getItem('user');
-                if (!userStr) {
-                    window.location.href = '/pages/auth/login.html';
-                    return false;
-                }
-
-                const user = JSON.parse(userStr);
-                if (!user || user.role !== 'ADMIN') {
-                    window.location.href = '/pages/auth/login.html';
-                    return false;
-                }
-
-                document.getElementById('userInfo').innerText = user.fullName || user.FullName || user.email;
-                return true;
-            } catch (error) {
-                console.error('Auth error:', error);
-                window.location.href = '/pages/auth/login.html';
-                return false;
-            }
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || user.role !== 'ADMIN') {
+            window.location.href = '/auth/login.html';
+        } else {
+            document.getElementById('userInfo').innerText = user.fullName;
         }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            window.location.href = '/auth/login.html';
         });
 
         let currentEditId = null;
@@ -177,7 +487,16 @@
             return headers;
         }
 
-        // LOAD TOURS
+        // Helper: Hiển thị thông báo
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000); // Tăng thời gian hiển thị để dễ đọc lỗi
+        }
+
+        // LOAD TOURS - Xử lý response wrapper
         function loadTours() {
             fetch(PUBLIC_API, {
                 headers: getHeaders()
@@ -193,7 +512,7 @@
                     if (!tours || tours.length === 0) {
                         document.getElementById("tourTable").innerHTML = `
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 2rem;">No tours found.</td>
+                                <td colspan="6" class="empty-state">No tours found. Create your first tour!</td>
                             </tr>
                         `;
                         return;
@@ -201,18 +520,18 @@
 
                     let html = "";
                     tours.forEach(t => {
-                        const location = `${t.startLocation || '?'} - ${t.endLocation || '?'}`;
+                        const location = `${t.startLocation || '?'} → ${t.endLocation || '?'}`;
                         html += `
                             <tr>
                                 <td>${t.id}</td>
                                 <td><strong>${escapeHtml(t.tourName)}</strong></td>
                                 <td>${formatPrice(t.price)}</td>
-                                <td>${t.duration || '-'} days</td>
+                                <td>${t.duration || '—'} days</td>
                                 <td>${escapeHtml(location)}</td>
                                 <td class="action-buttons">
-                                    <button onclick="viewTour(${t.id})" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</button>
-                                    <button onclick="showEditModal(${t.id})" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
-                                    <button onclick="deleteTour(${t.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
+                                    <button onclick="viewTour(${t.id})" class="btn-info">View</button>
+                                    <button onclick="showEditModal(${t.id})" class="btn-warning">Edit</button>
+                                    <button onclick="deleteTour(${t.id})" class="btn-danger">Delete</button>
                                 </td>
                             </tr>
                         `;
@@ -223,9 +542,10 @@
                     console.error('Error loading tours:', error);
                     document.getElementById("tourTable").innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);">Error: ${error.message}</td>
+                            <td colspan="6" class="empty-state">Error: ${error.message}</td>
                         </tr>
                     `;
+                    showToast('Error: ' + error.message, 'error');
                 });
         }
 
@@ -242,29 +562,22 @@
                 .then(response => {
                     const t = response.data;
                     document.getElementById("detail").innerHTML = `
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                            <p><strong>Tour Name:</strong> ${escapeHtml(t.tourName)}</p>
-                            <p><strong>Price:</strong> ${formatPrice(t.price)}</p>
-                            <p><strong>Duration:</strong> ${t.duration} days</p>
-                            <p><strong>Start Location:</strong> ${escapeHtml(t.startLocation || 'N/A')}</p>
-                            <p><strong>End Location:</strong> ${escapeHtml(t.endLocation || 'N/A')}</p>
-                            <p><strong>Rating:</strong> ${t.rating || 'No ratings'}</p>
-                        </div>
-                        <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
-                            <p><strong>Description:</strong></p>
-                            <p>${escapeHtml(t.description || 'No description available')}</p>
-                        </div>
-                        ${t.imageUrls && t.imageUrls.length > 0 ? `
-                        <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
-                            <p><strong>Images:</strong></p>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                                ${t.imageUrls.map(url => `<img src="http://localhost:8080${url}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">`).join('')}
-                            </div>
-                        </div>` : ''}
+                        <p><strong>🏷️ Tour Name:</strong> ${escapeHtml(t.tourName)}</p>
+                        <p><strong>💰 Price:</strong> ${formatPrice(t.price)}</p>
+                        <p><strong>⏱️ Duration:</strong> ${t.duration} days</p>
+                        <p><strong>📍 Start Location:</strong> ${escapeHtml(t.startLocation || 'Not specified')}</p>
+                        <p><strong>📍 End Location:</strong> ${escapeHtml(t.endLocation || 'Not specified')}</p>
+                        <p><strong>📝 Description:</strong></p>
+                        <p style="margin-left: 1rem;">${escapeHtml(t.description || 'No description available')}</p>
+                        ${t.rating ? `<p><strong>⭐ Rating:</strong> ${t.rating} / 5</p>` : ''}
+                        ${t.categoryId ? `<p><strong>📁 Category ID:</strong> ${t.categoryId}</p>` : ''}
                     `;
                 })
                 .catch(error => {
                     console.error('Error loading tour details:', error);
+                    document.getElementById("detail").innerHTML = `
+                        <p style="color: #ef4444;">Error loading tour details. Please try again.</p>
+                    `;
                     showToast('Error loading tour details: ' + error.message, 'error');
                 });
         }
@@ -281,9 +594,6 @@
             document.getElementById('endLocation').value = '';
             document.getElementById('description').value = '';
             document.getElementById('categoryId').value = '';
-            document.getElementById('tourImages').value = '';
-            document.getElementById('imagePreviewContainer').innerHTML = '';
-            document.getElementById('existingImages').value = '';
             document.getElementById('tourModal').style.display = 'flex';
         }
 
@@ -309,60 +619,17 @@
                     document.getElementById('endLocation').value = t.endLocation || '';
                     document.getElementById('description').value = t.description || '';
                     document.getElementById('categoryId').value = t.categoryId || '';
-                    
-                    document.getElementById('tourImages').value = '';
-                    document.getElementById('existingImages').value = (t.imageUrls && t.imageUrls.length > 0) ? JSON.stringify(t.imageUrls) : '';
-                    
-                    const previewContainer = document.getElementById('imagePreviewContainer');
-                    previewContainer.innerHTML = '';
-                    if (t.imageUrls && t.imageUrls.length > 0) {
-                        t.imageUrls.forEach(url => {
-                            const img = document.createElement('img');
-                            img.src = "http://localhost:8080" + url;
-                            img.className = 'preview-img';
-                            img.style.width = '80px';
-                            img.style.height = '80px';
-                            img.style.objectFit = 'cover';
-                            img.style.borderRadius = '4px';
-                            img.style.border = '1px solid #ddd';
-                            previewContainer.appendChild(img);
-                        });
-                    }
-
                     document.getElementById('tourModal').style.display = 'flex';
                 })
                 .catch(error => {
                     console.error('Error loading tour for edit:', error);
-                    showToast('Error: ' + error.message, 'error');
+                    alert('Error: ' + error.message);
+                    showToast('Error loading tour for edit: ' + error.message, 'error');
                 });
-        }
-
-        // PREVIEW IMAGES
-        function previewImages(event) {
-            const container = document.getElementById('imagePreviewContainer');
-            container.innerHTML = ''; // clear for new selection
-            const files = event.target.files;
-            if (files) {
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'preview-img';
-                        img.style.width = '80px';
-                        img.style.height = '80px';
-                        img.style.objectFit = 'cover';
-                        img.style.borderRadius = '4px';
-                        img.style.border = '1px solid #ddd';
-                        container.appendChild(img);
-                    }
-                    reader.readAsDataURL(file);
-                });
-            }
         }
 
         // SAVE TOUR (CREATE OR UPDATE)
-        async function saveTour() {
+        function saveTour() {
             const tourName = document.getElementById('tourName').value.trim();
             const price = parseFloat(document.getElementById('price').value);
             const duration = parseInt(document.getElementById('duration').value);
@@ -370,44 +637,31 @@
             const endLocation = document.getElementById('endLocation').value.trim();
             const description = document.getElementById('description').value.trim();
             const categoryId = document.getElementById('categoryId').value;
-            const fileInput = document.getElementById('tourImages');
 
             // Validation
-            if (!tourName || isNaN(price) || isNaN(duration) || !startLocation || !endLocation) {
-                showToast('Please fill all required fields!', 'error');
+            if (!tourName) {
+                alert('Tour name is required!');
                 return;
             }
-            
-            let finalImageUrls = [];
-            const existingImagesStr = document.getElementById('existingImages').value;
-            if (existingImagesStr) {
-                try {
-                    finalImageUrls = JSON.parse(existingImagesStr);
-                } catch(e) {}
+
+            if (isNaN(price) || price <= 0) {
+                alert('Please enter a valid price!');
+                return;
             }
 
-            // Upload images if new files selected
-            if (fileInput.files && fileInput.files.length > 0) {
-                const formData = new FormData();
-                Array.from(fileInput.files).forEach(f => formData.append("files", f));
-                
-                try {
-                    const uploadRes = await fetch("http://localhost:8080/api/v1/admin/tours/upload", {
-                        method: 'POST',
-                        headers: {
-                            "Authorization": `Bearer ${localStorage.getItem('token')}`
-                        },
-                        body: formData
-                    });
-                    const uploadData = await uploadRes.json();
-                    if (!uploadRes.ok) throw new Error(uploadData.message || 'Image upload failed');
-                    // Gắn thêm ảnh mới vào danh sách ảnh cũ (nếu có)
-                    finalImageUrls = finalImageUrls.concat(uploadData.data); 
-                } catch(error) {
-                    console.error('Upload error:', error);
-                    showToast('Error uploading images: ' + error.message, 'error');
-                    return;
-                }
+            if (isNaN(duration) || duration <= 0) {
+                alert('Please enter a valid duration (number of days)!');
+                return;
+            }
+
+            if (!startLocation) {
+                alert('Start location is required!');
+                return;
+            }
+
+            if (!endLocation) {
+                alert('End location is required!');
+                return;
             }
 
             const tourData = {
@@ -417,8 +671,7 @@
                 duration: duration,
                 startLocation: startLocation,
                 endLocation: endLocation,
-                categoryId: categoryId ? parseInt(categoryId) : null,
-                imageUrls: finalImageUrls.length > 0 ? finalImageUrls : null
+                categoryId: categoryId ? parseInt(categoryId) : null
             };
 
             let url = API;
@@ -436,39 +689,56 @@
             })
                 .then(async res => {
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Failed to save tour');
+                    if (!res.ok) {
+                        // Trả về thông báo lỗi cụ thể từ server nếu có
+                        throw new Error(data.message || 'Failed to save tour');
+                    }
                     return data;
                 })
                 .then(() => {
                     closeModal();
                     loadTours();
-                    showToast(currentEditId ? 'Tour updated successfully!' : 'Tour created successfully!', 'success');
+                    const message = currentEditId ? 'Tour updated successfully!' : 'Tour created successfully!';
+                    showToast(message, 'success');
+                    document.getElementById("detail").innerHTML = `
+                        <p style="color: var(--text-muted);">${message} Select a tour to view details</p>
+                    `;
                 })
                 .catch(error => {
                     console.error('Error saving tour:', error);
-                    showToast('Error: ' + error.message, 'error');
+                    alert('Error: ' + error.message);
+                    showToast(error.message, 'error');
                 });
         }
 
         // DELETE TOUR
         function deleteTour(id) {
-            if (confirm('Are you sure you want to delete this tour?')) {
+            console.log('deleteTour called with ID:', id);
+            if (confirm('Are you sure you want to delete this tour? This action cannot be undone.')) {
+                const token = localStorage.getItem('token');
+                console.log('Sending DELETE request to:', `${API}/${id}`);
+                
                 fetch(`${API}/${id}`, {
                     method: "DELETE",
                     headers: getHeaders()
                 })
                     .then(async res => {
+                        console.log('DELETE response status:', res.status);
                         if (!res.ok) {
                             const data = await res.json();
                             throw new Error(data.message || 'Failed to delete tour');
                         }
+                        console.log('Tour deleted successfully, reloading...');
                         loadTours();
                         showToast('Tour deleted successfully!', 'success');
-                        document.getElementById("detail").innerHTML = `<p style="color: var(--text-muted);">Tour deleted. Select a tour to view details</p>`;
+                        document.getElementById("detail").innerHTML = `
+                            <p style="color: var(--text-muted);">Tour deleted successfully. Select a tour to view details</p>
+                        `;
                     })
                     .catch(error => {
                         console.error('Error deleting tour:', error);
-                        showToast('Error: ' + error.message, 'error');
+                        alert('Error: ' + error.message);
+                        showToast('Error deleting tour: ' + error.message, 'error');
                     });
             }
         }
@@ -479,6 +749,7 @@
             currentEditId = null;
         }
 
+        // Close modal when clicking outside
         window.onclick = function (event) {
             const modal = document.getElementById('tourModal');
             if (event.target === modal) {
@@ -486,30 +757,22 @@
             }
         }
 
+        // Helper function to format price
         function formatPrice(price) {
-            if (!price && price !== 0) return '-';
+            if (!price && price !== 0) return '—';
             return new Intl.NumberFormat('vi-VN', {
                 style: 'currency',
                 currency: 'VND'
             }).format(price);
         }
 
+        // Helper function to escape HTML
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
-        // Init
-        if (checkAuth()) {
-            loadTours();
-        }
-    </script>
-</body>
-
-</html>
-  }
 
         // Load tours on page load
         loadTours();

@@ -5,26 +5,248 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Report - TourBooking Admin</title>
-    <link rel="stylesheet" href="../../assets/css/admin-common.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    <script src="../../assets/js/toast.js"></script>
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--text-main);
+            color: white;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar .logo {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 5%;
+            background-color: #f1f5f9;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.875rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-box .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .report-table {
+            background: white;
+            border-radius: 1rem;
+            overflow: auto;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .chart-container {
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .chart-container canvas {
+            max-height: 300px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="./dashboard.html" class="logo">TourBooking</a>
+            <a href="./dashboard.html" class="logo"><strong>TourBooking</strong> Admin</a>
             <nav>
                 <a href="./dashboard.html" class="nav-item">Dashboard</a>
-                <a href="./manageTours.html" class="nav-item">Tours</a>
-                <a href="./manageCategories.html" class="nav-item">Categories</a>
-                <a href="./manageDiscounts.html" class="nav-item">Discounts</a>
-                <a href="./manageUsers.html" class="nav-item">Users</a>
-                <a href="./manageReview.html" class="nav-item">Reviews</a>
-                <a href="./financialReport.html" class="nav-item active">Financial Report</a>
+                <a href="./manageTours.html" class="nav-item">Manager Tours</a>
+                <a href="./manageCatelories.html" class="nav-item">Manager Categories</a>
+                <a href="./manageUsers.html" class="nav-item">Manager User</a>
+                <a href="./manageReviews.html" class="nav-item">Manager Reviews</a>
+                <a href="./financialReport.html" class="nav-item">Financial Report</a>
+
             </nav>
         </aside>
 
@@ -33,91 +255,87 @@
                 <h1>Financial Report</h1>
                 <div class="user-actions">
                     <span id="userInfo" style="font-weight: 600;"></span>
-                    <button id="logoutBtn" class="btn btn-secondary" style="margin-left: 1rem;">Logout</button>
+                    <button id="logoutBtn" class="btn-secondary" style="margin-left: 1rem;">Logout</button>
                 </div>
             </header>
 
-            <div class="card" style="margin-bottom: 2rem;">
-                <div class="filter-row" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-                    <div class="form-group" style="margin-bottom: 0;">
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
                         <label>From Date</label>
-                        <input type="date" id="startDate" class="form-control">
+                        <input type="date" id="startDate">
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="filter-group">
                         <label>To Date</label>
-                        <input type="date" id="endDate" class="form-control">
+                        <input type="date" id="endDate">
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Type</label>
-                        <select id="reportType" class="form-control">
+                    <div class="filter-group">
+                        <label>Report Type</label>
+                        <select id="reportType">
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                         </select>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Payment Status</label>
-                        <select id="bookingStatus" class="form-control">
-                            <option value="all">All Successful Payments</option>
-                            <option value="SUCCESS">Success Only</option>
-                            <option value="CANCELLED">Cancellations Only</option>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="bookingStatus">
+                            <option value="all">All</option>
+                            <option value="CONFIRMED">Confirmed</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="CANCELLED">Cancelled</option>
                         </select>
                     </div>
-                    <button onclick="loadReport()" class="btn btn-primary">Generate</button>
-                    <div style="flex: 1;"></div>
-                    <button onclick="exportToExcel()" class="btn btn-success">Excel</button>
-                    <button onclick="exportToPDF()" class="btn btn-danger">PDF</button>
+                    <button onclick="loadReport()" class="btn-primary">Generate Report</button>
                 </div>
             </div>
 
-            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                <div class="card" style="text-align: center; border-top: 4px solid var(--primary);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Revenue</small>
-                    <h2 id="totalRevenue" style="margin: 0.5rem 0; color: var(--primary);">₫0</h2>
+            <div class="export-buttons" style="margin-bottom: 1rem;">
+                <button onclick="exportToExcel()" class="btn-success">📊 Export to Excel</button>
+                <button onclick="exportToPDF()" class="btn-danger">📄 Export to PDF</button>
+            </div>
+
+            <div class="stats-summary" id="statsSummary">
+                <div class="stat-box">
+                    <div class="label">Total Revenue</div>
+                    <div class="value" id="totalRevenue">₫0</div>
                 </div>
-                <div class="card" style="text-align: center; border-top: 4px solid var(--success);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Bookings</small>
-                    <h2 id="totalBookings" style="margin: 0.5rem 0; color: var(--success);">0</h2>
+                <div class="stat-box">
+                    <div class="label">Total Bookings</div>
+                    <div class="value" id="totalBookings">0</div>
                 </div>
-                <div class="card" style="text-align: center; border-top: 4px solid var(--warning);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Avg. Value</small>
-                    <h2 id="avgOrderValue" style="margin: 0.5rem 0; color: var(--warning);">₫0</h2>
+                <div class="stat-box">
+                    <div class="label">Average Order Value</div>
+                    <div class="value" id="avgOrderValue">₫0</div>
                 </div>
-                <div class="card" style="text-align: center; border-top: 4px solid var(--danger);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Cancel Rate</small>
-                    <h2 id="cancelRate" style="margin: 0.5rem 0; color: var(--danger);">0%</h2>
+                <div class="stat-box">
+                    <div class="label">Cancellation Rate</div>
+                    <div class="value" id="cancelRate">0%</div>
                 </div>
             </div>
 
-            <div class="grid" style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2.5rem;">
-                <div class="card">
-                    <h3>Revenue Trends</h3>
-                    <div style="height: 300px; position: relative;">
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
             </div>
 
-            <div class="card">
-                <div class="table-container">
-                    <table id="reportTable">
-                        <thead>
-                            <tr>
-                                <th>Date/Period</th>
-                                <th>Bookings</th>
-                                <th>Revenue</th>
-                                <th>Avg. Value</th>
-                                <th>Cancellations</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportBody">
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 2rem;">Select date range to generate report</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="report-table">
+                <table id="reportTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Bookings</th>
+                            <th>Revenue</th>
+                            <th>Avg. Value</th>
+                            <th>Cancellations</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportBody">
+                        <tr>
+                            <td colspan="5" class="loading">Select date range to generate report</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </main>
     </div>
@@ -127,18 +345,17 @@
         let currentReportData = [];
         let revenueChart;
 
-        // Auth check
         const currentUser = JSON.parse(localStorage.getItem('user'));
         if (!currentUser || currentUser.role !== 'ADMIN') {
-            window.location.href = '/pages/auth/login.html';
+            window.location.href = '/auth/login.html';
         } else {
-            document.getElementById('userInfo').innerText = currentUser.fullName || currentUser.FullName || currentUser.email;
+            document.getElementById('userInfo').innerText = currentUser.fullName;
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            window.location.href = '/auth/login.html';
         });
 
         // Set default dates
@@ -154,43 +371,43 @@
             const status = document.getElementById('bookingStatus').value;
 
             if (!startDate || !endDate) {
-                showToast('Please select date range', 'warning');
+                alert('Please select date range');
                 return;
             }
 
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_BASE}/admin/financial-report?start=${startDate}&end=${endDate}&type=${reportType}&status=${status}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 const result = await response.json();
                 const data = result.data || [];
                 currentReportData = data;
-                
                 renderReport(data);
                 updateStats(data);
                 updateChart(data);
-                showToast('Report generated successfully', 'success');
             } catch (error) {
                 console.error('Error loading report:', error);
-                showToast('Failed to load report', 'error');
+                alert('Failed to load report. Please try again.');
             }
         }
 
         function renderReport(data) {
             const tbody = document.getElementById('reportBody');
             if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No data available for selected period</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No data available for selected period</td></tr>';
                 return;
             }
 
             tbody.innerHTML = data.map(item => `
                 <tr>
-                    <td><strong>${item.period || item.date}</strong></td>
+                    <td>${item.period || item.date}</td>
                     <td>${item.bookingCount || 0}</td>
-                    <td style="color: var(--primary); font-weight: 600;">${formatCurrency(item.revenue || 0)}</td>
+                    <td>${formatCurrency(item.revenue || 0)}</td>
                     <td>${formatCurrency(item.averageValue || 0)}</td>
-                    <td><span class="badge badge-danger">${item.cancellations || 0}</span></td>
+                    <td>${item.cancellations || 0}</td>
                 </tr>
             `).join('');
         }
@@ -213,45 +430,49 @@
             if (revenueChart) revenueChart.destroy();
 
             revenueChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: data.map(item => item.period || item.date),
                     datasets: [
                         {
-                            label: 'Revenue',
+                            label: 'Revenue (VND)',
                             data: data.map(item => item.revenue || 0),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            fill: true,
-                            tension: 0.4,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
                             yAxisID: 'y'
                         },
                         {
                             label: 'Bookings',
                             data: data.map(item => item.bookingCount || 0),
-                            borderColor: '#10b981',
-                            backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0.4,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
                             yAxisID: 'y1'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     plugins: {
-                        legend: { position: 'top' }
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    if (ctx.dataset.label === 'Revenue (VND)') {
+                                        return `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`;
+                                    }
+                                    return `${ctx.dataset.label}: ${ctx.raw}`;
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: (v) => v >= 1000000 ? (v/1000000)+'M' : v }
+                            ticks: {
+                                callback: (value) => formatCurrency(value)
+                            }
                         },
                         y1: {
                             beginAtZero: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false }
+                            position: 'right'
                         }
                     }
                 }
@@ -260,17 +481,18 @@
 
         function exportToExcel() {
             if (!currentReportData || currentReportData.length === 0) {
-                showToast('No data to export', 'warning');
+                alert('No data to export');
                 return;
             }
 
             const wsData = [
-                ['FINANCIAL REPORT'],
+                ['Financial Report'],
                 [`Generated: ${new Date().toLocaleString()}`],
-                [],
-                ['Period', 'Bookings', 'Revenue (VND)', 'Avg. Value', 'Cancellations'],
+                ['Period', 'Start Date', 'End Date', 'Bookings', 'Revenue', 'Average Value', 'Cancellations'],
                 ...currentReportData.map(item => [
                     item.period || item.date,
+                    item.startDate || '',
+                    item.endDate || '',
                     item.bookingCount || 0,
                     item.revenue || 0,
                     item.averageValue || 0,
@@ -280,61 +502,75 @@
 
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'FinancialData');
-            XLSX.writeFile(wb, `Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showToast('Excel exported', 'success');
+            XLSX.utils.book_append_sheet(wb, ws, 'Financial Report');
+
+            const fileName = `financial_report_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
         }
 
         async function exportToPDF() {
             if (!currentReportData || currentReportData.length === 0) {
-                showToast('No data to export', 'warning');
+                alert('No data to export');
                 return;
             }
 
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ orientation: 'landscape' });
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
 
-                doc.setFontSize(20);
-                doc.text('Financial Report', 14, 20);
-                
-                doc.setFontSize(10);
-                doc.text(`Period: ${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}`, 14, 30);
-                doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 35);
+            // Title
+            doc.setFontSize(18);
+            doc.text('Financial Report', 14, 15);
 
-                const tableData = currentReportData.map(item => [
-                    item.period || item.date,
-                    item.bookingCount || 0,
-                    formatCurrency(item.revenue || 0),
-                    formatCurrency(item.averageValue || 0),
-                    item.cancellations || 0
-                ]);
+            // Date range info
+            doc.setFontSize(10);
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            doc.text(`Period: ${startDate} to ${endDate}`, 14, 25);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 31);
 
-                doc.autoTable({
-                    startY: 45,
-                    head: [['Period', 'Bookings', 'Revenue', 'Avg. Value', 'Cancellations']],
-                    body: tableData,
-                    theme: 'grid',
-                    headStyles: { fillColor: [59, 130, 246] }
-                });
+            // Summary stats
+            const totalRevenue = currentReportData.reduce((s, i) => s + (i.revenue || 0), 0);
+            const totalBookings = currentReportData.reduce((s, i) => s + (i.bookingCount || 0), 0);
 
-                doc.save(`Report_${new Date().toISOString().split('T')[0]}.pdf`);
-                showToast('PDF exported', 'success');
-            } catch (error) {
-                showToast('PDF Export failed', 'error');
-            }
+            doc.setFontSize(11);
+            doc.text(`Total Revenue: ${formatCurrency(totalRevenue)}`, 14, 40);
+            doc.text(`Total Bookings: ${totalBookings}`, 14, 47);
+            doc.text(`Average Order Value: ${formatCurrency(totalBookings ? totalRevenue / totalBookings : 0)}`, 14, 54);
+
+            // Table
+            const tableData = currentReportData.map(item => [
+                item.period || item.date,
+                item.bookingCount || 0,
+                formatCurrency(item.revenue || 0),
+                formatCurrency(item.averageValue || 0),
+                item.cancellations || 0
+            ]);
+
+            doc.autoTable({
+                startY: 62,
+                head: [['Period', 'Bookings', 'Revenue', 'Avg. Value', 'Cancellations']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [59, 130, 246] },
+                columnStyles: {
+                    0: { cellWidth: 40 },
+                    1: { cellWidth: 30 },
+                    2: { cellWidth: 45 },
+                    3: { cellWidth: 45 },
+                    4: { cellWidth: 35 }
+                }
+            });
+
+            doc.save(`financial_report_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         function formatCurrency(amount) {
             return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
         }
 
-        // Initial load
+        // Load initial report
         loadReport();
     </script>
 </body>
-
-</html>
-
 
 </html>

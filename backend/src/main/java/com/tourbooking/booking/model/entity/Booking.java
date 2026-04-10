@@ -1,58 +1,7 @@
-<<<<<<<< Updated upstream:backend/src/main/java/com/tourbooking/booking/model/entity/Booking.java
-﻿package com.tourbooking.booking.model.entity;
+
+package com.tourbooking.booking.model.entity;
 
 import com.tourbooking.booking.model.entity.enums.BookingStatus;
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
-import java.math.BigDecimal;
-
-@Entity
-@Table(name = "Bookings")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@AttributeOverride(name = "id", column = @Column(name = "BookingID", nullable = false, unique = true))
-public class Booking extends Base {
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserID")
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ScheduleID")
-    private TourSchedule schedule;
-
-    @Column(name = "BookingDate")
-    private LocalDateTime bookingDate;
-
-    @Column(name = "NumberOfPeople")
-    private Integer numberOfPeople;
-
-    @Column(name = "TotalPrice", precision = 10, scale = 2)
-    private BigDecimal totalPrice;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 50)
-    private BookingStatus status = BookingStatus.PENDING;
-
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Payment payment;
-
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (bookingDate == null) {
-            bookingDate = LocalDateTime.now();
-        }
-    }
-}
-========
-package com.tourbooking.booking.backend.model.entity;
-
-import com.tourbooking.booking.backend.model.entity.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -107,4 +56,3 @@ public class Booking extends Base {
     }
 
 }
->>>>>>>> Stashed changes:backend/src/main/java/com/tourbooking/booking/backend/model/entity/Booking.java

@@ -14,8 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadBookings() {
     const tbody = document.querySelector('#bookingsTable tbody');
     try {
-        // We assume standard GET endpoint for Staff to view all bookings
-        const res = await TB.apiFetch('/api/v1/bookings/staff/view-all'); // Mock standard fetch
+        const res = await TB.apiFetch('/api/v1/bookings');
         const bookings = res.data || [];
         
         tbody.innerHTML = '';

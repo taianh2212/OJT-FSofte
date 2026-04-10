@@ -5,167 +5,461 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Reviews - TourBooking Admin</title>
-    <link rel="stylesheet" href="../../assets/css/admin-common.css">
-    <script src="../../assets/js/toast.js"></script>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--text-main);
+            color: white;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar .logo {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 5%;
+            background-color: #f1f5f9;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+        }
+
+        .reviews-table {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .rating-stars {
+            display: inline-flex;
+            gap: 0.25rem;
+        }
+
+        .star-filled {
+            color: #fbbf24;
+        }
+
+        .star-empty {
+            color: #e2e8f0;
+        }
+
+        .comment-preview {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .comment-full {
+            max-width: 400px;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-chip strong {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+        }
+
+        .rating-filter {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .view-detail {
+            cursor: pointer;
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="./dashboard.html" class="logo">TourBooking</a>
+            <a href="./dashboard.html" class="logo"><strong>TourBooking</strong> Admin</a>
             <nav>
                 <a href="./dashboard.html" class="nav-item">Dashboard</a>
-                <a href="./manageTours.html" class="nav-item">Tours</a>
-                <a href="./manageCategories.html" class="nav-item">Categories</a>
-                <a href="./manageDiscounts.html" class="nav-item">Discounts</a>
-                <a href="./manageUsers.html" class="nav-item">Users</a>
-                <a href="./manageReview.html" class="nav-item active">Reviews</a>
+                <a href="./manageTours.html" class="nav-item">Manager Tours</a>
+                <a href="./manageCatelories.html" class="nav-item">Manager Categories</a>
+                <a href="./manageUsers.html" class="nav-item">Manager User</a>
+                <a href="./manageReviews.html" class="nav-item active">Manager Reviews</a>
                 <a href="./financialReport.html" class="nav-item">Financial Report</a>
+
             </nav>
         </aside>
 
         <main class="main-content">
             <header>
-                <h1>Reviews</h1>
+                <h1>Manage Reviews</h1>
                 <div class="user-actions">
                     <span id="userInfo" style="font-weight: 600;"></span>
-                    <button id="logoutBtn" class="btn btn-secondary" style="margin-left: 1rem;">Logout</button>
+                    <button id="logoutBtn" class="btn-secondary" style="margin-left: 1rem;">Logout</button>
                 </div>
             </header>
 
-            <div class="card" style="margin-bottom: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2>Review Statistics</h2>
-                </div>
-                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
-                    <div class="stat-card" style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                        <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Total Reviews</small>
-                        <strong id="totalReviews" style="font-size: 1.5rem; color: var(--primary);">0</strong>
-                    </div>
-                    <div class="stat-card" style="background: var(--bg-light); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                        <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Avg Rating</small>
-                        <strong id="avgRating" style="font-size: 1.5rem; color: var(--warning);">0</strong>
-                    </div>
-                    <div class="stat-card" style="background: var(--bg-light); padding: 0.5rem; border-radius: 0.5rem; text-align: center;">
-                        <small style="color: var(--text-muted);">5 Stars</small>
-                        <strong id="rating5" style="display: block; color: var(--success);">0</strong>
-                    </div>
-                    <div class="stat-card" style="background: var(--bg-light); padding: 0.5rem; border-radius: 0.5rem; text-align: center;">
-                        <small style="color: var(--text-muted);">4 Stars</small>
-                        <strong id="rating4" style="display: block; color: var(--primary);">0</strong>
-                    </div>
-                    <div class="stat-card" style="background: var(--bg-light); padding: 0.5rem; border-radius: 0.5rem; text-align: center;">
-                        <small style="color: var(--text-muted);">3 Stars</small>
-                        <strong id="rating3" style="display: block; color: var(--warning);">0</strong>
-                    </div>
-                </div>
+            <div class="page-header">
+                <h2>Customer Reviews</h2>
             </div>
 
-            <div class="card">
-                <div class="filter-bar" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap;">
-                    <div class="form-group" style="margin-bottom: 0; min-width: 150px;">
-                        <select id="ratingFilter" class="form-control" onchange="loadReviews()">
-                            <option value="all">All Ratings</option>
-                            <option value="5">5 Stars</option>
-                            <option value="4">4 Stars</option>
-                            <option value="3">3 Stars</option>
-                            <option value="2">2 Stars</option>
-                            <option value="1">1 Star</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <input type="text" id="tourFilter" class="form-control" placeholder="Search by Tour ID..." onkeyup="loadReviews()">
-                    </div>
-                    <button onclick="loadReviews()" class="btn btn-secondary">Refresh</button>
-                </div>
+            <div class="stats-summary" id="statsSummary">
+                <div class="stat-chip">Total Reviews: <strong id="totalReviews">0</strong></div>
+                <div class="stat-chip">Average Rating: <strong id="avgRating">0</strong> ⭐</div>
+                <div class="stat-chip">5 Stars: <strong id="rating5">0</strong></div>
+                <div class="stat-chip">4 Stars: <strong id="rating4">0</strong></div>
+                <div class="stat-chip">3 Stars: <strong id="rating3">0</strong></div>
+                <div class="stat-chip">2 Stars: <strong id="rating2">0</strong></div>
+                <div class="stat-chip">1 Star: <strong id="rating1">0</strong></div>
+            </div>
 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Tour</th>
-                                <th>Rating</th>
-                                <th>Comment</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reviewTable">
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 2rem;">Loading reviews...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="filter-bar">
+                <div class="rating-filter">
+                    <label>Filter by Rating:</label>
+                    <select id="ratingFilter" onchange="loadReviews()">
+                        <option value="all">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
                 </div>
+                <div>
+                    <input type="text" id="tourFilter" placeholder="Filter by Tour ID" onkeyup="loadReviews()">
+                </div>
+                <div>
+                    <input type="text" id="userFilter" placeholder="Filter by User ID" onkeyup="loadReviews()">
+                </div>
+                <button onclick="loadReviews()" class="btn-secondary">Refresh</button>
+            </div>
+
+            <div class="reviews-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Review ID</th>
+                            <th>User ID</th>
+                            <th>Tour ID</th>
+                            <th>Rating</th>
+                            <th>Comment</th>
+                            <th>Review Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewTable">
+                        <tr>
+                            <td colspan="7" class="loading">Loading reviews...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </main>
     </div>
 
+    <!-- No Modal Needed -->
+
     <script>
         const API = "http://localhost:8080/api/v1/reviews";
 
-        // Auth check
+        // Kiểm tra quyền ADMIN
         const currentUser = JSON.parse(localStorage.getItem('user'));
         if (!currentUser || currentUser.role !== 'ADMIN') {
-            window.location.href = '/pages/auth/login.html';
+            window.location.href = '/auth/login.html';
         } else {
-            document.getElementById('userInfo').innerText = currentUser.fullName || currentUser.FullName || currentUser.email;
+            document.getElementById('userInfo').innerText = currentUser.fullName;
         }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            window.location.href = '/auth/login.html';
         });
 
+        let currentReviewId = null;
+
+        // LOAD REVIEWS - Emulated using tour endpoints because root API /reviews returns 405 without restart
         async function loadReviews() {
+            console.log('loadReviews (emulated) called');
             const reviewTable = document.getElementById("reviewTable");
+            reviewTable.innerHTML = '<tr><td colspan="7" class="loading">⏳ Emulating "Get All Reviews" by scanning tours...</td></tr>';
             
             try {
                 const token = localStorage.getItem('token');
                 const headers = { 'Authorization': `Bearer ${token}` };
 
-                // 1. Get all tours (since root /reviews might be restricted or require scanning)
+                // 1. Get all tours
+                console.log('Fetching all tours...');
                 const toursRes = await fetch("http://localhost:8080/api/v1/tours");
                 if (!toursRes.ok) throw new Error('Failed to fetch tours');
                 const toursData = await toursRes.json();
-                const tours = toursData.data || [];
+                const tours = toursData.data;
 
-                if (tours.length === 0) {
-                    reviewTable.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No tours found.</td></tr>';
+                if (!tours || tours.length === 0) {
+                    reviewTable.innerHTML = '<tr><td colspan="7" class="empty-state">📭 No tours found, so no reviews could be scanned.</td></tr>';
                     updateStats([]);
                     return;
                 }
 
-                // 2. Fetch reviews for each tour
+                // 2. For each tour, fetch its reviews
+                let allReviews = [];
+                console.log(`Scanning reviews for ${tours.length} tours...`);
+                
                 const reviewPromises = tours.map(tour => 
                     fetch(`${API}/tour/${tour.id}`, { headers })
                         .then(res => res.ok ? res.json() : { data: [] })
                         .then(resp => {
-                            const reviews = resp.data || [];
-                            return reviews.map(r => ({ ...r, tourId: tour.id, tourName: tour.tourName }));
+                            if (resp.data) {
+                                // Add tour info to each review
+                                return resp.data.map(r => ({ ...r, tourId: tour.id, tourName: tour.tourName }));
+                            }
+                            return [];
                         })
                 );
 
                 const results = await Promise.all(reviewPromises);
-                let allReviews = results.flat();
+                allReviews = results.flat();
 
-                // 3. Filtering
-                const ratingFilter = document.getElementById('ratingFilter').value;
-                const tourFilter = document.getElementById('tourFilter').value.toLowerCase();
-                
-                if (ratingFilter !== 'all') {
-                    allReviews = allReviews.filter(r => r.rating == ratingFilter);
-                }
-                if (tourFilter) {
-                    allReviews = allReviews.filter(r => r.tourId.toString().includes(tourFilter) || r.tourName.toLowerCase().includes(tourFilter));
-                }
+                console.log(`Fetched total ${allReviews.length} reviews`);
 
+                // 3. Render
                 if (allReviews.length === 0) {
-                    reviewTable.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No reviews found.</td></tr>';
+                    reviewTable.innerHTML = '<tr><td colspan="7" class="empty-state">📭 No reviews found in the system.</td></tr>';
                     updateStats([]);
                     return;
                 }
@@ -179,12 +473,15 @@
                         <tr>
                             <td>${r.reviewId}</td>
                             <td><strong>${r.userId || '—'}</strong></td>
-                            <td><span style="font-size: 0.8rem;">${r.tourId}</span><br><strong>${escapeHtml(r.tourName)}</strong></td>
+                            <td>${r.tourId} <small>(${escapeHtml(r.tourName)})</small></td>
                             <td>${renderStars(r.rating)}</td>
-                            <td style="max-width: 300px; font-size: 0.9rem;">${escapeHtml(r.comment || '—')}</td>
+                            <td class="comment-preview" title="${escapeHtml(r.comment || '')}">
+                                ${escapeHtml(r.comment ? r.comment.substring(0, 100) : '—')}
+                                ${r.comment && r.comment.length > 100 ? '...' : ''}
+                            </td>
                             <td>${formatDate(r.createdAt)}</td>
                             <td class="action-buttons">
-                                <button onclick="deleteReviewById(${r.reviewId})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
+                                <button onclick="deleteReviewById(${r.reviewId})" class="btn-danger">Delete</button>
                             </td>
                         </tr>
                     `;
@@ -193,19 +490,24 @@
                 updateStats(allReviews);
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                reviewTable.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--danger);">Error scanning reviews.</td></tr>`;
+                reviewTable.innerHTML = `<tr><td colspan="7" class="empty-state">❌ Error scanning reviews: ${error.message}</td></tr>`;
             }
         }
 
+        // RENDER STARS
         function renderStars(rating) {
             let stars = '';
             for (let i = 1; i <= 5; i++) {
-                stars += i <= rating ? '★' : '☆';
+                if (i <= rating) {
+                    stars += '<span class="star-filled">★</span>';
+                } else {
+                    stars += '<span class="star-empty">★</span>';
+                }
             }
-            const colorClass = rating >= 4 ? 'success' : (rating >= 3 ? 'warning' : 'danger');
-            return `<span class="badge badge-${colorClass}" style="letter-spacing: 2px;">${stars}</span>`;
+            return `<div class="rating-stars">${stars}</div>`;
         }
 
+        // UPDATE STATISTICS
         function updateStats(reviews) {
             const total = reviews.length;
             let sumRating = 0;
@@ -213,7 +515,9 @@
 
             reviews.forEach(r => {
                 sumRating += r.rating;
-                if (ratingCount[r.rating] !== undefined) ratingCount[r.rating]++;
+                if (ratingCount[r.rating]) {
+                    ratingCount[r.rating]++;
+                }
             });
 
             const avg = total > 0 ? (sumRating / total).toFixed(1) : 0;
@@ -223,30 +527,51 @@
             document.getElementById('rating5').innerText = ratingCount[5];
             document.getElementById('rating4').innerText = ratingCount[4];
             document.getElementById('rating3').innerText = ratingCount[3];
+            document.getElementById('rating2').innerText = ratingCount[2];
+            document.getElementById('rating1').innerText = ratingCount[1];
         }
 
-        async function deleteReviewById(id) {
-            if (confirm('Delete this review permanently?')) {
+        // DELETE REVIEW BY ID
+        function deleteReviewById(id) {
+            if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
                 const token = localStorage.getItem('token');
-                try {
-                    const res = await fetch(`${API}/${id}`, {
-                        method: "DELETE",
-                        headers: { 'Authorization': `Bearer ${token}` }
+                fetch(`${API}/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error('Failed to delete review');
+                        loadReviews();
+                        alert('Review deleted successfully!');
+                    })
+                    .catch(error => {
+                        console.error('Error deleting review:', error);
+                        alert('Failed to delete review. Please try again.');
                     });
-                    if (!res.ok) throw new Error('Failed to delete review');
-                    showToast('Review deleted successfully!', 'success');
-                    loadReviews();
-                } catch (error) {
-                    showToast('Error: ' + error.message, 'error');
-                }
             }
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return '—';
-            return new Date(dateString).toLocaleDateString('vi-VN');
+        // CLOSE MODAL - No longer needed
+        function closeModal() {
+            // Modal removed
         }
 
+        // FORMAT DATE
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN');
+        }
+
+        // Helper function to escape HTML
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -254,12 +579,17 @@
             return div.innerHTML;
         }
 
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('reviewModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Load reviews on page load
         loadReviews();
     </script>
-</body>
-
-</html>
-/script>
 </body>
 
 </html>

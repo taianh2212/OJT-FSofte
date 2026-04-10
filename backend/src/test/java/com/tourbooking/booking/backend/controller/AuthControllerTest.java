@@ -1,15 +1,15 @@
-package com.tourbooking.booking.backend.controller;
+package com.tourbooking.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tourbooking.booking.backend.model.dto.request.AuthRequest;
-import com.tourbooking.booking.backend.model.dto.response.UserResponse;
-import com.tourbooking.booking.backend.model.entity.enums.UserRole;
-import com.tourbooking.booking.backend.repository.UserRepository;
-import com.tourbooking.booking.backend.security.JwtService;
-import com.tourbooking.booking.backend.service.AuthSessionNotificationService;
-import com.tourbooking.booking.backend.service.MailService;
-import com.tourbooking.booking.backend.service.RateLimiterService;
-import com.tourbooking.booking.backend.service.UserService;
+import com.tourbooking.booking.model.dto.request.AuthRequest;
+import com.tourbooking.booking.model.dto.response.UserResponse;
+import com.tourbooking.booking.model.entity.enums.UserRole;
+import com.tourbooking.booking.repository.UserRepository;
+import com.tourbooking.booking.security.JwtService;
+import com.tourbooking.booking.service.AuthSessionNotificationService;
+import com.tourbooking.booking.service.MailService;
+import com.tourbooking.booking.service.RateLimiterService;
+import com.tourbooking.booking.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -90,7 +90,7 @@ class AuthControllerTest {
                 verify(jwtService).generateToken(user, "session-abc");
                 verify(authSessionNotificationService).notifySessionInvalidated(
                                 "test@example.com",
-                                "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại.");
+                                "TÃƒÆ’Ã‚Â i khoÃƒÂ¡Ã‚ÂºÃ‚Â£n Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â£ Ãƒâ€žÃ¢â‚¬ËœÃƒâ€ Ã‚Â°ÃƒÂ¡Ã‚Â»Ã‚Â£c Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng nhÃƒÂ¡Ã‚ÂºÃ‚Â­p ÃƒÂ¡Ã‚Â»Ã…Â¸ nÃƒâ€ Ã‚Â¡i khÃƒÆ’Ã‚Â¡c. Vui lÃƒÆ’Ã‚Â²ng Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng nhÃƒÂ¡Ã‚ÂºÃ‚Â­p lÃƒÂ¡Ã‚ÂºÃ‚Â¡i.");
         }
 
         @Test
@@ -106,6 +106,6 @@ class AuthControllerTest {
                 verify(userService).clearSession("test@example.com");
                 verify(authSessionNotificationService).notifySessionInvalidated(
                                 "test@example.com",
-                                "Phiên đăng nhập đã bị đăng xuất. Vui lòng đăng nhập lại.");
+                                "PhiÃƒÆ’Ã‚Âªn Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng nhÃƒÂ¡Ã‚ÂºÃ‚Â­p Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â£ bÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¹ Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng xuÃƒÂ¡Ã‚ÂºÃ‚Â¥t. Vui lÃƒÆ’Ã‚Â²ng Ãƒâ€žÃ¢â‚¬ËœÃƒâ€žÃ†â€™ng nhÃƒÂ¡Ã‚ÂºÃ‚Â­p lÃƒÂ¡Ã‚ÂºÃ‚Â¡i.");
         }
 }

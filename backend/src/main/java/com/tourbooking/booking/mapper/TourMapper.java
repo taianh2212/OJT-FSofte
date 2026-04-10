@@ -1,10 +1,15 @@
 package com.tourbooking.booking.mapper;
 
+import com.tourbooking.booking.model.dto.request.TourRequest;
+import com.tourbooking.booking.model.dto.request.TourScheduleRequest;
 import com.tourbooking.booking.model.dto.response.TourDetailResponse;
 import com.tourbooking.booking.model.dto.response.TourResponse;
 import com.tourbooking.booking.model.entity.Tour;
 import com.tourbooking.booking.model.entity.TourImage;
 import com.tourbooking.booking.model.entity.TourHighlight;
+import com.tourbooking.booking.model.entity.TourSchedule;
+import com.tourbooking.booking.model.entity.enums.TourStatus;
+
 import java.util.stream.Collectors;
 
 public class TourMapper {
@@ -21,6 +26,12 @@ public class TourMapper {
         response.setStartLocation(tour.getStartLocation());
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
+        response.setTransportType(tour.getTransportType());
+        
+        if (tour.getImages() != null) {
+            response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
+        }
+        
         return response;
     }
 
@@ -36,6 +47,7 @@ public class TourMapper {
         response.setStartLocation(tour.getStartLocation());
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
+        response.setTransportType(tour.getTransportType());
 
         if (tour.getCategory() != null) {
             response.setCategoryName(tour.getCategory().getCategoryName());
@@ -50,21 +62,51 @@ public class TourMapper {
                     tour.getHighlights().stream().map(TourHighlight::getHighlight).collect(Collectors.toList()));
         }
 
+        if (tour.getSchedules() != null) {
+            response.setSchedules(tour.getSchedules().stream().map(TourMapper::toScheduleSummary).toList());
+        }
+
         return response;
     }
 
-    public static Tour toEntity(TourResponse response) {
-        if (response == null)
+    private static TourDetailResponse.TourScheduleSummary toScheduleSummary(TourSchedule schedule) {
+        TourDetailResponse.TourScheduleSummary s = new TourDetailResponse.TourScheduleSummary();
+        s.setScheduleId(schedule.getId());
+        s.setStartDate(schedule.getStartDate());
+        s.setEndDate(schedule.getEndDate());
+        s.setAvailableSlots(schedule.getAvailableSlots());
+        s.setStatus(schedule.getStatus() == null ? null : schedule.getStatus().name());
+        return s;
+    }
+
+    public static Tour toEntity(TourRequest request) {
+        if (request == null)
             return null;
         Tour tour = new Tour();
-        tour.setId(response.getId());
-        tour.setTourName(response.getTourName());
-        tour.setDescription(response.getDescription());
-        tour.setPrice(response.getPrice());
-        tour.setDuration(response.getDuration());
-        tour.setStartLocation(response.getStartLocation());
-        tour.setEndLocation(response.getEndLocation());
-        tour.setRating(response.getRating());
+        updateEntityFromRequest(tour, request);
         return tour;
+    }
+
+    public static TourSchedule toScheduleEntity(TourScheduleRequest request) {
+        if (request == null) return null;
+        TourSchedule schedule = new TourSchedule();
+        schedule.setStartDate(request.getStartDate());
+        schedule.setEndDate(request.getEndDate());
+        schedule.setAvailableSlots(request.getAvailableSlots());
+        schedule.setStatus(TourStatus.OPEN);
+        return schedule;
+    }
+
+    public static void updateEntityFromRequest(Tour tour, TourRequest request) {
+        if (request == null || tour == null)
+            return;
+        if (request.getTourName() != null) tour.setTourName(request.getTourName());
+        if (request.getDescription() != null) tour.setDescription(request.getDescription());
+        if (request.getPrice() != null) tour.setPrice(request.getPrice());
+        if (request.getDuration() != null) tour.setDuration(request.getDuration());
+        if (request.getStartLocation() != null) tour.setStartLocation(request.getStartLocation());
+        if (request.getEndLocation() != null) tour.setEndLocation(request.getEndLocation());
+        if (request.getTransportType() != null) tour.setTransportType(request.getTransportType());
+        // Category and other collections should be handled in the Service layer
     }
 }

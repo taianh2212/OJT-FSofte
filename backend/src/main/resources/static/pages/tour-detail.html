@@ -14,12 +14,6 @@
     @media (max-width: 960px) {
       .twoCol { grid-template-columns: 1fr; }
     }
-
-    /* Modal Styles */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal.active { display: flex; animation: fadeIn 0.3s ease; }
-    .modal-content { background: #fff; border-radius: 20px; width: 100%; max-width: 500px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
@@ -70,45 +64,6 @@
     </div>
   </div>
 
-  <!-- Booking Modal -->
-  <div id="bookingModal" class="modal">
-    <div class="modal-content">
-      <h3 class="section-title">Book Your Tour</h3>
-      <div class="list" style="margin-top:20px;">
-        <div class="list-item">
-          <label class="label">Schedule</label>
-          <div id="selectedSchedule" style="font-weight:700;"></div>
-        </div>
-        <div class="list-item">
-          <label class="label">Number of People</label>
-          <input type="number" id="peopleInput" class="input" value="1" min="1">
-        </div>
-        <div class="list-item">
-          <label class="label">Discount Code</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="discountInput" class="input" placeholder="Enter code">
-            <button class="btn btn-secondary" id="applyDiscountBtn" style="padding: 0 20px;">Apply</button>
-          </div>
-          <div id="discountMsg" style="font-size:0.85rem; margin-top:5px;"></div>
-        </div>
-        <hr style="border:none; border-top:1px solid var(--border); margin:10px 0;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div style="font-size:0.9rem; color:var(--text-soft);">Total Price</div>
-            <div id="finalPrice" style="font-size:1.5rem; font-weight:800; color:var(--accent);"></div>
-          </div>
-          <div id="discountAppliedRow" style="text-align:right; display:none;">
-            <div style="font-size:0.8rem; color:var(--sun); text-decoration:line-through;" id="originalPrice"></div>
-            <div style="font-size:0.85rem; color:var(--accent-deep); font-weight:700;">Discount applied!</div>
-          </div>
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:24px;">
-          <button class="btn btn-secondary" onclick="this.closest('.modal').classList.remove('active')">Cancel</button>
-          <button class="btn" id="confirmBookingBtn">Confirm Booking</button>
-        </div>
-      </div>
-    </div>
-  </div>
   <style>
     .gallery { 
       display: grid; 

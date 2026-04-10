@@ -1,4 +1,4 @@
-package com.tourbooking.booking.backend.service.impl;
+package com.tourbooking.booking.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,16 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.tourbooking.booking.backend.model.dto.request.ChatEscalationReplyRequest;
-import com.tourbooking.booking.backend.model.dto.request.ChatEscalationRequest;
-import com.tourbooking.booking.backend.model.entity.ChatEscalation;
-import com.tourbooking.booking.backend.model.entity.User;
-import com.tourbooking.booking.backend.model.entity.enums.ChatEscalationStatus;
-import com.tourbooking.booking.backend.model.entity.enums.UserRole;
-import com.tourbooking.booking.backend.repository.ChatEscalationRepository;
-import com.tourbooking.booking.backend.repository.ChatMessagesRepository;
-import com.tourbooking.booking.backend.repository.UserRepository;
-import com.tourbooking.booking.backend.service.ChatService;
+import com.tourbooking.booking.model.dto.request.ChatEscalationReplyRequest;
+import com.tourbooking.booking.model.dto.request.ChatEscalationRequest;
+import com.tourbooking.booking.model.entity.ChatEscalation;
+import com.tourbooking.booking.model.entity.User;
+import com.tourbooking.booking.model.entity.enums.ChatEscalationStatus;
+import com.tourbooking.booking.model.entity.enums.UserRole;
+import com.tourbooking.booking.repository.ChatEscalationRepository;
+import com.tourbooking.booking.repository.ChatMessagesRepository;
+import com.tourbooking.booking.repository.UserRepository;
+import com.tourbooking.booking.service.ChatService;
 
 @ExtendWith(MockitoExtension.class)
 class ChatEscalationServiceImplTest {

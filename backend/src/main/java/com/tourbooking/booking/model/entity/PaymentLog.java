@@ -1,27 +1,5 @@
-<<<<<<<< Updated upstream:backend/src/main/java/com/tourbooking/booking/model/entity/PaymentLog.java
-﻿package com.tourbooking.booking.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
-@Entity
-@Table(name = "PaymentLogs")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@AttributeOverride(name = "id", column = @Column(name = "LogID", nullable = false, unique = true))
-public class PaymentLog extends Base {
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PaymentID")
-    private Payment payment;
-
-    @Column(name = "LogMessage", columnDefinition = "NVARCHAR(MAX)")
-    private String logMessage;
-}
-========
-package com.tourbooking.booking.backend.model.entity;
+package com.tourbooking.booking.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,4 +20,3 @@ public class PaymentLog extends Base {
     @Column(name = "LogMessage", columnDefinition = "NVARCHAR(MAX)")
     private String logMessage;
 }
->>>>>>>> Stashed changes:backend/src/main/java/com/tourbooking/booking/backend/model/entity/PaymentLog.java

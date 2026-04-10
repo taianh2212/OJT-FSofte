@@ -5,72 +5,485 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users - TourBooking Admin</title>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Users - TourBooking Admin</title>
-    <link rel="stylesheet" href="../../assets/css/admin-common.css">
-    <script src="../../assets/js/toast.js"></script>
+    <style>
+        /* CSS Variables đầy đủ */
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
+            --success: #10b981;
+            --success-dark: #059669;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --text-main: #1e293b;
+            --text-light: #334155;
+            --text-muted: #64748b;
+            --text-white: #ffffff;
+            --border: #e2e8f0;
+            --bg-light: #f1f5f9;
+            --bg-white: #ffffff;
+            --bg-hover: #f8fafc;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-main);
+        }
+
+        /* Layout */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--text-main);
+            color: var(--text-white);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+        }
+
+        .sidebar .logo {
+            color: var(--text-white);
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            display: block;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-white);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: var(--text-white);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem 2rem;
+            background-color: var(--bg-light);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #userInfo {
+            font-weight: 600;
+            color: var(--text-main);
+            background: var(--bg-white);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background: var(--text-muted);
+            color: var(--text-white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--text-white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--text-white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--text-white);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-warning:hover {
+            background: var(--warning-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background: var(--bg-white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .stat-chip strong {
+            color: var(--primary);
+            font-size: 1.25rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Users Table */
+        .users-table {
+            background: var(--bg-white);
+            border-radius: 1rem;
+            overflow: auto;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background: var(--bg-hover);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-light);
+        }
+
+        tr:hover {
+            background: var(--bg-hover);
+        }
+
+        /* Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-blocked {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .role-admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-user {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Loading & Empty States */
+        .loading,
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                padding: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-summary {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="./dashboard.html" class="logo">TourBooking</a>
+            <a href="./dashboard.html" class="logo"><strong>🏨 TourBooking</strong> Admin</a>
             <nav>
-                <a href="./dashboard.html" class="nav-item">Dashboard</a>
-                <a href="./manageTours.html" class="nav-item">Tours</a>
-                <a href="./manageCategories.html" class="nav-item">Categories</a>
-                <a href="./manageDiscounts.html" class="nav-item">Discounts</a>
-                <a href="./manageUsers.html" class="nav-item active">Users</a>
-                <a href="./manageReview.html" class="nav-item">Reviews</a>
-                <a href="./financialReport.html" class="nav-item">Financial Report</a>
+                <a href="./dashboard.html" class="nav-item">📊 Dashboard</a>
+                <a href="./manageTours.html" class="nav-item">✈️ Manager Tours</a>
+                <a href="./manageCatelories.html" class="nav-item">📁 Manager Categories</a>
+                <a href="./manageUsers.html" class="nav-item active">👥 Manager Users</a>
+                <a href="./manageReview.html" class="nav-item">⭐ Manager Reviews</a>
+                <a href="./financialReport.html" class="nav-item">💰 Financial Report</a>
             </nav>
         </aside>
 
         <main class="main-content">
             <header>
-                <h1>Users</h1>
+                <h1>👥 Manage Users</h1>
                 <div class="user-actions">
                     <span id="userInfo">Loading...</span>
-                    <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+                    <button id="logoutBtn" class="btn-secondary">🚪 Logout</button>
                 </div>
             </header>
 
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2>User List</h2>
-                    <button onclick="showCreateModal()" class="btn btn-primary">Create New User</button>
-                </div>
-
-                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-                    <div class="badge badge-info">Total: <span id="totalUsers">0</span></div>
-                    <div class="badge badge-success">Active: <span id="activeUsers">0</span></div>
-                    <div class="badge badge-danger">Blocked: <span id="blockedUsers">0</span></div>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Email</th>
-                                <th>Full Name</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTable">
-                            <tr>
-                                <td colspan="6" style="text-align: center; padding: 2rem;">Loading users...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="page-header">
+                <h2>User List</h2>
+                <button onclick="showCreateModal()" class="btn-primary">➕ Create New User</button>
             </div>
-        </main>
-    </div>
+
+            <div class="stats-summary">
+                <div class="stat-chip">📊 Total Users: <strong id="totalUsers">0</strong></div>
+                <div class="stat-chip">✅ Active: <strong id="activeUsers">0</strong></div>
+                <div class="stat-chip">⛔ Blocked: <strong id="blockedUsers">0</strong></div>
+            </div>
+
+            <div class="users-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>🆔 ID</th>
+                            <th>📧 Email</th>
+                            <th>👤 Full Name</th>
+                            <th>🎭 Role</th>
+                            <th>🔘 Status</th>
+                            <th>⚙️ Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable">
+                        <tr>
+                            <td colspan="6" class="loading">⏳ Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </main>
     </div>
 
@@ -81,42 +494,40 @@
             <input type="hidden" id="userId">
 
             <div class="form-group">
-                <label>Email *</label>
-                <input type="email" id="email" class="form-control" placeholder="Enter email address">
+                <label>📧 Email *</label>
+                <input type="email" id="email" placeholder="Enter email address">
             </div>
 
             <div class="form-group">
-                <label>Password *</label>
-                <input type="password" id="password" class="form-control" placeholder="Enter password">
+                <label>🔐 Password *</label>
+                <input type="password" id="password" placeholder="Enter password">
                 <small>Leave blank to keep current password when editing</small>
             </div>
 
             <div class="form-group">
-                <label>Full Name *</label>
-                <input type="text" id="fullName" class="form-control" placeholder="Enter full name">
+                <label>👤 Full Name *</label>
+                <input type="text" id="fullName" placeholder="Enter full name">
             </div>
 
             <div class="form-group">
-                <label>Role</label>
-                <select id="role" class="form-control">
-                    <option value="CUSTOMER">Customer</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="GUIDE">Guide</option>
-                    <option value="STAFF">Staff</option>
+                <label>🎭 Role</label>
+                <select id="role">
+                    <option value="USER">👤 User</option>
+                    <option value="ADMIN">👑 Admin</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Status</label>
-                <select id="isActive" class="form-control">
-                    <option value="true">Active</option>
-                    <option value="false">Blocked</option>
+                <label>🔘 Status</label>
+                <select id="isActive">
+                    <option value="true">✅ Active</option>
+                    <option value="false">⛔ Blocked</option>
                 </select>
             </div>
 
             <div class="modal-buttons">
-                <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
-                <button onclick="saveUser()" class="btn btn-primary">Save User</button>
+                <button onclick="closeModal()" class="btn-secondary">❌ Cancel</button>
+                <button onclick="saveUser()" class="btn-primary">💾 Save</button>
             </div>
         </div>
     </div>
@@ -139,7 +550,7 @@
                     return false;
                 }
 
-                document.getElementById('userInfo').innerText = user.fullName || user.FullName || user.email;
+                document.getElementById('userInfo').innerHTML = `👤 ${user.fullName || user.FullName || user.email}`;
                 return true;
             } catch (error) {
                 console.error('Auth error:', error);
@@ -178,7 +589,7 @@
                 if (!data || data.length === 0) {
                     document.getElementById("userTable").innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem;">No users found.</td>
+                            <td colspan="6" class="empty-state">📭 No users found.</td>
                         </tr>
                     `;
                     updateStats([]);
@@ -187,8 +598,7 @@
 
                 let html = "";
                 data.forEach(u => {
-                    const currentUser = JSON.parse(localStorage.getItem('user'));
-                    const isSelf = u.id === currentUser.id;
+                    const isCurrentUser = u.id === JSON.parse(localStorage.getItem('user')).id;
 
                     html += `
                         <tr>
@@ -196,24 +606,23 @@
                             <td>${escapeHtml(u.email)}</td>
                             <td><strong>${escapeHtml(u.fullName)}</strong></td>
                             <td>
-                                <span class="badge ${u.role === 'ADMIN' ? 'badge-info' : (u.role === 'GUIDE' ? 'badge-warning' : (u.role === 'STAFF' ? 'badge-secondary' : 'badge-info'))}">
-                                    ${u.role}
+                                <span class="role-badge ${u.role === 'ADMIN' ? 'role-admin' : 'role-user'}">
+                                    ${u.role === 'ADMIN' ? '👑 ADMIN' : '👤 USER'}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge ${u.isActive ? 'badge-success' : 'badge-danger'}">
-                                    ${u.isActive ? 'Active' : 'Blocked'}
+                                <span class="status-badge ${u.isActive ? 'status-active' : 'status-blocked'}">
+                                    ${u.isActive ? '✅ Active' : '⛔ Blocked'}
                                 </span>
                             </td>
                             <td class="action-buttons">
-                                <button onclick="editUser(${u.id})" class="btn btn-warning" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;" ${isSelf ? 'disabled style="opacity:0.5;cursor:not-allowed;" title="Cannot edit yourself"' : ''}>
-                                    Edit
+                                <button onclick="editUser(${u.id})" class="btn-warning" ${isCurrentUser ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                                    ✏️ Edit
                                 </button>
                                 <button onclick="toggleUserStatus(${u.id}, ${u.isActive})" 
-                                    class="btn ${u.isActive ? 'btn-danger' : 'btn-success'}"
-                                    style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
-                                    ${isSelf ? 'disabled style="opacity:0.5;cursor:not-allowed;" title="Cannot block yourself"' : ''}>
-                                    ${u.isActive ? 'Block' : 'Unblock'}
+                                    class="${u.isActive ? 'btn-danger' : 'btn-success'}"
+                                    ${isCurrentUser ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                                    ${u.isActive ? '🔒 Block' : '🔓 Unblock'}
                                 </button>
                             </td>
                         </tr>
@@ -225,7 +634,7 @@
                 console.error('Error loading users:', error);
                 document.getElementById("userTable").innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading users. Please try again.</td>
+                        <td colspan="6" class="empty-state">❌ Error loading users. Please try again.</td>
                     </tr>
                 `;
             }
@@ -245,12 +654,12 @@
         // SHOW CREATE MODAL
         function showCreateModal() {
             currentEditId = null;
-            document.getElementById('modalTitle').innerText = 'Create New User';
+            document.getElementById('modalTitle').innerText = '➕ Create New User';
             document.getElementById('userId').value = '';
             document.getElementById('email').value = '';
             document.getElementById('password').value = '';
             document.getElementById('fullName').value = '';
-            document.getElementById('role').value = 'CUSTOMER';
+            document.getElementById('role').value = 'USER';
             document.getElementById('isActive').value = 'true';
             document.getElementById('userModal').style.display = 'flex';
         }
@@ -271,7 +680,7 @@
                 const responseData = await response.json();
                 const u = responseData.data;
                 currentEditId = id;
-                document.getElementById('modalTitle').innerText = 'Edit User';
+                document.getElementById('modalTitle').innerText = '✏️ Edit User';
                 document.getElementById('userId').value = u.id;
                 document.getElementById('email').value = u.email;
                 document.getElementById('password').value = '';
@@ -281,7 +690,7 @@
                 document.getElementById('userModal').style.display = 'flex';
             } catch (error) {
                 console.error('Error loading user for edit:', error);
-                showToast('Failed to load user details', 'error');
+                alert('Failed to load user details. Please try again.');
             }
         }
 
@@ -294,17 +703,17 @@
             const isActive = document.getElementById('isActive').value === 'true';
 
             if (!email) {
-                showToast('Please enter email!', 'error');
+                alert('Please enter email!');
                 return;
             }
             if (!fullName) {
-                showToast('Please enter full name!', 'error');
+                alert('Please enter full name!');
                 return;
             }
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                showToast('Please enter a valid email address!', 'error');
+                alert('Please enter a valid email address!');
                 return;
             }
 
@@ -343,24 +752,26 @@
                     throw new Error(text || 'Failed to save user');
                 }
 
-                showToast(currentEditId ? 'User updated successfully' : 'User created successfully', 'success');
                 closeModal();
                 loadUsers();
             } catch (error) {
                 console.error('Error saving user:', error);
-                showToast('Failed to save user: ' + error.message, 'error');
+                alert('Failed to save user: ' + error.message);
             }
         }
 
         // TOGGLE USER STATUS
         async function toggleUserStatus(id, isActive) {
+            console.log('toggleUserStatus called with:', id, isActive);
             const action = isActive ? 'block' : 'unblock';
             if (!confirm(`Are you sure you want to ${action} this user?`)) {
+                console.log('Confirmation cancelled');
                 return;
             }
             
             try {
                 const token = localStorage.getItem('token');
+                console.log('Sending request to:', `${API}/${id}/status`);
                 const response = await fetch(`${API}/${id}/status`, {
                     method: "PUT",
                     headers: {
@@ -370,38 +781,43 @@
                     body: JSON.stringify({ isActive: !isActive })
                 });
 
+                console.log('Response status:', response.status);
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(errorText || 'Failed to update user status');
                 }
 
-                showToast(`User ${action}ed successfully`, 'success');
+                console.log('Status updated successfully, reloading users...');
                 loadUsers();
             } catch (error) {
-                console.error('Error updating status:', error);
-                showToast('Failed to update status: ' + error.message, 'error');
+                console.error('Error updating user status:', error);
+                alert('Failed to update user status. Error: ' + error.message);
             }
         }
 
+        // CLOSE MODAL
         function closeModal() {
             document.getElementById('userModal').style.display = 'none';
+            currentEditId = null;
         }
 
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('userModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Helper function to escape HTML
         function escapeHtml(text) {
-            if (!text) return "";
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('userModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-
-        // Init
+        // Initialize
         if (checkAuth()) {
             loadUsers();
         }

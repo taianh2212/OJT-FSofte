@@ -1,55 +1,7 @@
-<<<<<<<< Updated upstream:backend/src/main/java/com/tourbooking/booking/model/entity/User.java
-﻿package com.tourbooking.booking.model.entity;
+
+package com.tourbooking.booking.model.entity;
 
 import com.tourbooking.booking.model.entity.enums.UserRole;
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.List;
-
-@Entity
-@Table(name = "Users")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@AttributeOverride(name = "id", column = @Column(name = "UserID", nullable = false, unique = true))
-public class User extends Base {
-
-    @Column(name = "FullName", length = 100)
-    private String fullName;
-
-    @Column(name = "Email", nullable = false, unique = true, length = 100)
-    private String email;
-
-    @Column(name = "PasswordHash", length = 255)
-    private String passwordHash;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Role", length = 20)
-    private UserRole role;
-
-    @Column(name = "AvatarURL", length = 255)
-    private String avatarUrl;
-
-    @Column(name = "IsActive")
-    private Boolean isActive = true;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Booking> bookings;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Review> reviews;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Wishlist> wishlist;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<ChatMessages> chatMessages;
-}
-========
-package com.tourbooking.booking.backend.model.entity;
-
-import com.tourbooking.booking.backend.model.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -97,4 +49,3 @@ public class User extends Base {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ChatMessages> chatMessages;
 }
->>>>>>>> Stashed changes:backend/src/main/java/com/tourbooking/booking/backend/model/entity/User.java

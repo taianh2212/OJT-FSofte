@@ -12,7 +12,8 @@ public class NewsletterMapper {
         NewsletterResponse response = new NewsletterResponse();
         response.setId(newsletter.getId());
         response.setEmail(newsletter.getEmail());
-        response.setSubscribed(true); // Default to true if entity exists
+        response.setSubscribedAt(newsletter.getSubscribedAt());
+        response.setSubscribed(true); // Since it exists in DB
         return response;
     }
 
@@ -20,8 +21,15 @@ public class NewsletterMapper {
         if (request == null)
             return null;
         Newsletter newsletter = new Newsletter();
-        newsletter.setEmail(request.getEmail());
-        // ignore other fields for now as they are not in our Entity
+        updateEntityFromRequest(newsletter, request);
         return newsletter;
+    }
+
+    public static void updateEntityFromRequest(Newsletter newsletter, NewsletterRequest request) {
+        if (request == null || newsletter == null)
+            return;
+        if (request.getEmail() != null) {
+            newsletter.setEmail(request.getEmail());
+        }
     }
 }
