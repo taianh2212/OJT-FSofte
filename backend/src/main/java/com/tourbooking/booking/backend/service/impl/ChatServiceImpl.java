@@ -79,7 +79,8 @@ public class ChatServiceImpl implements ChatService {
         } else if (StringUtils.hasText(guestId)) {
             messages = chatRepo.findByGuestIdOrderBySentAtAsc(guestId);
         } else {
-            messages = chatRepo.findByUserIsNullOrderBySentAtAsc();
+            // Do NOT return all anonymous messages when no identifier is given
+            return List.of();
         }
 
         return messages.stream().map(ChatServiceImpl::toResponse).toList();
