@@ -7,6 +7,9 @@
   }
 
   const el = (id) => document.getElementById(id);
+  const selectedState = {
+    scheduleId: null
+  };
 
   function escapeHtml(s) {
     return String(s)
@@ -67,6 +70,9 @@
     }
     root.innerHTML = list.map(s => {
       const isAvailable = String(s.status || '').toUpperCase() === 'AVAILABLE';
+      const isSelectable = isAvailable && Number(s.availableSlots || 0) > 0;
+      return `
+        <div class="card panel ${isSelectable ? 'schedule-card' : ''}" data-schedule-id="${escapeHtml(s.scheduleId || '')}" style="box-shadow:none; border: 1px solid rgba(255,255,255,0.05); padding: 14px; ${isSelectable ? 'cursor:pointer;' : ''}">
       return `
         <div class="card panel" style="box-shadow:none; border: 1px solid rgba(255,255,255,0.05); padding: 14px;">
           <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -84,6 +90,18 @@
         </div>
       `;
     }).join('');
+
+    root.querySelectorAll('.schedule-card').forEach(card => {
+      card.addEventListener('click', () => {
+        root.querySelectorAll('.schedule-card').forEach(c => {
+          c.style.border = '1px solid rgba(255,255,255,0.05)';
+          c.style.boxShadow = 'none';
+        });
+        card.style.border = '1px solid var(--primary)';
+        card.style.boxShadow = '0 0 0 1px rgba(243, 141, 73, 0.35)';
+        selectedState.scheduleId = card.getAttribute('data-schedule-id');
+      });
+    });
   }
 
   function addToCompare(tourId) {
@@ -95,6 +113,14 @@
   }
 
   el('addCompareBtn').onclick = () => addToCompare(id);
+  el('bookNowBtn').onclick = () => {
+    const qs = new URLSearchParams();
+    qs.set('tourId', String(id));
+    if (selectedState.scheduleId) {
+      qs.set('scheduleId', String(selectedState.scheduleId));
+    }
+    window.location.href = `./user/checkout.html?${qs.toString()}`;
+  };
 
   async function load() {
     const res = await TB.apiFetch(`/api/v1/tours/${encodeURIComponent(id)}`, { method: 'GET' });

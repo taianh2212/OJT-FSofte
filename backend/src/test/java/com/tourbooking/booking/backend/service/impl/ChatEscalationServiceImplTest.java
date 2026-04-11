@@ -1,3 +1,4 @@
+package com.tourbooking.booking.backend.service.impl;
 package com.tourbooking.booking.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,6 +17,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tourbooking.booking.backend.model.dto.request.ChatEscalationReplyRequest;
+import com.tourbooking.booking.backend.model.dto.request.ChatEscalationRequest;
+import com.tourbooking.booking.backend.model.entity.ChatEscalation;
+import com.tourbooking.booking.backend.model.entity.User;
+import com.tourbooking.booking.backend.model.entity.enums.ChatEscalationStatus;
+import com.tourbooking.booking.backend.model.entity.enums.UserRole;
+import com.tourbooking.booking.backend.repository.ChatEscalationRepository;
+import com.tourbooking.booking.backend.repository.ChatMessagesRepository;
+import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.service.ChatService;
 import com.tourbooking.booking.model.dto.request.ChatEscalationReplyRequest;
 import com.tourbooking.booking.model.dto.request.ChatEscalationRequest;
 import com.tourbooking.booking.model.entity.ChatEscalation;
@@ -44,6 +55,7 @@ class ChatEscalationServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        when(escalationRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(escalationRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(chatRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }

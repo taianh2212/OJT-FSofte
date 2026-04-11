@@ -49,34 +49,57 @@
   }
   const isGuest = !user;
 
+  // Track which server message IDs are already rendered
+  const renderedIds = new Set();
+  let greetingShown = false;
+
+  function buildMsgDiv(m) {
+    const div = document.createElement('div');
+    const senderType = (m.senderType || 'GUEST').toUpperCase();
+    const isUserSender = senderType === 'GUEST' || senderType === 'USER';
+    const fromMe = isUserSender && (
+      (m.userId && userId && m.userId === userId)
+      || (!m.userId && m.guestId && m.guestId === guestId)
+    );
+    div.className = `msg ${senderType.toLowerCase()}`;
+    if (fromMe) div.classList.add('me');
+    if (m.id) div.dataset.msgId = String(m.id);
+    const senderLabel = senderType === 'AI' ? '🤖 Trợ lý AI' : (senderType === 'STAFF' ? 'Staff' : 'You');
+    const content = senderType === 'AI' ? formatAiText(m.message) : escapeHtml(m.message);
+    div.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">${senderLabel}</div><div>${content}</div>`;
+    return div;
+  }
+
   function render(msgs) {
-    box.innerHTML = '';
     if (msgs.length === 0) {
-      proactiveGreeting();
+      if (!greetingShown && box.children.length === 0) {
+        proactiveGreeting();
+        greetingShown = true;
+      }
       return;
     }
+    // Hide greeting once real messages arrive
+    if (greetingShown) {
+      box.innerHTML = '';
+      greetingShown = false;
+      renderedIds.clear();
+    }
+    let appended = false;
     msgs.forEach(m => {
-      const div = document.createElement('div');
-      const senderType = (m.senderType || 'GUEST').toUpperCase();
-      const senderClass = senderType.toLowerCase();
-      const isUserSender = senderType === 'GUEST' || senderType === 'USER';
-      const fromMe = isUserSender && (
-        (m.userId && userId && m.userId === userId)
-        || (!m.userId && m.guestId && m.guestId === guestId)
-      );
-      div.className = `msg ${senderClass}`;
-      if (fromMe) div.classList.add('me');
-
-      const senderLabel = senderType === 'AI'
-        ? 'Assistant'
-        : (isUserSender ? 'You' : 'Staff');
-      div.innerHTML = `
-        <div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">${senderLabel}</div>
-        <div>${escapeHtml(m.message)}</div>
-      `;
-      box.appendChild(div);
+      const idStr = m.id ? String(m.id) : null;
+      if (idStr && renderedIds.has(idStr)) return; // already rendered
+      // Remove local echo for same message (matched by content + senderType)
+      const typing = document.getElementById('typing-indicator');
+      const div = buildMsgDiv(m);
+      if (typing) {
+        box.insertBefore(div, typing);
+      } else {
+        box.appendChild(div);
+      }
+      if (idStr) renderedIds.add(idStr);
+      appended = true;
     });
-    box.scrollTop = box.scrollHeight;
+    if (appended) box.scrollTop = box.scrollHeight;
   }
 
   function proactiveGreeting() {
@@ -113,16 +136,24 @@
     const content = input.value.trim();
     if (!content) return;
 
-    // Local echo
+    // Remove proactive greeting if still visible
+    if (greetingShown) {
+      box.innerHTML = '';
+      greetingShown = false;
+    }
+
+    // Local echo (tagged so we can remove it when server message arrives)
     const myMsg = document.createElement('div');
-    myMsg.className = 'msg user me';
+    myMsg.className = 'msg guest me';
+    myMsg.dataset.local = 'true';
+    myMsg.dataset.localContent = content;
     myMsg.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">You</div><div>${escapeHtml(content)}</div>`;
     box.appendChild(myMsg);
     box.scrollTop = box.scrollHeight;
     input.value = '';
 
     try {
-      await TB.apiFetch('/api/v1/chat/messages', {
+      const saved = await TB.apiFetch('/api/v1/chat/messages', {
         method: 'POST',
         body: JSON.stringify({
           userId: isGuest ? null : user.id,
@@ -131,12 +162,19 @@
           senderType: 'USER'
         })
       });
+      // Replace local echo with server version (has real ID)
+      if (saved?.data?.id) {
+        myMsg.dataset.msgId = String(saved.data.id);
+        delete myMsg.dataset.local;
+        renderedIds.add(String(saved.data.id));
+      }
       // Trigger AI response after a short delay
       setTimeout(() => getAiResponse(content), 600);
     } catch (err) {
       alert('Failed to send message');
     }
   };
+
 
   async function getAiResponse(userMsg) {
     // Hiện typing indicator

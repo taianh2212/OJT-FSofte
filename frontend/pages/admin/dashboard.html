@@ -132,6 +132,11 @@
             <a href="#" class="logo"><strong>TourBooking</strong> Admin</a>
             <nav>
                 <a href="#" class="nav-item active">Dashboard</a>
+                <a href="./manageTours.html" class="nav-item">Manager Tours</a>
+                <a href="./manageCatelories.html" class="nav-item">Manager Categories</a>
+                <a href="./manageUsers.html" class="nav-item">Manager User</a>
+                <a href="./manageReview.html" class="nav-item">Manager Review</a>
+                <a href="./financialReport.html" class="nav-item">Financial Report</a>
                 <a href="./manageTours.html" class="nav-item admin-only">Manager Tours</a>
                 <a href="./manageCatelories.html" class="nav-item admin-only">Manager Categories</a>
                 <a href="./manageUsers.html" class="nav-item admin-only">Manager User</a>
@@ -200,10 +205,17 @@
             if (user.role !== 'ADMIN') {
                 console.log('Not an admin, redirecting to home');
                 window.location.href = '/pages/index.html';
+            if (!user || user.role !== 'ADMIN') {
+                console.log('User is not ADMIN, redirecting');
+            if (!user || (user.role !== 'ADMIN' && user.role !== 'STAFF')) {
+                console.log('User is not authorized, redirecting');
+                window.location.href = '/pages/auth/login.html';
                 throw new Error('Not authorized');
             }
 
             // Hiển thị thông tin user
+            const userName = user.fullName || user.FullName || user.email || 'Admin';
+            document.getElementById('userInfo').innerText = userName;
             const userName = user.fullName || user.FullName || user.email || user.role;
             document.getElementById('userInfo').innerText = userName + ' (' + user.role + ')';
 

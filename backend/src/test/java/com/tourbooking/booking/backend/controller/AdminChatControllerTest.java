@@ -1,3 +1,4 @@
+package com.tourbooking.booking.backend.controller;
 package com.tourbooking.booking.controller;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,6 +15,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tourbooking.booking.backend.model.dto.request.ChatEscalationReplyRequest;
+import com.tourbooking.booking.backend.model.dto.response.ChatSessionSummaryResponse;
+import com.tourbooking.booking.backend.model.entity.ChatSession;
+import com.tourbooking.booking.backend.model.entity.User;
+import com.tourbooking.booking.backend.model.entity.enums.ChatSessionStatus;
+import com.tourbooking.booking.backend.repository.ChatSessionRepository;
+import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.service.ChatNotificationService;
+import com.tourbooking.booking.backend.service.ChatService;
+import com.tourbooking.booking.backend.security.JwtService;
 import com.tourbooking.booking.model.dto.request.ChatEscalationReplyRequest;
 import com.tourbooking.booking.model.dto.response.ChatSessionSummaryResponse;
 import com.tourbooking.booking.model.entity.ChatSession;
@@ -38,6 +49,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @WebMvcTest(controllers = AdminChatController.class)
 @Import({
+        com.tourbooking.booking.backend.config.SecurityConfig.class,
+        com.tourbooking.booking.backend.security.JwtAuthenticationFilter.class
         com.tourbooking.booking.config.SecurityConfig.class,
         com.tourbooking.booking.security.JwtAuthenticationFilter.class
 })
@@ -102,6 +115,8 @@ class AdminChatControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.status").value("STAFF_CHATTING"));
 
+        org.mockito.ArgumentCaptor<com.tourbooking.booking.backend.model.dto.request.ChatMessageRequest> captor =
+                org.mockito.ArgumentCaptor.forClass(com.tourbooking.booking.backend.model.dto.request.ChatMessageRequest.class);
         org.mockito.ArgumentCaptor<com.tourbooking.booking.model.dto.request.ChatMessageRequest> captor =
                 org.mockito.ArgumentCaptor.forClass(com.tourbooking.booking.model.dto.request.ChatMessageRequest.class);
         verify(chatService).sendMessage(captor.capture());
