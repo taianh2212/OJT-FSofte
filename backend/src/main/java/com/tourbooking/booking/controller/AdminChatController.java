@@ -37,6 +37,7 @@ public class AdminChatController {
     private final ChatNotificationService notificationService;
 
     @GetMapping
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ApiResponse<List<ChatSessionSummaryResponse>> listEscalations() {
         List<ChatSession> sessions = chatService.getActiveSessionsForStaff();
         List<ChatSessionSummaryResponse> data = sessions.stream()
@@ -51,6 +52,7 @@ public class AdminChatController {
 
     @PostMapping("/{id}/reply")
     @ResponseStatus(HttpStatus.CREATED)
+    @org.springframework.transaction.annotation.Transactional
     public ApiResponse<ChatSessionSummaryResponse> reply(
             @PathVariable("id") Long id,
             @Valid @RequestBody ChatEscalationReplyRequest request,
@@ -76,6 +78,7 @@ public class AdminChatController {
     }
 
     @PostMapping("/{id}/assign")
+    @org.springframework.transaction.annotation.Transactional
     public ApiResponse<ChatSessionSummaryResponse> assign(@PathVariable("id") Long id, Principal principal) {
         resolveStaffId(principal);
         ChatSession session = sessionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Session not found"));
@@ -90,6 +93,7 @@ public class AdminChatController {
     }
 
     @PostMapping("/{id}/resolve")
+    @org.springframework.transaction.annotation.Transactional
     public ApiResponse<ChatSessionSummaryResponse> resolve(@PathVariable("id") Long id, Principal principal) {
         resolveStaffId(principal);
         ChatSession session = sessionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Session not found"));

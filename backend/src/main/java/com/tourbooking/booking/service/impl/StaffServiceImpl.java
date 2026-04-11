@@ -60,6 +60,7 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RefundResponse> listRefundRequests() {
         return refundRequestRepository.findAll().stream()
                 .map(req -> RefundResponse.builder()
@@ -101,6 +102,7 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingResponse> listBookings(String status) {
         List<Booking> bookings;
         if (status != null) {
@@ -125,5 +127,25 @@ public class StaffServiceImpl implements StaffService {
                     return res;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<com.tourbooking.booking.model.dto.response.TourScheduleResponse> listSchedules() {
+        return tourScheduleRepository.findAll().stream()
+                .map(schedule -> com.tourbooking.booking.model.dto.response.TourScheduleResponse.builder()
+                        .id(schedule.getId())
+                        .tourId(schedule.getTour() != null ? schedule.getTour().getId() : null)
+                        .tourName(schedule.getTour() != null ? schedule.getTour().getTourName() : null)
+                        .guideId(schedule.getGuide() != null ? schedule.getGuide().getId() : null)
+                        .startDate(schedule.getStartDate())
+                        .endDate(schedule.getEndDate())
+                        .availableSlots(schedule.getAvailableSlots())
+                        .status(schedule.getStatus() != null ? schedule.getStatus().name() : null)
+                        .currentProgress(schedule.getCurrentProgress())
+                        .reportContent(schedule.getReportContent())
+                        .reportSubmittedAt(schedule.getReportSubmittedAt())
+                        .build())
+                .toList();
     }
 }

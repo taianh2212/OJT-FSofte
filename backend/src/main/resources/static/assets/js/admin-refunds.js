@@ -5,8 +5,17 @@ let mockRefunds = [
 
 document.addEventListener('DOMContentLoaded', async () => {
     const userStr = localStorage.getItem('user');
-    if (!userStr) window.location.href = '/pages/auth/login.html';
+    if (!userStr) { window.location.href = '/pages/auth/login.html'; return; }
     const user = JSON.parse(userStr);
+
+    if (user.role === 'ADMIN') {
+        window.location.href = '/pages/admin/dashboard.html';
+        return;
+    }
+    if (user.role !== 'STAFF') {
+        window.location.href = '/pages/auth/login.html';
+        return;
+    }
     document.getElementById('userInfo').innerText = user.fullName || user.email;
 
     await loadRefunds();
@@ -33,8 +42,8 @@ async function loadRefunds() {
             <td><span class="status-badge status-${(r.status||'').toLowerCase()}">${r.status}</span></td>
             <td>${r.reason || 'N/A'}</td>
             <td>
-                ${r.status === 'REQUESTED' ? `
-                    <button class="action-btn" onclick="processRefund(${r.id}, 'PROCESSED')">Approve</button>
+                ${r.status === 'PENDING' ? `
+                    <button class="action-btn" onclick="processRefund(${r.id}, 'APPROVED')">Approve</button>
                     <button class="action-btn btn-danger" onclick="processRefund(${r.id}, 'REJECTED')">Reject</button>
                 ` : ''}
             </td>

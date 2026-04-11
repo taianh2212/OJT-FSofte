@@ -96,6 +96,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatSession> getActiveSessionsForStaff() {
         return sessionRepo.findByStatusInOrderByLastMessageAtDesc(ACTIVE_STATUSES);
     }

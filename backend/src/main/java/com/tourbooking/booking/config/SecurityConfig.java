@@ -13,10 +13,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.tourbooking.booking.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -56,12 +58,26 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/newsletters").permitAll()
                 // UC11 chat support + UC51 AI chat
                 .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
-                // Admin chat escalation dashboard
+                // Admin chat escalation dashboard - allow STAFF and ADMIN
+                .requestMatchers("/api/v1/admin/chat/**").hasAnyRole("ADMIN", "STAFF")
+                // Generic admin routes - only ADMIN
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                // Staff operational routes
+                .requestMatchers("/api/v1/staff/**").hasAnyRole("ADMIN", "STAFF")
                 // Read-only categories
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 // Everything else requires login (can be refined later)
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, authEx) -> {
+                    System.err.println("Unauthorized access to: " + req.getRequestURI() + " Error: " + authEx.getMessage());
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                })
+                .accessDeniedHandler((req, res, accessEx) -> {
+                    System.err.println("Access denied for user: " + req.getUserPrincipal() + " to: " + req.getRequestURI());
+                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                })
             );
 
         return http.build();

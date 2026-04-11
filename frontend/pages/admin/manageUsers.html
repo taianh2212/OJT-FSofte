@@ -545,7 +545,17 @@
                 }
 
                 const user = JSON.parse(userStr);
-                if (!user || user.role !== 'ADMIN') {
+                if (!user) {
+                    window.location.href = '/pages/auth/login.html';
+                    return false;
+                }
+                
+                if (user.role === 'STAFF') {
+                    window.location.href = '/pages/staff/dashboard.html';
+                    return false;
+                }
+
+                if (user.role !== 'ADMIN') {
                     window.location.href = '/pages/auth/login.html';
                     return false;
                 }

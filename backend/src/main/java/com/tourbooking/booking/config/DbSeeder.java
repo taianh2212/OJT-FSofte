@@ -4,6 +4,7 @@ import com.tourbooking.booking.model.entity.*;
 import com.tourbooking.booking.model.entity.enums.UserRole;
 import com.tourbooking.booking.repository.*;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,7 @@ public class DbSeeder implements CommandLineRunner {
         seedUser("Quản Trị Viên", "admin@gmail.com", "123456", UserRole.ADMIN);
         seedUser("Nguyễn Văn Khách", "customer@gmail.com", "123456", UserRole.CUSTOMER);
         seedUser("Trần Văn Hướng", "guide@gmail.com", "123456", UserRole.GUIDE);
+        seedUser("Lê Thị Nhân Viên", "staff@gmail.com", "123456", UserRole.STAFF);
 
         // 2. Seed Foundation Categories
         seedCategory("Tour Trong Ngày", "Phù hợp cho lịch trình ngắn gọn, tối ưu thời gian.");
@@ -56,15 +58,18 @@ public class DbSeeder implements CommandLineRunner {
     }
 
     private User seedUser(String fullName, String email, String password, UserRole role) {
-        return userRepository.findByEmail(email).orElseGet(() -> {
-            User user = new User();
-            user.setFullName(fullName);
-            user.setEmail(email);
-            user.setPasswordHash(passwordEncoder.encode(password));
-            user.setRole(role);
-            user.setIsActive(true);
-            return userRepository.save(user);
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setPasswordHash(passwordEncoder.encode(password));
+            newUser.setRole(role);
+            newUser.setIsActive(true);
+            return newUser;
         });
+        
+        // Always ensure the name is correct (especially after NVARCHAR fix)
+        user.setFullName(fullName);
+        return userRepository.save(user);
     }
 
     private Category seedCategory(String name, String desc) {
