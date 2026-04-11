@@ -13,4 +13,5 @@ public interface StaffService {
     void processRefund(Long refundId, RefundStatus status, String staffNote);
     List<UserResponse> listGuides();
     List<BookingResponse> listBookings(String status);
+    List<com.tourbooking.booking.model.dto.response.TourScheduleResponse> listSchedules();
 }

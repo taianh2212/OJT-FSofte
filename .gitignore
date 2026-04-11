@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+.m2/
+*.log
+**/target/
+**/build/

@@ -35,14 +35,8 @@ public class PaymentDataSeeder {
         int seeded = 0;
 
         for (Booking booking : bookings) {
-            // 1. If status is PENDING/CONFIRMED but has no payment, let's treat it as SUCCESS for the report demo
-            if (booking.getStatus() == BookingStatus.PENDING || booking.getStatus() == BookingStatus.CONFIRMED) {
-                booking.setStatus(BookingStatus.SUCCESS);
-                bookingRepository.save(booking);
-                updated++;
-            }
+            // 1. Check if payment exists
 
-            // 2. Create payment if not exists
             if (booking.getPayment() == null) {
                 Payment payment = new Payment();
                 payment.setBooking(booking);

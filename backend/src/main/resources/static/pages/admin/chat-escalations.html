@@ -54,6 +54,20 @@
     </div>
   </div>
 
+  <script>
+    // Kiểm tra quyền ADMIN ngay lập tức
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      window.location.href = '/pages/auth/login.html';
+    } else {
+      const user = JSON.parse(userStr);
+      if (user.role === 'STAFF') {
+        window.location.href = '/pages/staff/dashboard.html';
+      } else if (user.role !== 'ADMIN') {
+        window.location.href = '/pages/auth/login.html';
+      }
+    }
+  </script>
   <script src="/assets/js/api.js"></script>
   <script src="/assets/js/admin-escalations.js"></script>
   <script src="/assets/js/admin-notifications.js"></script>

@@ -398,17 +398,21 @@
 
         // Kiểm tra quyền ADMIN
         const currentUser = JSON.parse(localStorage.getItem('user'));
-        if (!currentUser || currentUser.role !== 'ADMIN') {
-            window.location.href = '/auth/login.html';
+        if (!currentUser) {
+            window.location.href = '/pages/auth/login.html';
+        } else if (currentUser.role === 'STAFF') {
+            window.location.href = '/pages/staff/dashboard.html';
+        } else if (currentUser.role !== 'ADMIN') {
+            window.location.href = '/pages/auth/login.html';
         } else {
-            document.getElementById('userInfo').innerText = currentUser.fullName;
+            document.getElementById('userInfo').innerText = currentUser.fullName || currentUser.email;
         }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = '/auth/login.html';
+            window.location.href = '/pages/auth/login.html';
         });
 
         let currentReviewId = null;

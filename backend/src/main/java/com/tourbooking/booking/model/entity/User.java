@@ -15,17 +15,17 @@ import java.util.List;
 @AttributeOverride(name = "id", column = @Column(name = "UserID", nullable = false, unique = true, columnDefinition = "BIGINT"))
 public class User extends Base {
 
-    @Column(name = "FullName", length = 100)
+    @Column(name = "FullName", length = 150)
     private String fullName;
 
-    @Column(name = "Email", nullable = false, unique = true, length = 100)
+    @Column(name = "Email", nullable = false, unique = true, length = 150)
     private String email;
 
     @Column(name = "PasswordHash", length = 255)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Role", length = 20)
+    @Column(name = "Role", length = 50)
     private UserRole role;
 
     @Column(name = "AvatarURL", length = 255)

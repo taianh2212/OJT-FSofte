@@ -46,7 +46,7 @@
 
         <main class="main-content">
             <header>
-                <h1>Manage Refund Requests (UC33)</h1>
+                <h1>Manage Refund Requests</h1>
                 <span id="userInfo" style="font-weight: 600;"></span>
             </header>
 
@@ -66,6 +66,17 @@
         </main>
     </div>
 
+    <script>
+        (function() {
+            var userStr = localStorage.getItem('user');
+            if (!userStr) { window.location.href = '/pages/auth/login.html'; return; }
+            var user = JSON.parse(userStr);
+            if (user.role === 'ADMIN') { window.location.href = '/pages/admin/dashboard.html'; return; }
+            if (user.role !== 'STAFF') { window.location.href = '/pages/auth/login.html'; return; }
+            var el = document.getElementById('userInfo');
+            if (el) el.innerText = user.fullName || user.email;
+        })();
+    </script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/admin-refunds.js"></script>
 </body>

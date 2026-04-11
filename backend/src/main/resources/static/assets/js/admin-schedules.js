@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const userStr = localStorage.getItem('user');
-    if (!userStr) window.location.href = '/pages/auth/login.html';
+    if (!userStr) { window.location.href = '/pages/auth/login.html'; return; }
     const user = JSON.parse(userStr);
-    if (user.role !== 'ADMIN' && user.role !== 'STAFF') {
-        window.location.href = '/pages/index.html';
+
+    if (user.role === 'ADMIN') {
+        window.location.href = '/pages/admin/dashboard.html';
+        return;
+    }
+    if (user.role !== 'STAFF') {
+        window.location.href = '/pages/auth/login.html';
         return;
     }
     document.getElementById('userInfo').innerText = user.fullName || user.email;
@@ -16,7 +21,7 @@ let currentScheduleId = null;
 async function loadSchedules() {
     const tbody = document.querySelector('#schedulesTable tbody');
     try {
-        const res = await TB.apiFetch('/api/v1/schedules'); 
+        const res = await TB.apiFetch('/api/v1/staff/schedules'); 
         const data = res.data || [];
         tbody.innerHTML = '';
         data.forEach(s => {

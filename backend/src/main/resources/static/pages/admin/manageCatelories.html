@@ -294,18 +294,25 @@
         const API = "http://localhost:8080/api/v1/categories";
 
         // Kiểm tra quyền ADMIN
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user || user.role !== 'ADMIN') {
-            window.location.href = '/auth/login.html';
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            window.location.href = '/pages/auth/login.html';
         } else {
-            document.getElementById('userInfo').innerText = user.fullName;
+            const user = JSON.parse(userStr);
+            if (user.role === 'STAFF') {
+                window.location.href = '/pages/staff/dashboard.html';
+            } else if (user.role !== 'ADMIN') {
+                window.location.href = '/pages/auth/login.html';
+            } else {
+                document.getElementById('userInfo').innerText = user.fullName || user.email;
+            }
         }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            window.location.href = '/auth/login.html';
+            window.location.href = '/pages/auth/login.html';
         });
 
         let currentEditId = null;
