@@ -46,7 +46,6 @@ public class TourDataImporter implements CommandLineRunner {
     private final ObjectMapper objectMapper;
 
     @Override
-    @Transactional
     public void run(String... args) {
         log.info("Tour data importer enabled, scanning {}/*.json", properties.getDirectory());
         try {
@@ -64,6 +63,7 @@ public class TourDataImporter implements CommandLineRunner {
         }
     }
 
+    @Transactional
     private void process(Resource resource) {
         try {
             TourImportDto dto = objectMapper.readValue(resource.getInputStream(), TourImportDto.class);

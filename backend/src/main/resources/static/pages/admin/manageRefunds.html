@@ -42,10 +42,6 @@
                 <a href="./manageUsers.html" class="nav-item admin-only">Manager User</a>
                 <a href="./manageReview.html" class="nav-item">Manager Review</a>
                 <a href="./financialReport.html" class="nav-item admin-only">Financial Report</a>
-                <a href="./manageBookings.html" class="nav-item">Manage Bookings</a>
-                <a href="./manageSchedules.html" class="nav-item">Manage Schedules</a>
-                <a href="./manageRefunds.html" class="nav-item active">Manage Refunds</a>
-                <a href="./chat-escalations.html" class="nav-item">Chat Escalations</a>
             </nav>
         </aside>
 
@@ -71,6 +67,20 @@
         </main>
     </div>
 
+    <script>
+        // Kiểm tra quyền ADMIN ngay lập tức
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            window.location.href = '/pages/auth/login.html';
+        } else {
+            const user = JSON.parse(userStr);
+            if (user.role === 'STAFF') {
+                window.location.href = '/pages/staff/dashboard.html';
+            } else if (user.role !== 'ADMIN') {
+                window.location.href = '/pages/auth/login.html';
+            }
+        }
+    </script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/admin-refunds.js"></script>
 </body>

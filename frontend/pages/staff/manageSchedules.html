@@ -47,7 +47,7 @@
 
         <main class="main-content">
             <header>
-                <h1>Manage Schedules (UC32)</h1>
+                <h1>Manage Schedules</h1>
                 <span id="userInfo" style="font-weight: 600;"></span>
             </header>
 
@@ -79,6 +79,17 @@
         </div>
     </div>
 
+    <script>
+        (function() {
+            var userStr = localStorage.getItem('user');
+            if (!userStr) { window.location.href = '/pages/auth/login.html'; return; }
+            var user = JSON.parse(userStr);
+            if (user.role === 'ADMIN') { window.location.href = '/pages/admin/dashboard.html'; return; }
+            if (user.role !== 'STAFF') { window.location.href = '/pages/auth/login.html'; return; }
+            var el = document.getElementById('userInfo');
+            if (el) el.innerText = user.fullName || user.email;
+        })();
+    </script>
     <script src="/assets/js/api.js"></script>
     <script src="/assets/js/admin-schedules.js"></script>
 </body>

@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -52,6 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.info("Authenticated user: {} with roles: {}", email, userDetails.getAuthorities());
+                } else {
+                    log.warn("Session mismatch or user not found for email: {}. DB Session: {}, JWT Session: {}", 
+                        email, user != null ? user.getCurrentSessionId() : "N/A", sessionId);
                 }
             }
         } catch (Exception ignored) {

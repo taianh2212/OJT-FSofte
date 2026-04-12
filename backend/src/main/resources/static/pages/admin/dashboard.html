@@ -137,10 +137,6 @@
                 <a href="./manageUsers.html" class="nav-item admin-only">Manager User</a>
                 <a href="./manageReview.html" class="nav-item">Manager Review</a>
                 <a href="./financialReport.html" class="nav-item admin-only">Financial Report</a>
-                <a href="./manageBookings.html" class="nav-item">Manage Bookings</a>
-                <a href="./manageSchedules.html" class="nav-item">Manage Schedules</a>
-                <a href="./manageRefunds.html" class="nav-item">Manage Refunds</a>
-                <a href="./chat-escalations.html" class="nav-item">Chat Escalations</a>
             </nav>
         </aside>
 
@@ -186,8 +182,6 @@
         // Kiểm tra đăng nhập và role ADMIN
         try {
             const userStr = localStorage.getItem('user');
-            console.log('User from localStorage:', userStr);
-
             if (!userStr) {
                 console.log('No user found, redirecting to login');
                 window.location.href = '/pages/auth/login.html';
@@ -197,9 +191,15 @@
             const user = JSON.parse(userStr);
             console.log('Parsed user:', user);
 
-            if (!user || (user.role !== 'ADMIN' && user.role !== 'STAFF')) {
-                console.log('User is not authorized, redirecting');
-                window.location.href = '/pages/auth/login.html';
+            if (user.role === 'STAFF') {
+                console.log('Staff logged in, redirecting to staff portal');
+                window.location.href = '/pages/staff/dashboard.html';
+                return;
+            }
+
+            if (user.role !== 'ADMIN') {
+                console.log('Not an admin, redirecting to home');
+                window.location.href = '/pages/index.html';
                 throw new Error('Not authorized');
             }
 
@@ -208,9 +208,6 @@
             document.getElementById('userInfo').innerText = userName + ' (' + user.role + ')';
 
             // Hide admin-only links for staff
-            if (user.role !== 'ADMIN') {
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-            }
 
             // Load dữ liệu thống kê
             loadStats();

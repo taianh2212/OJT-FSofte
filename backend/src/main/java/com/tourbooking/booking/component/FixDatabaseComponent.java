@@ -32,11 +32,20 @@ public class FixDatabaseComponent {
             jdbcTemplate.execute("ALTER TABLE Users ADD CONSTRAINT chk_user_role CHECK (Role IN ('ADMIN', 'CUSTOMER', 'GUIDE', 'STAFF'))");
             log.info("Added new constraint with ADMIN, CUSTOMER, GUIDE, STAFF");
 
-            // 2. Ensure bookings are SUCCESS and have dates for sample data
+            // 2. Ensure bookings have dates for sample data
             jdbcTemplate.execute("UPDATE Bookings SET CreatedAt = GETDATE() WHERE CreatedAt IS NULL");
             jdbcTemplate.execute("UPDATE Bookings SET UpdatedAt = GETDATE() WHERE UpdatedAt IS NULL");
-            int updated = jdbcTemplate.update("UPDATE Bookings SET Status = 'SUCCESS' WHERE Status = 'PENDING' OR Status = 'CONFIRMED' OR Status IS NULL");
-            log.info("Sanitized bookings: Updated {} records to have dates and SUCCESS status.", updated);
+            // Removed forcefully updating Bookings to SUCCESS to allow testing UC31
+            // 3. Convert VARCHAR to NVARCHAR for Vietnamese support
+            try {
+                jdbcTemplate.execute("ALTER TABLE Users ALTER COLUMN FullName NVARCHAR(MAX)");
+                jdbcTemplate.execute("ALTER TABLE Categories ALTER COLUMN Description NVARCHAR(MAX)");
+                log.info("Converted Users.FullName and Categories.Description to NVARCHAR.");
+            } catch (Exception e) {
+                log.warn("Failed to convert columns to NVARCHAR: {}", e.getMessage());
+            }
+
+            log.info("Sanitized bookings dates.");
 
         } catch (Exception e) {
             log.error("Failed to fix database: {}", e.getMessage());

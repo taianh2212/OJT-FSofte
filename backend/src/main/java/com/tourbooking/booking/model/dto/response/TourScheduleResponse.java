@@ -13,6 +13,7 @@ import java.time.LocalDate;
 public class TourScheduleResponse {
     private Long id;
     private Long tourId;
+    private Long guideId;
     private String tourName;
     private LocalDate startDate;
     private LocalDate endDate;
