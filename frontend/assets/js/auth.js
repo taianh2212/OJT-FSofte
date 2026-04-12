@@ -1,0 +1,107 @@
+(() => {
+  function setActiveTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    document.querySelectorAll('.form-section').forEach(s => {
+      s.classList.toggle('active', s.id === `${tab}Section`);
+    });
+    document.querySelectorAll('.message').forEach(m => m.textContent = '');
+  }
+
+  document.addEventListener('click', (e) => {
+    const tab = e.target?.dataset?.tab;
+    if (tab) setActiveTab(tab);
+  });
+
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const forgotForm = document.getElementById('forgotForm');
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value
+      };
+      const msgEl = document.getElementById('loginMessage');
+      msgEl.style.color = '#333';
+      msgEl.textContent = 'Logging in...';
+      try {
+        const res = await TB.apiFetch('/api/v1/auth/login', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        msgEl.style.color = 'green';
+        msgEl.textContent = 'Login successful!';
+        setTimeout(() => window.location.href = '/pages/index.html', 700);
+        setTimeout(() => {
+          const role = res.data.user.role;
+          if (role === 'ADMIN') {
+            window.location.href = '/pages/admin/dashboard.html';
+          } else if (role === 'STAFF') {
+            window.location.href = '/pages/staff/dashboard.html';
+          } else if (role === 'GUIDE') {
+            window.location.href = '/pages/guide/dashboard.html';
+          } else {
+            window.location.href = '/pages/index.html';
+          }
+        }, 700);
+      } catch (err) {
+        msgEl.style.color = 'red';
+        msgEl.textContent = err.message || 'Login failed';
+      }
+    });
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        email: document.getElementById('regEmail').value,
+        fullName: document.getElementById('regName').value,
+        password: document.getElementById('regPassword').value
+      };
+      const msgEl = document.getElementById('registerMessage');
+      msgEl.style.color = '#333';
+      msgEl.textContent = 'Registering...';
+      try {
+        const res = await TB.apiFetch('/api/v1/auth/register', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        msgEl.style.color = 'green';
+        msgEl.textContent = res.message || 'Registration successful. Please check your email to verify.';
+      } catch (err) {
+        msgEl.style.color = 'red';
+        msgEl.textContent = err.message || 'Registration failed';
+      }
+    });
+  }
+
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        email: document.getElementById('forgotEmail').value
+      };
+      const msgEl = document.getElementById('forgotMessage');
+      msgEl.style.color = '#333';
+      msgEl.textContent = 'Sending request...';
+      try {
+        const res = await TB.apiFetch('/api/v1/auth/forgot-password', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        msgEl.style.color = 'green';
+        msgEl.textContent = res.message || 'If email exists, reset link has been sent.';
+      } catch (err) {
+        msgEl.style.color = 'red';
+        msgEl.textContent = err.message || 'Failed to send reset link';
+      }
+    });
+  }
+})();

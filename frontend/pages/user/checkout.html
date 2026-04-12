@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanh Toán & Đặt Tour - TourBooking</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; margin-top: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--text-base); }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; font-family: inherit; font-size: 1rem; }
+    .summary-box { background: rgba(0, 0, 0, 0.03); padding: 20px; border-radius: 12px; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .summary-total { font-weight: 700; font-size: 1.25rem; border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 12px; margin-top: 12px; }
+    .payment-method { border: 1px solid rgba(0, 0, 0, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+    .payment-method:hover { background: rgba(0, 0, 0, 0.02); }
+    .payment-method input[type="radio"] { width: auto; margin: 0; }
+    .badge { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+    @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container"><div class="page-shell"><div class="content-pad">
+    <div class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a>
+    </div>
+    <div class="layout">
+      <div class="card panel">
+        <h2 class="section-title">1. Thông tin liên hệ (UC12)</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group"><label>Họ và Tên</label><input type="text" id="fullName" placeholder="VD: Nguyễn Văn A" required></div>
+          <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="VD: email@example.com" required></div>
+          <div class="form-group"><label>Số điện thoại</label><input type="tel" id="phone" placeholder="09xxxxxxxxx" required></div>
+          <div class="form-group"><label>Địa chỉ</label><input type="text" id="address" placeholder="Tỉnh/Thành phố hiện tại"></div>
+        </div>
+        <h2 class="section-title" style="margin-top:24px;">2. Chọn Lịch Trình (UC13)</h2>
+        <div class="form-group">
+          <label>Ngày khởi hành</label>
+          <select id="scheduleId" onchange="checkAvailability()">
+            <option value="">-- Chọn ngày --</option>
+            <option value="1">25/08/2026 - Còn 10 chỗ trống</option>
+            <option value="2">02/09/2026 - Còn 5 chỗ trống</option>
+            <option value="3" disabled>10/09/2026 - Đã hết chỗ</option>
+          </select>
+          <small id="slotStatus" style="color: #059669; display: none; margin-top: 4px; font-weight: 600;">✔️ Ngày này hiện có thể đặt.</small>
+        </div>
+        <div class="form-group" style="width: 200px;">
+          <label>Số lượng khách</label>
+          <input type="number" id="numPeople" value="1" min="1" max="10" onchange="calculateTotal()">
+        </div>
+        <h2 class="section-title" style="margin-top:24px;">3. Phương thức thanh toán (UC16 & UC18)</h2>
+        <div class="payment-methods">
+          <label class="payment-method"><input type="radio" name="paymentType" value="VNPAY" checked><span>Thanh toán VNPay (Thẻ ATM/Visa)</span></label>
+          <label class="payment-method"><input type="radio" name="paymentType" value="MOMO"><span>Ví điện tử MoMo</span></label>
+          <label class="payment-method"><input type="radio" name="paymentType" value="INSTALLMENT"><span>Thanh toán trả góp 0% <span class="badge">UC18</span></span></label>
+          <label class="payment-method"><input type="radio" name="paymentType" value="CASH"><span>Thanh toán tại văn phòng</span></label>
+        </div>
+      </div>
+      <div class="card panel summary-box">
+        <h2 class="section-title" style="font-size:1.2rem;">Tóm tắt đơn hàng (UC14)</h2>
+        <div class="summary-row"><span style="font-weight:600">Đà Nẵng - Hội An (3N2Đ)</span></div>
+        <div class="summary-row"><span>Giá vé cơ bản (<span id="countDisplay">1</span>x)</span><span id="basePriceDisplay">3,500,000 ₫</span></div>
+        <div style="margin-top:20px; border-top:1px dashed rgba(0,0,0,0.1); padding-top:16px;">
+          <label style="font-weight:600; font-size:0.9rem; display:block; margin-bottom:8px;">Mã giảm giá (UC15)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="voucherCode" placeholder="Nhập mã giảm giá" style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(0,0,0,0.1);">
+            <button class="btn" style="padding:8px 16px;" onclick="applyVoucher()">Áp dụng</button>
+          </div>
+          <small id="voucherMsg" style="color: #dc2626; display:none; margin-top:4px;">Mã không hợp lệ</small>
+        </div>
+        <div class="summary-row" style="margin-top:16px; color: #059669; display:none;" id="discountRow"><span>Giảm giá</span><span id="discountValue">-0 ₫</span></div>
+        <div class="summary-row summary-total"><span>Tổng cộng</span><strong id="totalPrice" style="color:var(--primary); font-size:1.5rem;">3,500,000 ₫</strong></div>
+        <button class="btn" style="width:100%; margin-top:20px; font-size:1.1rem; padding:14px;" onclick="submitBooking()">Xác Nhận Đặt Tour (UC17)</button>
+      </div>
+    </div>
+  </div></div></div>
+  <script src="../../assets/js/api.js"></script>
+  <script>
+    let basePrice = 3500000;
+    let discount = 0;
+    let voucherCodeApplied = '';
+    let selectedTourName = 'Tour đã chọn';
+
+    function checkAvailability() {
+      const scheduleSelect = document.getElementById('scheduleId');
+      const selected = scheduleSelect.options[scheduleSelect.selectedIndex];
+      const slots = Number(selected?.dataset?.slots || 0);
+      const status = document.getElementById('slotStatus');
+      status.style.display = (scheduleSelect.value && slots > 0) ? 'block' : 'none';
+    }
+
+    function calculateTotal() {
+      const numInfo = Number(document.getElementById('numPeople').value || 1);
+      const totalBase = basePrice * numInfo;
+      let finalTotal = totalBase - discount;
+      if (finalTotal < 0) finalTotal = 0;
+      document.getElementById('countDisplay').innerText = numInfo;
+      document.getElementById('basePriceDisplay').innerText = totalBase.toLocaleString('vi-VN') + " ₫";
+      document.getElementById('totalPrice').innerText = finalTotal.toLocaleString('vi-VN') + " ₫";
+    }
+
+    async function loadSchedulesFromApi() {
+      const scheduleSelect = document.getElementById('scheduleId');
+      const params = new URLSearchParams(window.location.search);
+      const tourIdParam = Number(params.get('tourId') || 0);
+      const preselectedScheduleId = params.get('scheduleId');
+      try {
+        let tourId = tourIdParam;
+        if (!tourId) {
+          const toursRes = await TB.apiFetch('/api/v1/tours');
+          const tours = toursRes?.data || [];
+          if (!tours.length) throw new Error('Hiện chưa có tour để đặt.');
+          tourId = Number(tours[0].id);
+        }
+
+        const detailRes = await TB.apiFetch(`/api/v1/tours/${tourId}`);
+        const tour = detailRes?.data;
+        if (!tour) throw new Error('Không lấy được thông tin tour.');
+
+        basePrice = Number(tour.price || 0);
+        selectedTourName = tour.tourName || selectedTourName;
+        document.querySelector('.summary-row span').innerText = selectedTourName;
+
+        const schedules = (tour.schedules || []).filter(s => (s.availableSlots || 0) > 0);
+        scheduleSelect.innerHTML = '<option value="">-- Chọn ngày --</option>';
+        if (!schedules.length) {
+          scheduleSelect.innerHTML = '<option value="">Tour này hiện chưa có lịch khả dụng</option>';
+          return;
+        }
+
+        schedules.forEach(s => {
+          const op = document.createElement('option');
+          op.value = s.scheduleId;
+          op.dataset.slots = String(s.availableSlots || 0);
+          op.textContent = `${s.startDate} - Còn ${s.availableSlots} chỗ trống`;
+          scheduleSelect.appendChild(op);
+        });
+
+        if (preselectedScheduleId) {
+          const matched = schedules.find(s => String(s.scheduleId) === String(preselectedScheduleId));
+          if (matched) {
+            scheduleSelect.value = String(matched.scheduleId);
+            checkAvailability();
+          }
+        }
+      } catch (e) {
+        alert(e?.message || 'Không tải được lịch trình từ server.');
+      } finally {
+        calculateTotal();
+      }
+    }
+    async function applyVoucher() {
+      const code = (document.getElementById('voucherCode').value || '').trim(); const msg = document.getElementById('voucherMsg'); const discountRow = document.getElementById('discountRow');
+      const numInfo = Number(document.getElementById('numPeople').value || 1); const totalBase = basePrice * numInfo;
+      if (!code) { voucherCodeApplied = ''; discount = 0; msg.innerText = "Vui lòng nhập mã giảm giá"; msg.style.display = 'block'; msg.style.color = '#dc2626'; discountRow.style.display = 'none'; calculateTotal(); return; }
+      try {
+        const res = await TB.apiFetch('/api/v1/bookings/apply-voucher', { method: 'POST', body: JSON.stringify({ voucherCode: code, currentTotal: totalBase }) });
+        const d = res?.data; if (!d?.isValid) throw new Error(d?.message || 'Mã không hợp lệ');
+        voucherCodeApplied = code; discount = Number(d.discountAmount || 0); msg.style.display = 'none'; discountRow.style.display = 'flex';
+        document.getElementById('discountValue').innerText = "-" + discount.toLocaleString('vi-VN') + " ₫"; calculateTotal();
+      } catch (e) { voucherCodeApplied = ''; discount = 0; msg.innerText = e?.message || "Mã không hợp lệ hoặc đã hết hạn!"; msg.style.display = 'block'; msg.style.color = '#dc2626'; discountRow.style.display = 'none'; calculateTotal(); }
+    }
+    async function submitBooking() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null'); if (!user?.id) { TB.goToLogin('Vui lòng đăng nhập để đặt tour.'); return; }
+      const scheduleId = Number(document.getElementById('scheduleId').value || 0); const numberOfPeople = Number(document.getElementById('numPeople').value || 1);
+      if (!scheduleId) { alert('Vui lòng chọn lịch trình.'); return; }
+      try {
+        const bookingRes = await TB.apiFetch('/api/v1/bookings', {
+          method: 'POST',
+          body: JSON.stringify({
+            userId: user.id,
+            scheduleId,
+            numberOfPeople,
+            voucherCode: voucherCodeApplied || null
+          })
+        });
+        const booking = bookingRes?.data;
+        if (!booking?.id) { alert('Không tạo được booking.'); return; }
+
+        const paymentType = document.querySelector('input[name="paymentType"]:checked')?.value || 'VNPAY';
+        const numInfo = Number(document.getElementById('numPeople').value || 1);
+        const totalBase = basePrice * numInfo;
+        const finalTotal = Math.max(0, totalBase - discount);
+
+        let amount = null;
+        if (paymentType === 'INSTALLMENT') amount = Math.round(finalTotal / 2);
+
+        await TB.apiFetch('/api/v1/payments', {
+          method: 'POST',
+          body: JSON.stringify({
+            bookingId: booking.id,
+            paymentMethod: paymentType,
+            amount,
+            transactionCode: `MOCK-${Date.now()}`
+          })
+        });
+
+        alert('Đặt tour & thanh toán thành công. Nếu payment SUCCESS hệ thống sẽ gửi email xác nhận.');
+        window.location.href = "history.html";
+      } catch (e) {
+        alert(e?.message || 'Không thể hoàn tất đặt tour/thanh toán.');
+      }
+    }
+    (async function init() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (user?.fullName) document.getElementById('fullName').value = user.fullName;
+      if (user?.email) document.getElementById('email').value = user.email;
+      await loadSchedulesFromApi();
+    })();
+  </script>
+</body>
+</html>

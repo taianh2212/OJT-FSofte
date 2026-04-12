@@ -1,0 +1,38 @@
+{
+    "externalId": "HUE_1DAY_HERITAGE",
+    "tourName": "Huế 1 ngày - Đại Nội & Lăng Khải Định",
+    "description": "Khám phá chiều sâu văn hóa cố đô Huế từ Đà Nẵng với lịch trình trọn ngày: Đại Nội, chùa Thiên Mụ, lăng Khải Định và ẩm thực cung đình cùng hướng dẫn viên am hiểu lịch sử.",
+    "price": 1890000,
+    "originalPrice": 2190000,
+    "duration": 1,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Huế",
+    "categoryName": "Tour Văn Hóa",
+    "transportType": "Xe giường nằm + Hướng dẫn viên",
+    "itinerary": "[DAY 1]\n06:30 Khởi hành qua đèo Hải Vân.\n08:30 Tham quan Đại Nội Huế, Ngọ Môn, điện Thái Hòa.\n11:30 Dùng cơm trưa cung đình tại nhà hàng bên sông.\n13:30 Viếng chùa Thiên Mụ và tham quan sông Hương.\n15:00 Ghé Lăng Khải Định với kiến trúc pha trộn phương Tây.\n17:00 Mua đặc sản Huế (bánh bột lọc, mè xửng).\n18:30 Trở về Đà Nẵng.",
+    "highlights": [
+        "Đại Nội Huế với Ngọ Môn",
+        "Chùa Thiên Mụ bên dòng Hương Giang",
+        "Lăng Khải Định nghệ thuật pha trộn",
+        "Đèo Hải Vân đẹp ngoạn mục",
+        "Ẩm thực cung đình Huế"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1460411257553-59ff0cde0687?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "schedules": [
+        {
+            "startDate": "2026-04-09",
+            "availableSlots": 15,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-17",
+            "availableSlots": 10,
+            "status": "OPEN"
+        }
+    ]
+}

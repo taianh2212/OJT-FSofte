@@ -1,0 +1,38 @@
+{
+    "externalId": "RUNG_DUA_HOIAN",
+    "tourName": "Rừng Dừa Bảy Mẫu - Hội An 1 ngày",
+    "description": "Hành trình trải nghiệm miền sông nước với rừng dừa Bảy Mẫu và dạo phố cổ Hội An, thích hợp cho gia đình mong muốn hoạt động vui nhộn cả ngày.",
+    "price": 1290000,
+    "originalPrice": 1490000,
+    "duration": 1,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Hội An",
+    "categoryName": "Tour Trải Nghiệm địa phương",
+    "transportType": "Xe du lịch + Thúng chai",
+    "itinerary": "[DAY 1]\n08:30 Đến rừng dừa Bảy Mẫu, trải nghiệm thúng chai và lặn lưới.\n11:30 Ăn trưa đặc sản miền Tây Quảng Nam.\n13:30 Di chuyển đến Hội An, tham quan phố cổ.\n16:30 Dạo quanh sông Hoài, chụp ảnh đèn lồng.\n18:30 Ăn tối cao lầu và chè bắp.\n20:00 Về lại Đà Nẵng.",
+    "highlights": [
+        "Thúng chai và múa thúng",
+        "Rừng dừa Bảy Mẫu sông nước",
+        "Phố cổ Hội An đèn lồng",
+        "Workshop quăng lưới và làm bánh",
+        "Ẩm thực miền Trung đặc sắc"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1487412720507-e7ef71caa4c4?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "schedules": [
+        {
+            "startDate": "2026-04-09",
+            "availableSlots": 16,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-14",
+            "availableSlots": 14,
+            "status": "OPEN"
+        }
+    ]
+}
