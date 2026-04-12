@@ -22,4 +22,6 @@ public class TourScheduleResponse {
     private String currentProgress;
     private String reportContent;
     private java.time.LocalDateTime reportSubmittedAt;
+    private java.util.List<String> imageUrls;
+    private java.util.List<ProgressLogResponse> progressLogs;
 }

@@ -64,6 +64,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Staff operational routes
                 .requestMatchers("/api/v1/staff/**").hasAnyRole("ADMIN", "STAFF")
+                // Guide operational routes
+                .requestMatchers("/api/v1/guides/**").hasRole("GUIDE")
                 // Read-only categories
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
                 // Everything else requires login (can be refined later)

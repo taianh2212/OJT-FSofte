@@ -35,3 +35,4 @@ build/
 *.log
 **/target/
 **/build/
+backend/uploads/

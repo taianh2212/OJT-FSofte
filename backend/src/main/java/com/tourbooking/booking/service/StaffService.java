@@ -14,4 +14,5 @@ public interface StaffService {
     List<UserResponse> listGuides();
     List<BookingResponse> listBookings(String status);
     List<com.tourbooking.booking.model.dto.response.TourScheduleResponse> listSchedules();
+    com.tourbooking.booking.model.dto.response.TourScheduleResponse getScheduleDetails(Long id);
 }
