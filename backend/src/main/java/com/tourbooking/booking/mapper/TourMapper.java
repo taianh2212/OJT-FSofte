@@ -1,5 +1,13 @@
 package com.tourbooking.booking.mapper;
 
+import com.tourbooking.booking.backend.model.dto.request.TourRequest;
+import com.tourbooking.booking.backend.model.dto.response.TourDetailResponse;
+import com.tourbooking.booking.backend.model.dto.response.TourResponse;
+import com.tourbooking.booking.backend.model.entity.Tour;
+import com.tourbooking.booking.backend.model.entity.TourImage;
+import com.tourbooking.booking.backend.model.entity.TourHighlight;
+import com.tourbooking.booking.backend.model.entity.TourSchedule;
+
 import com.tourbooking.booking.model.dto.request.TourRequest;
 import com.tourbooking.booking.model.dto.request.TourScheduleRequest;
 import com.tourbooking.booking.model.dto.response.TourDetailResponse;
@@ -32,7 +40,7 @@ public class TourMapper {
         response.setHasLunch(tour.getHasLunch());
         response.setIsDaily(tour.getIsDaily());
         response.setIsInstantConfirmation(tour.getIsInstantConfirmation());
-        
+
         if (tour.getImages() != null) {
             response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
         }
@@ -57,12 +65,13 @@ public class TourMapper {
         response.setEndLocation(tour.getEndLocation());
         response.setRating(tour.getRating());
         response.setTransportType(tour.getTransportType());
-        
+
         if (tour.getCity() != null) {
             response.setCityId(tour.getCity().getId());
             response.setCityName(tour.getCity().getCityName());
         }
 
+        // New fields
         response.setInclusions(tour.getInclusions());
         response.setExclusions(tour.getExclusions());
         response.setTips(tour.getTips());
@@ -108,6 +117,8 @@ public class TourMapper {
         return response;
     }
 
+    private static TourDetailResponse.TourFaqSummary toFaqSummary(com.tourbooking.booking.backend.model.entity.TourFaq faq) {
+
     private static TourDetailResponse.TourFaqSummary toFaqSummary(TourFaq faq) {
         TourDetailResponse.TourFaqSummary s = new TourDetailResponse.TourFaqSummary();
         s.setQuestion(faq.getQuestion());
@@ -133,44 +144,60 @@ public class TourMapper {
         return tour;
     }
 
-    public static TourSchedule toScheduleEntity(TourScheduleRequest request) {
-        if (request == null) return null;
-        TourSchedule schedule = new TourSchedule();
-        schedule.setStartDate(request.getStartDate());
-        schedule.setEndDate(request.getEndDate());
-        schedule.setAvailableSlots(request.getAvailableSlots());
-        schedule.setStatus(TourStatus.OPEN);
-        return schedule;
-    }
-
     public static void updateEntityFromRequest(Tour tour, TourRequest request) {
         if (request == null || tour == null)
             return;
-        if (request.getTourName() != null) tour.setTourName(request.getTourName());
-        if (request.getDescription() != null) tour.setDescription(request.getDescription());
-        if (request.getPrice() != null) tour.setPrice(request.getPrice());
-        if (request.getOriginalPrice() != null) tour.setOriginalPrice(request.getOriginalPrice());
-        if (request.getDuration() != null) tour.setDuration(request.getDuration());
-        if (request.getStartLocation() != null) tour.setStartLocation(request.getStartLocation());
-        if (request.getEndLocation() != null) tour.setEndLocation(request.getEndLocation());
-        if (request.getTransportType() != null) tour.setTransportType(request.getTransportType());
+        if (request.getTourName() != null)
+            tour.setTourName(request.getTourName());
+        if (request.getDescription() != null)
+            tour.setDescription(request.getDescription());
+        if (request.getPrice() != null)
+            tour.setPrice(request.getPrice());
+        if (request.getOriginalPrice() != null)
+            tour.setOriginalPrice(request.getOriginalPrice());
+        if (request.getDuration() != null)
+            tour.setDuration(request.getDuration());
+        if (request.getStartLocation() != null)
+            tour.setStartLocation(request.getStartLocation());
+        if (request.getEndLocation() != null)
+            tour.setEndLocation(request.getEndLocation());
+        if (request.getTransportType() != null)
+            tour.setTransportType(request.getTransportType());
 
-        if (request.getInclusions() != null) tour.setInclusions(request.getInclusions());
-        if (request.getExclusions() != null) tour.setExclusions(request.getExclusions());
-        if (request.getTips() != null) tour.setTips(request.getTips());
-        if (request.getItinerary() != null) tour.setItinerary(request.getItinerary());
-        if (request.getPaymentPolicy() != null) tour.setPaymentPolicy(request.getPaymentPolicy());
-        if (request.getCancellationPolicy() != null) tour.setCancellationPolicy(request.getCancellationPolicy());
-        if (request.getChildPolicy() != null) tour.setChildPolicy(request.getChildPolicy());
+        if (request.getInclusions() != null)
+            tour.setInclusions(request.getInclusions());
+        if (request.getExclusions() != null)
+            tour.setExclusions(request.getExclusions());
+        if (request.getTips() != null)
+            tour.setTips(request.getTips());
+        if (request.getItinerary() != null)
+            tour.setItinerary(request.getItinerary());
+        if (request.getPaymentPolicy() != null)
+            tour.setPaymentPolicy(request.getPaymentPolicy());
+        if (request.getCancellationPolicy() != null)
+            tour.setCancellationPolicy(request.getCancellationPolicy());
+        if (request.getChildPolicy() != null)
+            tour.setChildPolicy(request.getChildPolicy());
 
-        if (request.getHasPickup() != null) tour.setHasPickup(request.getHasPickup());
-        if (request.getHasLunch() != null) tour.setHasLunch(request.getHasLunch());
-        if (request.getIsInstantConfirmation() != null) tour.setIsInstantConfirmation(request.getIsInstantConfirmation());
-        if (request.getIsDaily() != null) tour.setIsDaily(request.getIsDaily());
+        if (request.getHasPickup() != null)
+            tour.setHasPickup(request.getHasPickup());
+        if (request.getHasLunch() != null)
+            tour.setHasLunch(request.getHasLunch());
+        if (request.getIsInstantConfirmation() != null)
+            tour.setIsInstantConfirmation(request.getIsInstantConfirmation());
+        if (request.getIsDaily() != null)
+            tour.setIsDaily(request.getIsDaily());
 
-        if (request.getMinDepositRate() != null) tour.setMinDepositRate(request.getMinDepositRate());
-        if (request.getRefundGracePeriod() != null) tour.setRefundGracePeriod(request.getRefundGracePeriod());
-        if (request.getMetaTitle() != null) tour.setMetaTitle(request.getMetaTitle());
-        if (request.getMetaDescription() != null) tour.setMetaDescription(request.getMetaDescription());
+        if (request.getMinDepositRate() != null)
+            tour.setMinDepositRate(request.getMinDepositRate());
+        if (request.getRefundGracePeriod() != null)
+            tour.setRefundGracePeriod(request.getRefundGracePeriod());
+        if (request.getMetaTitle() != null)
+            tour.setMetaTitle(request.getMetaTitle());
+        if (request.getMetaDescription() != null)
+            tour.setMetaDescription(request.getMetaDescription());
+
+        // Note: Adding these manually as they might be part of extended request later
+        // For now, Seeder uses them directly.
     }
 }

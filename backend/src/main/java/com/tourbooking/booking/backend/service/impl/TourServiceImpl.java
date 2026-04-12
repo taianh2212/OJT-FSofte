@@ -17,9 +17,6 @@ import com.tourbooking.booking.backend.model.dto.response.TourResponse;
 import com.tourbooking.booking.backend.model.entity.City;
 import com.tourbooking.booking.backend.model.entity.Category;
 import com.tourbooking.booking.backend.model.entity.Tour;
-import com.tourbooking.booking.backend.model.entity.TourHighlight;
-import com.tourbooking.booking.backend.model.entity.TourImage;
-import com.tourbooking.booking.backend.model.entity.TourSchedule;
 import com.tourbooking.booking.backend.repository.CategoryRepository;
 import com.tourbooking.booking.backend.repository.CityRepository;
 import com.tourbooking.booking.backend.repository.TourRepository;
@@ -28,28 +25,24 @@ import com.tourbooking.booking.backend.service.TourService;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TourServiceImpl implements TourService {
 
     private final TourRepository tourRepo;
     private final CategoryRepository categoryRepo;
     private final CityRepository cityRepository;
 
-    public TourServiceImpl(TourRepository tourRepo, CategoryRepository categoryRepo, CityRepository cityRepository) {
-        this.tourRepo = tourRepo;
-        this.categoryRepo = categoryRepo;
-        this.cityRepository = cityRepository;
-    }
-
     @Override
     public List<TourResponse> getAllTours() {
-        return tourRepo.findAll().stream()
+        return tourRepo.findAllWithBasicDetails().stream()
                 .map(TourMapper::toResponse)
                 .toList();
     }
 
     @Override
     public TourDetailResponse getTourById(Long id) {
-        Tour tour = tourRepo.findById(id)
+        Tour tour = tourRepo.findByIdWithDetails(id)
                 .orElseThrow(() -> new AppException(ErrorCode.TOUR_NOT_FOUND));
         return TourMapper.toDetailResponse(tour);
     }
@@ -80,41 +73,6 @@ public class TourServiceImpl implements TourService {
             tour.setCategory(category);
         }
 
-        // Handle Highlights
-        if (request.getHighlights() != null) {
-            List<TourHighlight> highlights = request.getHighlights().stream()
-                    .map(h -> {
-                        TourHighlight highlight = new TourHighlight();
-                        highlight.setHighlight(h);
-                        highlight.setTour(tour);
-                        return highlight;
-                    }).toList();
-            tour.setHighlights(highlights);
-        }
-
-        // Handle Images
-        if (request.getImageUrls() != null) {
-            List<TourImage> images = request.getImageUrls().stream()
-                    .map(url -> {
-                        TourImage image = new TourImage();
-                        image.setImageUrl(url);
-                        image.setTour(tour);
-                        return image;
-                    }).toList();
-            tour.setImages(images);
-        }
-
-        // Handle Schedules
-        if (request.getSchedules() != null) {
-            List<TourSchedule> schedules = request.getSchedules().stream()
-                    .map(sReq -> {
-                        TourSchedule schedule = TourMapper.toScheduleEntity(sReq);
-                        schedule.setTour(tour);
-                        return schedule;
-                    }).toList();
-            tour.setSchedules(schedules);
-        }
-
         Tour savedTour = tourRepo.save(tour);
         return TourMapper.toResponse(savedTour);
     }
@@ -132,38 +90,6 @@ public class TourServiceImpl implements TourService {
             Category category = categoryRepo.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
             existingTour.setCategory(category);
-        }
-
-        // Update Highlights
-        if (request.getHighlights() != null) {
-            existingTour.getHighlights().clear();
-            request.getHighlights().forEach(h -> {
-                TourHighlight highlight = new TourHighlight();
-                highlight.setHighlight(h);
-                highlight.setTour(existingTour);
-                existingTour.getHighlights().add(highlight);
-            });
-        }
-
-        // Update Images
-        if (request.getImageUrls() != null) {
-            existingTour.getImages().clear();
-            request.getImageUrls().forEach(url -> {
-                TourImage image = new TourImage();
-                image.setImageUrl(url);
-                image.setTour(existingTour);
-                existingTour.getImages().add(image);
-            });
-        }
-
-        // Update Schedules
-        if (request.getSchedules() != null) {
-            existingTour.getSchedules().clear();
-            request.getSchedules().forEach(sReq -> {
-                TourSchedule schedule = TourMapper.toScheduleEntity(sReq);
-                schedule.setTour(existingTour);
-                existingTour.getSchedules().add(schedule);
-            });
         }
 
         Tour updatedTour = tourRepo.save(existingTour);
@@ -198,6 +124,10 @@ public class TourServiceImpl implements TourService {
                                                   Long cityId,
                                                   Double lat,
                                                   Double lng,
+                                                  Boolean hasPickup,
+                                                  Boolean hasLunch,
+                                                  Boolean isDaily,
+                                                  Boolean isInstantConfirmation,
                                                   String sortBy,
                                                   String sortDir,
                                                   Pageable pageable) {
@@ -205,12 +135,12 @@ public class TourServiceImpl implements TourService {
 
         Page<Tour> page;
         if ("popularity".equals(normalizedSortBy)) {
-            page = tourRepo.browseToursByPopularity(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, pageable);
+            page = tourRepo.browseToursByPopularity(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, hasPickup, hasLunch, isDaily, isInstantConfirmation, pageable);
         } else if ("distance".equals(normalizedSortBy)) {
             double[] coords = resolveCoords(cityId, lat, lng);
-            page = tourRepo.browseToursByDistance(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, coords[0], coords[1], pageable);
+            page = tourRepo.browseToursByDistance(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, hasPickup, hasLunch, isDaily, isInstantConfirmation, coords[0], coords[1], pageable);
         } else {
-            page = tourRepo.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, pageable);
+            page = tourRepo.browseTours(keyword, minPrice, maxPrice, minRating, startDate, categoryId, transportType, hasPickup, hasLunch, isDaily, isInstantConfirmation, pageable);
         }
         return PagedResponse.<TourResponse>builder()
                 .content(page.getContent().stream().map(TourMapper::toResponse).toList())
