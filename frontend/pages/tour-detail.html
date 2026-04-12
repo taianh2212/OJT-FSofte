@@ -20,11 +20,19 @@
     }
     @media (max-width: 960px) {
       .twoCol { grid-template-columns: 1fr; }
-      .floating-book-now {
-        right: 14px;
-        bottom: 14px;
-      }
+    .floating-book-now {
+      right: 14px;
+      bottom: 14px;
     }
+    }
+    .review-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .review-card .meta { font-size: 0.8rem; color: var(--text-soft); margin-top: 6px; }
+    .review-card .stars { color: #fbbf24; letter-spacing: 1px; font-size: 0.95rem; }
   </style>
 </head>
 <body>
@@ -50,6 +58,13 @@
 
             <h3 class="section-title" style="margin-top:28px; font-size:1.6rem;">Highlights</h3>
             <div id="highlights" class="list" style="margin-top:12px;"></div>
+
+            <h3 class="section-title" style="margin-top:32px; font-size:1.6rem;">Đánh giá từ khách hàng</h3>
+            <p class="section-copy" id="reviewsSummary" style="margin-top:8px; font-size:0.9rem; color:var(--text-soft);"></p>
+            <div id="customerReviews" class="list" style="margin-top:14px;"></div>
+            <p class="section-copy" id="reviewsHint" style="margin-top:12px; font-size:0.85rem; color:var(--text-faint);">
+              Bạn đã hoàn thành tour? Hãy đánh giá tại <a href="./user/history.html" style="color:var(--primary);">Lịch sử đặt tour</a> sau khi đăng nhập.
+            </p>
           </div>
 
           <div class="glass-list">

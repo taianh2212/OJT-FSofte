@@ -14,6 +14,6 @@ public class PayOSProperties {
     private String apiKey;
     private String checksumKey;
     private String baseUrl = "https://api-merchant.payos.vn";
-    private String returnUrl = "http://localhost:8080/pages/user/history.html";
+    private String returnUrl = "http://localhost:8080/pages/user/payment-return.html";
     private String cancelUrl = "http://localhost:8080/pages/user/checkout.html";
 }

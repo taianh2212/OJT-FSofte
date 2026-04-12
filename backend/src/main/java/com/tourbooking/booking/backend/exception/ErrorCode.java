@@ -16,7 +16,10 @@ public enum ErrorCode {
     UNAUTHORIZED(1009, "Unauthorized access"),
     FORBIDDEN(1010, "Access denied"),
     INVALID_REQUEST(1011, "Invalid request"),
-    OPENTRIPMAP_FETCH_FAILED(1012, "Failed to fetch data from OpenTripMap");
+    OPENTRIPMAP_FETCH_FAILED(1012, "Failed to fetch data from OpenTripMap"),
+    PAYOS_PAYMENT_PENDING(1013, "PayOS chưa ghi nhận thanh toán (PENDING/PROCESSING). Vui lòng thử lại sau vài giây."),
+    PAYOS_NOT_CONFIGURED(1014, "Chưa cấu hình PayOS: đặt PAYOS_CLIENT_ID và PAYOS_API_KEY trong backend/.env rồi khởi động lại backend."),
+    PAYOS_LINK_FAILED(1015, "PayOS không tạo được link (sai Client ID/API Key, sai số tiền, hoặc lỗi mạng). Kiểm tra my.payos.vn và log backend.");
 
     private final int code;
     private final String message;

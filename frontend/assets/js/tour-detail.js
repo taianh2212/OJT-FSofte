@@ -62,6 +62,86 @@
     `).join('');
   }
 
+  function formatStars(n) {
+    const r = Math.min(5, Math.max(0, Math.round(Number(n) || 0)));
+    return '★'.repeat(r) + '☆'.repeat(5 - r);
+  }
+
+  function formatReviewDate(createdAt) {
+    if (createdAt == null || createdAt === '') return '';
+    if (Array.isArray(createdAt) && createdAt.length >= 3) {
+      const y = createdAt[0];
+      const mo = createdAt[1];
+      const d = createdAt[2];
+      const h = createdAt[3] ?? 0;
+      const mi = createdAt[4] ?? 0;
+      const dt = new Date(y, mo - 1, d, h, mi);
+      return Number.isNaN(dt.getTime()) ? '' : dt.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    try {
+      const dt = new Date(createdAt);
+      if (Number.isNaN(dt.getTime())) return String(createdAt);
+      return dt.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (_) {
+      return String(createdAt);
+    }
+  }
+
+  function renderCustomerReviews(list) {
+    const root = el('customerReviews');
+    const summary = el('reviewsSummary');
+    if (!list || list.length === 0) {
+      summary.textContent = 'Chưa có đánh giá nào.';
+      root.innerHTML = '<div class="section-copy" style="color:var(--text-faint);">Hãy là người đầu tiên chia sẻ trải nghiệm sau khi hoàn thành tour.</div>';
+      return;
+    }
+    const sum = list.reduce((a, r) => a + Number(r.rating || 0), 0);
+    const avg = sum / list.length;
+    summary.textContent = `${list.length} đánh giá · Trung bình ${avg.toFixed(1)}/5`;
+    el('rating').textContent = `⭐ ${avg.toFixed(1)} (${list.length})`;
+
+    function reviewTimeMs(r) {
+      const c = r && r.createdAt;
+      if (Array.isArray(c) && c.length >= 3) {
+        return new Date(c[0], c[1] - 1, c[2], c[3] || 0, c[4] || 0).getTime();
+      }
+      const t = new Date(c || 0).getTime();
+      return Number.isNaN(t) ? 0 : t;
+    }
+    const sorted = [...list].sort((a, b) => reviewTimeMs(b) - reviewTimeMs(a));
+
+    root.innerHTML = sorted.map((r) => {
+      const name = escapeHtml(r.userName || 'Khách hàng');
+      const rawComment = (r.comment || '').trim();
+      const comment = rawComment
+        ? escapeHtml(rawComment)
+        : '<em style="color:var(--text-faint)">(Không có nhận xét)</em>';
+      const when = formatReviewDate(r.createdAt);
+      const stars = formatStars(r.rating);
+      const metaLine = when ? escapeHtml(when) : '';
+      return `
+      <div class="review-card list-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <strong>${name}</strong>
+          <span class="stars" title="${Number(r.rating) || 0}/5">${stars}</span>
+        </div>
+        <p style="margin:10px 0 0; line-height:1.6;">${comment}</p>
+        ${metaLine ? `<div class="meta">${metaLine}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function loadCustomerReviews(tourId) {
+    try {
+      const res = await TB.apiFetch(`/api/v1/reviews/tour/${encodeURIComponent(tourId)}`, { method: 'GET' });
+      const list = Array.isArray(res?.data) ? res.data : [];
+      renderCustomerReviews(list);
+    } catch (e) {
+      el('reviewsSummary').textContent = '';
+      el('customerReviews').innerHTML = `<div class="section-copy" style="color:#fca5a5;">Không tải được đánh giá. ${escapeHtml(e.message || 'Lỗi')}</div>`;
+    }
+  }
+
   function renderSchedules(list) {
     const root = el('schedules');
     if (!list || list.length === 0) {
@@ -135,6 +215,7 @@
     renderPills(t);
     renderHighlights(t.highlights);
     renderSchedules(t.schedules);
+    await loadCustomerReviews(id);
   }
 
   load().catch(err => {

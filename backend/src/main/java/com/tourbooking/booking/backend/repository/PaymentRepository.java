@@ -21,4 +21,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             @Param("end") LocalDateTime end);
 
     Optional<Payment> findByTransactionCode(String transactionCode);
+
+    Optional<Payment> findFirstByBooking_IdAndStatusOrderByPaymentDateDesc(Long bookingId, PaymentStatus status);
+
+    Optional<Payment> findFirstByBooking_IdOrderByPaymentDateDesc(Long bookingId);
 }

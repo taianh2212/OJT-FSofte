@@ -10,4 +10,8 @@ public interface PaymentService {
     PaymentResponse createPayOSPayment(PaymentRequest request);
 
     void handlePayOSWebhook(String rawPayload, String signature);
+
+    PaymentResponse confirmPayOsAfterReturn(long orderCode);
+
+    PaymentResponse confirmManualPayment(PaymentRequest request);
 }

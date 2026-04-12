@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -110,45 +112,126 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void handlePayOSWebhook(String rawPayload, String signature) {
-        if (!payOSService.verifyWebhookSignature(rawPayload, signature)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
-
+    public void handlePayOSWebhook(String rawPayload, String headerSignature) {
+        JsonNode root;
         try {
-            JsonNode root = objectMapper.readTree(rawPayload);
-            JsonNode data = root.path("data");
-            long orderCode = data.path("orderCode").asLong();
-            String status = data.path("status").asText();
-            String transactionCode = "PAYOS-" + orderCode;
-
-            Payment payment = paymentRepository.findByTransactionCode(transactionCode)
-                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
-
-            if ("PAID".equalsIgnoreCase(status) || "SUCCESS".equalsIgnoreCase(status)) {
-                if (payment.getStatus() != PaymentStatus.SUCCESS) {
-                    payment.setStatus(PaymentStatus.SUCCESS);
-                    payment.setPaymentDate(LocalDateTime.now());
-                    Booking booking = payment.getBooking();
-                    booking.setStatus(BookingStatus.CONFIRMED);
-                    bookingRepository.save(booking);
-                    paymentRepository.save(payment);
-                    awardLoyaltyAndSendMail(booking, payment.getAmount());
-                    savePaymentLog(payment, "PayOS webhook success");
-                }
-                return;
-            }
-
-            if ("CANCELLED".equalsIgnoreCase(status) || "FAILED".equalsIgnoreCase(status)) {
-                payment.setStatus(PaymentStatus.FAILED);
-                paymentRepository.save(payment);
-                savePaymentLog(payment, "PayOS webhook failed/cancelled");
-            }
-        } catch (AppException ex) {
-            throw ex;
+            root = objectMapper.readTree(rawPayload);
         } catch (Exception e) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
+
+        JsonNode data = root.path("data");
+        String signature = (headerSignature != null && !headerSignature.isBlank())
+                ? headerSignature.trim()
+                : root.path("signature").asText("").trim();
+        if (!payOSService.verifyPayOsDataSignature(data, signature)) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+
+        if (!data.isObject() || !data.has("orderCode") || data.get("orderCode").isNull()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        long orderCode = data.path("orderCode").asLong();
+        String transactionCode = "PAYOS-" + orderCode;
+        Payment payment = paymentRepository.findByTransactionCode(transactionCode)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
+
+        if (!PayOSService.amountsMatch(payment.getAmount(), data)) {
+            savePaymentLog(payment, "PayOS webhook: amount mismatch — không cập nhật");
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (isPayOsPaidFromWebhook(root, data)) {
+            finalizePayOsPaymentSuccess(payment, "PayOS webhook (VietQR) thành công");
+            return;
+        }
+
+        if (isPayOsCancelledOrFailedFromWebhook(root, data)) {
+            if (payment.getStatus() == PaymentStatus.PENDING) {
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                savePaymentLog(payment, "PayOS webhook: hủy / thất bại");
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse confirmPayOsAfterReturn(long orderCode) {
+        Optional<JsonNode> apiDataOpt = payOSService.fetchPaymentRequestByOrderCode(orderCode);
+        if (apiDataOpt.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        JsonNode d = apiDataOpt.get();
+        String status = d.path("status").asText("").trim().toUpperCase(Locale.ROOT);
+        String transactionCode = "PAYOS-" + orderCode;
+        Payment payment = paymentRepository.findByTransactionCode(transactionCode)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
+
+        if (!PayOSService.amountsMatch(payment.getAmount(), d)) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if ("PAID".equals(status)) {
+            finalizePayOsPaymentSuccess(payment, "PayOS returnUrl + API: PAID");
+            return toResponse(paymentRepository.findById(payment.getId()).orElse(payment));
+        }
+        if ("PENDING".equals(status) || "PROCESSING".equals(status)) {
+            throw new AppException(ErrorCode.PAYOS_PAYMENT_PENDING);
+        }
+        if ("CANCELLED".equals(status) || "FAILED".equals(status)) {
+            if (payment.getStatus() == PaymentStatus.PENDING) {
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                savePaymentLog(payment, "PayOS API: " + status);
+            }
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        throw new AppException(ErrorCode.INVALID_REQUEST);
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse confirmManualPayment(PaymentRequest request) {
+        if (request == null || request.getBookingId() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        Booking booking = bookingRepository.findById(request.getBookingId())
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        Payment payment = paymentRepository
+                .findFirstByBooking_IdAndStatusOrderByPaymentDateDesc(booking.getId(), PaymentStatus.PENDING)
+                .or(() -> paymentRepository.findFirstByBooking_IdOrderByPaymentDateDesc(booking.getId()))
+                .orElseGet(() -> {
+                    Payment created = new Payment();
+                    created.setBooking(booking);
+                    created.setAmount(booking.getTotalPrice());
+                    created.setPaymentMethod(
+                            request.getPaymentMethod() != null && !request.getPaymentMethod().isBlank()
+                                    ? request.getPaymentMethod()
+                                    : "BANK_TRANSFER"
+                    );
+                    created.setTransactionCode("MANUAL-" + System.currentTimeMillis());
+                    created.setStatus(PaymentStatus.PENDING);
+                    created.setPaymentDate(LocalDateTime.now());
+                    Payment saved = paymentRepository.save(created);
+                    savePaymentLog(saved, "Manual payment created on confirm flow");
+                    return saved;
+                });
+
+        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+            payment.setStatus(PaymentStatus.SUCCESS);
+            payment.setPaymentDate(LocalDateTime.now());
+            booking.setStatus(BookingStatus.CONFIRMED);
+            bookingRepository.save(booking);
+            paymentRepository.save(payment);
+            awardLoyaltyAndSendMail(booking, payment.getAmount());
+            savePaymentLog(payment, "Manual transfer confirmed by operator");
+        }
+
+        return toResponse(payment);
     }
 
     private PaymentResponse toResponse(Payment saved) {
@@ -178,5 +261,40 @@ public class PaymentServiceImpl implements PaymentService {
                     paidAmount
             );
         }
+    }
+
+    private void finalizePayOsPaymentSuccess(Payment payment, String logMessage) {
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            return;
+        }
+        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setPaymentDate(LocalDateTime.now());
+        Booking booking = payment.getBooking();
+        booking.setStatus(BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
+        paymentRepository.save(payment);
+        awardLoyaltyAndSendMail(booking, payment.getAmount());
+        savePaymentLog(payment, logMessage);
+    }
+
+    private static boolean isPayOsPaidFromWebhook(JsonNode root, JsonNode data) {
+        boolean outerOk = "00".equals(root.path("code").asText()) && root.path("success").asBoolean(false);
+        if (!outerOk) {
+            return false;
+        }
+        String dataStatus = data.path("status").asText("");
+        if ("PAID".equalsIgnoreCase(dataStatus) || "SUCCESS".equalsIgnoreCase(dataStatus)) {
+            return true;
+        }
+        String innerCode = data.path("code").asText("");
+        return innerCode.isEmpty() || "00".equals(innerCode);
+    }
+
+    private static boolean isPayOsCancelledOrFailedFromWebhook(JsonNode root, JsonNode data) {
+        if (!root.path("success").asBoolean(true)) {
+            return true;
+        }
+        String dataStatus = data.path("status").asText("");
+        return "CANCELLED".equalsIgnoreCase(dataStatus) || "FAILED".equalsIgnoreCase(dataStatus);
     }
 }

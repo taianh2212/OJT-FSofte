@@ -1,5 +1,7 @@
 package com.tourbooking.booking.backend.controller;
 
+import com.tourbooking.booking.backend.exception.AppException;
+import com.tourbooking.booking.backend.exception.ErrorCode;
 import com.tourbooking.booking.backend.model.dto.request.PaymentRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
 import com.tourbooking.booking.backend.model.dto.response.PaymentResponse;
@@ -44,6 +46,31 @@ public class PaymentController {
                 .code(200)
                 .message("Webhook processed")
                 .data("OK")
+                .build();
+    }
+
+    /**
+     * Sau khi khách thanh toán xong, PayOS redirect về returnUrl kèm orderCode;
+     * frontend gọi API này để đối soát trạng thái PAID trực tiếp với PayOS và hoàn tất đơn + email.
+     */
+    @PostMapping("/payos/confirm-return")
+    public ApiResponse<PaymentResponse> confirmPayOsReturn(@RequestBody PaymentRequest request) {
+        if (request.getOrderCode() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        return ApiResponse.<PaymentResponse>builder()
+                .code(200)
+                .message("PayOS payment confirmed")
+                .data(paymentService.confirmPayOsAfterReturn(request.getOrderCode()))
+                .build();
+    }
+
+    @PostMapping("/manual/confirm")
+    public ApiResponse<PaymentResponse> confirmManualPayment(@RequestBody PaymentRequest request) {
+        return ApiResponse.<PaymentResponse>builder()
+                .code(200)
+                .message("Manual payment confirmed")
+                .data(paymentService.confirmManualPayment(request))
                 .build();
     }
 }

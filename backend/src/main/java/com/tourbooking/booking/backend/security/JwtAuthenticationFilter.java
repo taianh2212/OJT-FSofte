@@ -8,8 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,13 +16,15 @@ import java.io.IOException;
 
 import com.tourbooking.booking.backend.repository.UserRepository;
 import org.springframework.util.StringUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
 
     @Override
@@ -47,7 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var user = userRepository.findByEmail(email).orElse(null);
                 // Chỉ set Authentication nếu user tồn tại và sessionId khớp
                 if (user != null && user.getCurrentSessionId() != null && sessionId.equals(user.getCurrentSessionId())) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    String roleName = (user.getRole() != null) ? user.getRole().name() : "CUSTOMER";
+                    boolean enabled = Boolean.TRUE.equals(user.getIsActive());
+                    if (!enabled) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                    var userDetails = new org.springframework.security.core.userdetails.User(
+                            user.getEmail(),
+                            user.getPasswordHash() != null ? user.getPasswordHash() : "",
+                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName))
+                    );
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

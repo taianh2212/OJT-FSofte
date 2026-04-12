@@ -134,10 +134,11 @@
     validateCurrentSession();
     setInterval(() => {
       if (getToken()) {
+        if (document.hidden) return;
         connectSessionStream();
         validateCurrentSession();
       }
-    }, 15000);
+    }, 60000);
   }
 
   if (document.readyState === 'loading') {

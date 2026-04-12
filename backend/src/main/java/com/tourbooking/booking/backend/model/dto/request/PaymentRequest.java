@@ -17,4 +17,7 @@ public class PaymentRequest {
 
     // optional: mã giao dịch (nếu mock)
     private String transactionCode;
+
+    /** Mã đơn PayOS (orderCode) khi xác nhận sau returnUrl */
+    private Long orderCode;
 }

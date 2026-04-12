@@ -52,12 +52,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 // Guest UC01-UC06
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/tours/**").permitAll()
+                // Public read: đánh giá theo tour (trang chi tiết tour)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/reviews/tour/**").permitAll()
                 // UC10 newsletter subscribe
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/newsletters").permitAll()
                 // UC11 chat support + UC51 AI chat
                 .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
-                // PayOS webhook callback
+                // PayOS webhook + xác nhận sau returnUrl (không dùng JWT)
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/payments/payos/webhook").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/payments/payos/confirm-return").permitAll()
                 // Admin chat escalation dashboard
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Read-only categories
