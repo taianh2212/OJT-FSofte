@@ -55,7 +55,7 @@ public class GuideServiceImpl implements GuideService {
             throw new RuntimeException("You are not assigned to this tour");
         }
 
-        return response;
+        return mapToResponse(schedule, true);
     }
 
     @Override
