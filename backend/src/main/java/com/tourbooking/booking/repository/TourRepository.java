@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,7 +43,11 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
            "(:minRating IS NULL OR t.rating >= :minRating) AND " +
            "(:startDate IS NULL OR ts.startDate >= :startDate) AND " +
            "(:categoryId IS NULL OR t.category.id = :categoryId) AND " +
-           "(:transportType IS NULL OR LOWER(t.transportType) = LOWER(:transportType))")
+           "(:transportType IS NULL OR LOWER(t.transportType) = LOWER(:transportType)) AND " +
+           "(:hasPickup IS NULL OR t.hasPickup = :hasPickup) AND " +
+           "(:hasLunch IS NULL OR t.hasLunch = :hasLunch) AND " +
+           "(:isDaily IS NULL OR t.isDaily = :isDaily) AND " +
+           "(:isInstantConfirmation IS NULL OR t.isInstantConfirmation = :isInstantConfirmation)")
     Page<Tour> browseTours(@Param("keyword") String keyword,
                            @Param("minPrice") BigDecimal minPrice,
                            @Param("maxPrice") BigDecimal maxPrice,
@@ -50,13 +55,22 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                            @Param("startDate") LocalDate startDate,
                            @Param("categoryId") Long categoryId,
                            @Param("transportType") String transportType,
+                           @Param("hasPickup") Boolean hasPickup,
+                           @Param("hasLunch") Boolean hasLunch,
+                           @Param("isDaily") Boolean isDaily,
+                           @Param("isInstantConfirmation") Boolean isInstantConfirmation,
                            Pageable pageable);
 
-    // Popularity sort (booking count)
+    // Popularity sort (booking count) - Fixed subquery
     @Query(value = """
         SELECT t.*
         FROM dbo.Tours t
-        LEFT JOIN dbo.TourBookingStats s ON s.TourID = t.TourID
+        LEFT JOIN (
+            SELECT s.TourID, COUNT(b.BookingID) as BookingCount
+            FROM dbo.TourSchedules s
+            JOIN dbo.Bookings b ON b.ScheduleID = s.ScheduleID
+            GROUP BY s.TourID
+        ) bc ON bc.TourID = t.TourID
         WHERE
             (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
@@ -64,11 +78,15 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
             AND (:minRating IS NULL OR t.Rating >= :minRating)
             AND (:categoryId IS NULL OR t.CategoryID = :categoryId)
             AND (:transportType IS NULL OR LOWER(t.TransportType) = LOWER(:transportType))
+            AND (:hasPickup IS NULL OR t.HasPickup = :hasPickup)
+            AND (:hasLunch IS NULL OR t.HasLunch = :hasLunch)
+            AND (:isDaily IS NULL OR t.IsDaily = :isDaily)
+            AND (:isInstantConfirmation IS NULL OR t.IsInstantConfirmation = :isInstantConfirmation)
             AND (:startDate IS NULL OR EXISTS (
                 SELECT 1 FROM dbo.TourSchedules ts
                 WHERE ts.TourID = t.TourID AND ts.StartDate >= :startDate
             ))
-        ORDER BY ISNULL(s.BookingCount, 0) DESC, t.TourID ASC
+        ORDER BY ISNULL(bc.BookingCount, 0) DESC, t.TourID ASC
         OFFSET :#{#pageable.offset} ROWS FETCH NEXT :#{#pageable.pageSize} ROWS ONLY
         """,
         countQuery = """
@@ -81,6 +99,10 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
             AND (:minRating IS NULL OR t.Rating >= :minRating)
             AND (:categoryId IS NULL OR t.CategoryID = :categoryId)
             AND (:transportType IS NULL OR LOWER(t.TransportType) = LOWER(:transportType))
+            AND (:hasPickup IS NULL OR t.HasPickup = :hasPickup)
+            AND (:hasLunch IS NULL OR t.HasLunch = :hasLunch)
+            AND (:isDaily IS NULL OR t.IsDaily = :isDaily)
+            AND (:isInstantConfirmation IS NULL OR t.IsInstantConfirmation = :isInstantConfirmation)
             AND (:startDate IS NULL OR EXISTS (
                 SELECT 1 FROM dbo.TourSchedules ts
                 WHERE ts.TourID = t.TourID AND ts.StartDate >= :startDate
@@ -94,9 +116,13 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                                        @Param("startDate") LocalDate startDate,
                                        @Param("categoryId") Long categoryId,
                                        @Param("transportType") String transportType,
+                                       @Param("hasPickup") Boolean hasPickup,
+                                       @Param("hasLunch") Boolean hasLunch,
+                                       @Param("isDaily") Boolean isDaily,
+                                       @Param("isInstantConfirmation") Boolean isInstantConfirmation,
                                        Pageable pageable);
 
-    // Distance sort (km) to a coordinate
+    // Distance sort
     @Query(value = """
         SELECT t.*
         FROM dbo.Tours t
@@ -108,6 +134,10 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
             AND (:minRating IS NULL OR t.Rating >= :minRating)
             AND (:categoryId IS NULL OR t.CategoryID = :categoryId)
             AND (:transportType IS NULL OR LOWER(t.TransportType) = LOWER(:transportType))
+            AND (:hasPickup IS NULL OR t.HasPickup = :hasPickup)
+            AND (:hasLunch IS NULL OR t.HasLunch = :hasLunch)
+            AND (:isDaily IS NULL OR t.IsDaily = :isDaily)
+            AND (:isInstantConfirmation IS NULL OR t.IsInstantConfirmation = :isInstantConfirmation)
             AND (:startDate IS NULL OR EXISTS (
                 SELECT 1 FROM dbo.TourSchedules ts
                 WHERE ts.TourID = t.TourID AND ts.StartDate >= :startDate
@@ -132,6 +162,10 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
             AND (:minRating IS NULL OR t.Rating >= :minRating)
             AND (:categoryId IS NULL OR t.CategoryID = :categoryId)
             AND (:transportType IS NULL OR LOWER(t.TransportType) = LOWER(:transportType))
+            AND (:hasPickup IS NULL OR t.HasPickup = :hasPickup)
+            AND (:hasLunch IS NULL OR t.HasLunch = :hasLunch)
+            AND (:isDaily IS NULL OR t.IsDaily = :isDaily)
+            AND (:isInstantConfirmation IS NULL OR t.IsInstantConfirmation = :isInstantConfirmation)
             AND (:startDate IS NULL OR EXISTS (
                 SELECT 1 FROM dbo.TourSchedules ts
                 WHERE ts.TourID = t.TourID AND ts.StartDate >= :startDate
@@ -145,19 +179,29 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                                      @Param("startDate") LocalDate startDate,
                                      @Param("categoryId") Long categoryId,
                                      @Param("transportType") String transportType,
+                                     @Param("hasPickup") Boolean hasPickup,
+                                     @Param("hasLunch") Boolean hasLunch,
+                                     @Param("isDaily") Boolean isDaily,
+                                     @Param("isInstantConfirmation") Boolean isInstantConfirmation,
                                      @Param("lat") double lat,
                                      @Param("lng") double lng,
                                      Pageable pageable);
 
-    boolean existsByTourNameAndStartLocation(String tourName, String startLocation);
+    boolean existsByTourNameAndStartLocationIgnoreCase(String tourName, String startLocation);
 
     Optional<Tour> findByExternalId(String externalId);
 
     boolean existsByExternalId(String externalId);
 
-    boolean existsByTourNameAndStartLocationIgnoreCase(String tourName, String startLocation);
+    List<Tour> findBySourceOrderByTourName(String source);
 
     long countBySourceAndStartLocationIgnoreCase(String source, String startLocation);
 
-    List<Tour> findBySourceOrderByTourName(String source);
+    @EntityGraph(attributePaths = {"images", "highlights", "schedules", "faqs", "category", "city"})
+    @Query("SELECT t FROM Tour t WHERE t.id = :id")
+    Optional<Tour> findByIdWithDetails(@Param("id") Long id);
+
+    @EntityGraph(attributePaths = {"images", "city", "category"})
+    @Query("SELECT DISTINCT t FROM Tour t")
+    List<Tour> findAllWithBasicDetails();
 }

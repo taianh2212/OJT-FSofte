@@ -1,3 +1,12 @@
+package com.tourbooking.booking.backend.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tourbooking.booking.backend.model.dto.request.AiChatRequest;
+import com.tourbooking.booking.backend.model.dto.response.AiChatResponse;
+import com.tourbooking.booking.backend.security.JwtService;
+import com.tourbooking.booking.backend.repository.ChatSessionRepository;
+import com.tourbooking.booking.backend.repository.UserRepository;
+import com.tourbooking.booking.backend.service.AiChatService;
 package com.tourbooking.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +23,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -42,12 +53,14 @@ class AiChatControllerTest {
     private UserRepository userRepository;
 
     @MockitoBean
+    private ChatSessionRepository sessionRepository;
     private ChatSessionRepository chatSessionRepository;
 
     @Test
     void chatReturnsCreatedResponse() throws Exception {
         AiChatResponse aiChatResponse = AiChatResponse.builder().reply("test reply").build();
         when(aiChatService.chat(any(AiChatRequest.class))).thenReturn(aiChatResponse);
+        when(sessionRepository.findTopByUser_IdOrderByLastMessageAtDesc(any(Long.class))).thenReturn(Optional.empty());
 
         AiChatRequest request = new AiChatRequest();
         request.setUserId(1L);

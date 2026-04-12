@@ -31,7 +31,6 @@ public class AuthSessionNotificationServiceImpl implements AuthSessionNotificati
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<ClientConnection>> connections = new ConcurrentHashMap<>();
 
     @Override
-    @Transactional(readOnly = true)
     public SseEmitter subscribe(String token) {
         Claims claims = jwtService.parseClaims(token);
         String email = claims.getSubject();

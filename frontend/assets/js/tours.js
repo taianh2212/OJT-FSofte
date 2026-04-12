@@ -43,6 +43,10 @@
       cityId: get('cityId') || null,
       lat: get('lat') || null,
       lng: get('lng') || null,
+      hasPickup: document.getElementById('hasPickup')?.checked ?? null,
+      hasLunch: document.getElementById('hasLunch')?.checked ?? null,
+      isDaily: document.getElementById('isDaily')?.checked ?? null,
+      isInstantConfirmation: document.getElementById('isInstantConfirmation')?.checked ?? null,
       sortBy: get('sortBy') || 'price',
       sortDir: get('sortDir') || 'asc',
       size: numOrNull(get('size')) || 12,
@@ -61,6 +65,10 @@
     if (filters.cityId) p.set('cityId', filters.cityId);
     if (filters.lat) p.set('lat', filters.lat);
     if (filters.lng) p.set('lng', filters.lng);
+    if (filters.hasPickup) p.set('hasPickup', 'true');
+    if (filters.hasLunch) p.set('hasLunch', 'true');
+    if (filters.isDaily) p.set('isDaily', 'true');
+    if (filters.isInstantConfirmation) p.set('isInstantConfirmation', 'true');
     p.set('page', String(state.page));
     p.set('size', String(state.size));
     p.set('sortBy', filters.sortBy);
@@ -89,10 +97,21 @@
         <div class="tour-title">${escapeHtml(t.tourName || '')}</div>
         <div class="meta">
           <span><strong>${t.price ?? ''}</strong></span>
+        <div class="thumb">
+          ${t.imageUrl ? `<img src="${t.imageUrl}" alt="${escapeHtml(t.tourName)}" loading="lazy">` : 
+            t.imageUrls && t.imageUrls.length > 0 ? `<img src="${t.imageUrls[0]}" alt="${escapeHtml(t.tourName)}" loading="lazy">` : 
+            '<span>Tour</span>'}
+        </div>
+        <div class="tour-title">${escapeHtml(t.tourName || '')}</div>
+        <div class="meta">
+          <span><strong>${t.price ? Number(t.price).toLocaleString() : ''} VNĐ</strong></span>
           <span>⭐ ${(t.rating ?? 0).toFixed ? (t.rating ?? 0).toFixed(1) : (t.rating ?? 0)}</span>
         </div>
         <div class="meta" style="margin-top:10px;justify-content:flex-start;gap:10px;flex-wrap:wrap;">
           ${t.transportType ? `<span class="pill">${escapeHtml(t.transportType)}</span>` : ''}
+          ${t.hasPickup ? `<span class="pill" style="background:#e0f2fe;color:#0369a1;">🚐 Đưa đón</span>` : ''}
+          ${t.hasLunch ? `<span class="pill" style="background:#fef3c7;color:#92400e;">🍱 Ăn trưa</span>` : ''}
+          ${t.isInstantConfirmation ? `<span class="pill" style="background:#dcfce7;color:#166534;">⚡ Xác nhận ngay</span>` : ''}
         </div>
         <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
           <label class="chk" style="flex:1;">

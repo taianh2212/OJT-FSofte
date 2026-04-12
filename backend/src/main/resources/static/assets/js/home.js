@@ -15,7 +15,7 @@
         const span = document.createElement('span');
         span.className = 'pill';
         span.style.cursor = 'pointer';
-        span.innerHTML = `<strong>${escapeHtml(cat.name)}</strong>`;
+        span.innerHTML = `<strong>${escapeHtml(cat.categoryName)}</strong>`;
         span.onclick = () => {
           window.location.href = `./tours.html?categoryId=${cat.id}`;
         };
@@ -40,8 +40,8 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
-        card.onmouseover = () => { card.style.transform = 'translateY(-6px)'; card.style.boxGuards = 'var(--shadow-soft)'; };
-        card.onmouseout = () => { card.style.transform = 'translateY(0)'; card.style.boxGuards = 'var(--shadow-card)'; };
+        card.onmouseover = () => { card.style.transform = 'translateY(-6px)'; card.style.boxShadow = 'var(--shadow-soft)'; };
+        card.onmouseout = () => { card.style.transform = 'translateY(0)'; card.style.boxShadow = 'var(--shadow-card)'; };
         
         card.innerHTML = `
           <div class="thumb">Tour</div>

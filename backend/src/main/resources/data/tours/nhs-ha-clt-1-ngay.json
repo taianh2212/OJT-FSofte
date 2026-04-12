@@ -1,0 +1,46 @@
+{
+    "externalId": "NHS_HOI_AN_CLC_1DAY",
+    "tourName": "Ngũ Hành Sơn - Hội An - Cù Lao Chàm",
+    "description": "Tour một ngày với combo Ngũ Hành Sơn, phố cổ Hội An và khám phá đảo Cù Lao Chàm: lịch sử, văn hóa và lặn biển giữa vùng di sản.",
+    "price": 1590000,
+    "originalPrice": 1890000,
+    "duration": 1,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Cù Lao Chàm",
+    "categoryName": "Tour Biển Đảo",
+    "transportType": "Xe du lịch + Cano cao tốc",
+    "itinerary": "[DAY 1]\n07:00 Khởi hành từ Đà Nẵng đi Ngũ Hành Sơn, khám phá động Huyền Không.\n09:30 Tiếp tục đến Hội An, tham quan phố cổ và ăn trưa đặc sản.\n12:00 Cano cao tốc ra Cù Lao Chàm, tham quan Làng Chàm và lặn ngắm san hô.\n15:00 Viếng chùa Hải Tạng, nghe câu chuyện về nghề yến.\n16:30 Cano đưa khách về lại cảng Cửa Đại và trở về Đà Nẵng.",
+    "highlights": [
+        "Ngũ Hành Sơn linh thiêng",
+        "Hội An di sản văn hoá",
+        "Cù Lao Chàm lặn san hô",
+        "Cano cao tốc và bảo tồn biển",
+        "Hướng dẫn viên Hội An uy tín"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1495803531432-b5cd9d0b6f1f?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "inclusions": [
+        "Xe đón/trả",
+        "Cano khứ hồi",
+        "Ăn trưa đặc sản",
+        "Vé tham quan",
+        "Hướng dẫn viên tiếng Việt"
+    ],
+    "rating": 4.9,
+    "schedules": [
+        {
+            "startDate": "2026-04-08",
+            "availableSlots": 12,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-18",
+            "availableSlots": 10,
+            "status": "OPEN"
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "externalId": "BANA_1DAY_PREMIUM",
+    "tourName": "Bà Nà Hills 1 ngày - Cầu Vàng & Fantasy Park",
+    "description": "Lịch trình 1 ngày tối ưu giúp du khách chinh phục Bà Nà Hills dù chỉ có thời gian ngắn. Bao gồm tuyến cáp treo Guinness, check-in Cầu Vàng, thăm làng Pháp cổ kính và chơi không giới hạn tại Fantasy Park trước khi trở về Đà Nẵng.",
+    "price": 1890000,
+    "originalPrice": 2190000,
+    "duration": 1,
+    "startLocation": "Đà Nẵng",
+    "endLocation": "Bà Nà Hills",
+    "categoryName": "Tour Trải Nghiệm",
+    "transportType": "Xe du lịch máy lạnh + Cáp treo",
+    "itinerary": "[DAY 1]\\n06:30 Đón khách tại khách sạn trung tâm Đà Nẵng.\n08:00 Lên cáp treo, ngắm toàn cảnh rừng núi.\n09:30 Check-in Cầu Vàng và Le Jardin.\n11:30 Dùng buffet trưa Beer Plaza hơn 80 món.\n13:30 Vui chơi Fantasy Park, tàu leo núi và khu hài.\n16:30 Tự do khám phá làng Pháp và vườn hoa 9 chủ đề.\n18:00 Xuống núi, trả khách tại Đà Nẵng.",
+    "highlights": [
+        "Cáp treo Guinness",
+        "Cầu Vàng ánh sáng vàng",
+        "Fantasy Park trò chơi trong nhà",
+        "Buffet Beer Plaza hơn 80 món",
+        "Làng Pháp và vườn hoa 9 chủ đề"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "schedules": [
+        {
+            "startDate": "2026-04-11",
+            "availableSlots": 18,
+            "status": "OPEN"
+        },
+        {
+            "startDate": "2026-04-15",
+            "availableSlots": 12,
+            "status": "OPEN"
+        }
+    ]
+}
