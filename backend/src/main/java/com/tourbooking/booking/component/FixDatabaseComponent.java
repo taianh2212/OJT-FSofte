@@ -46,6 +46,27 @@ public class FixDatabaseComponent {
             }
 
             log.info("Sanitized bookings dates.");
+            
+            // 4. Create TourProgressLogs if not exists
+            jdbcTemplate.execute("IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'TourProgressLogs') " +
+                "CREATE TABLE TourProgressLogs (" +
+                "LogID BIGINT IDENTITY(1,1) PRIMARY KEY, " +
+                "ScheduleID BIGINT NOT NULL, " +
+                "Content NVARCHAR(MAX), " +
+                "CreatedAt DATETIME, " +
+                "UpdatedAt DATETIME, " +
+                "CONSTRAINT FK_ProgressLog_Schedule FOREIGN KEY (ScheduleID) REFERENCES TourSchedules(ScheduleID)" +
+                ")");
+
+            // Ensure UpdatedAt column exists for existing tables
+            try {
+                jdbcTemplate.execute("IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('TourProgressLogs') AND name = 'UpdatedAt') " +
+                    "ALTER TABLE TourProgressLogs ADD UpdatedAt DATETIME");
+            } catch (Exception e) {
+                log.warn("Could not add UpdatedAt column (maybe already exists): {}", e.getMessage());
+            }
+
+            log.info("Ensured TourProgressLogs table and UpdatedAt column exist.");
 
         } catch (Exception e) {
             log.error("Failed to fix database: {}", e.getMessage());

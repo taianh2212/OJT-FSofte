@@ -2,6 +2,7 @@ package com.tourbooking.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.tourbooking.booking.model.entity.TourSchedule;
 import com.tourbooking.booking.model.entity.Tour;
@@ -15,7 +16,8 @@ public interface TourScheduleRepository extends JpaRepository<TourSchedule, Long
     @Query("SELECT s FROM TourSchedule s WHERE s.status = 'OPEN'")
     List<TourSchedule> findAllOpen();
 
-    List<TourSchedule> findByGuideId(Long guideId);
+    @Query("SELECT s FROM TourSchedule s WHERE s.guide.id = :guideId")
+    List<TourSchedule> findByGuideId(@Param("guideId") Long guideId);
 
     void deleteAllByTour(Tour tour);
 }

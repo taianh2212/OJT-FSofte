@@ -17,6 +17,7 @@ import com.tourbooking.booking.repository.TourRepository;
 import com.tourbooking.booking.repository.TourScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
@@ -64,7 +65,7 @@ public class TourDataImporter implements CommandLineRunner {
     }
 
     @Transactional
-    private void process(Resource resource) {
+    public void process(Resource resource) {
         try {
             TourImportDto dto = objectMapper.readValue(resource.getInputStream(), TourImportDto.class);
             if (dto.getExternalId() == null) {
