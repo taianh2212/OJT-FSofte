@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Discounts - TourBooking Admin</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 1.75rem 1.25rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0 0.5rem;
+            margin-bottom: 2rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: #4f46e5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .logo-text span {
+            color: #818cf8;
+            font-size: 0.75rem;
+            font-weight: 400;
+            display: block;
+        }
+
+        .nav-section-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.3);
+            padding: 0.75rem 0.75rem 0.25rem;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.75rem;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-bottom: 0.125rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .nav-item .icon {
+            font-size: 1.05rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem 2.5rem;
+            background-color: #f8fafc;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .discounts-table {
+            background: white;
+            border-radius: 1rem;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .detail-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-section h3 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .detail-content {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .detail-content p {
+            margin: 0.5rem 0;
+        }
+
+        .detail-content strong {
+            color: #1e293b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            ring: 2px solid #4f46e5;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-disabled {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        code {
+            background: #e2e8f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <a href="./dashboard.html" class="sidebar-logo">
+                <div class="logo-icon">🎫</div>
+                <div class="logo-text">TourBooking<span>Admin Panel</span></div>
+            </a>
+            <div class="nav-section-label">Menu chính</div>
+            <a href="./dashboard.html" class="nav-item">
+                <span class="icon">📊</span> Dashboard
+            </a>
+            <a href="./manageTours.html" class="nav-item">
+                <span class="icon">🏝️</span> Manage Tours
+            </a>
+            <a href="./manageCatelories.html" class="nav-item">
+                <span class="icon">📁</span> Manage Categories
+            </a>
+            <a href="./manageDiscounts.html" class="nav-item active">
+                <span class="icon">🏷️</span> Manage Discounts
+            </a>
+            <a href="./manageUsers.html" class="nav-item">
+                <span class="icon">👥</span> Manage Users
+            </a>
+            <a href="./manageReview.html" class="nav-item">
+                <span class="icon">⭐</span> Manage Reviews
+            </a>
+            <a href="./financialReport.html" class="nav-item">
+                <span class="icon">💰</span> Financial Report
+            </a>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Manage Discounts</h1>
+                <div class="user-actions">
+                    <span id="userInfo" style="font-weight: 600;"></span>
+                    <button id="logoutBtn" class="btn-secondary" style="margin-left: 1rem;">Logout</button>
+                </div>
+            </header>
+
+            <div class="page-header">
+                <h2>Discount List</h2>
+                <button onclick="showCreateModal()" class="btn-success">+ Create New Discount</button>
+            </div>
+
+            <div class="discounts-table">
+                <table id="discountTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Code</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Min Order</th>
+                            <th>Valid Period</th>
+                            <th>Usage</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="discountTableBody">
+                        <tr>
+                            <td colspan="9" class="loading">Loading discounts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="detail-section">
+                <h3>Discount Details</h3>
+                <div id="detail" class="detail-content">
+                    <p style="color: #64748b;">Select a discount to view details</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Create/Edit -->
+    <div id="discountModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Create Discount</h3>
+            <input type="hidden" id="discountId">
+
+            <div class="form-group">
+                <label>Discount Code *</label>
+                <input type="text" id="code" placeholder="e.g., SUMMER2024" maxlength="50">
+                <small>Unique code for customers to enter</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Discount Type *</label>
+                    <select id="discountType">
+                        <option value="PERCENT">Percentage (%)</option>
+                        <option value="FIXED">Fixed Amount (VND)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Discount Value *</label>
+                    <input type="number" id="discountValue" placeholder="0" step="1000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Minimum Order Value (Optional)</label>
+                <input type="number" id="minOrderValue" placeholder="0" step="1000">
+                <small>Minimum booking amount to apply this discount</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="form-group">
+                    <label>End Date *</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Max Total Usage (Optional)</label>
+                    <input type="number" id="maxUsage" placeholder="Unlimited" min="1">
+                    <small>Maximum times this code can be used</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Max Usage Per User (Optional)</label>
+                    <input type="number" id="maxUsagePerUser" placeholder="Unlimited" min="1">
+                    <small>Maximum times per customer</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select id="status">
+                    <option value="ACTIVE">Active</option>
+                    <option value="DISABLED">Disabled</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+                <button onclick="saveDiscount()" class="btn-success">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API endpoints
+        const DISCOUNT_API = "http://localhost:8080/api/v1/admin/discounts";
+
+        // Kiểm tra quyền ADMIN
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            window.location.href = '/pages/auth/login.html';
+        } else {
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role === 'STAFF') {
+                    window.location.href = '/pages/staff/dashboard.html';
+                } else if (user.role !== 'ADMIN') {
+                    window.location.href = '/pages/auth/login.html';
+                } else {
+                    document.getElementById('userInfo').innerText = user.fullName || user.email;
+                }
+            } catch (e) {
+                console.error('Error parsing user:', e);
+                window.location.href = '/pages/auth/login.html';
+            }
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            window.location.href = '/pages/auth/login.html';
+        });
+
+        let currentEditId = null;
+
+        // Helper: Lấy Header (bao gồm Token)
+        function getHeaders() {
+            const token = localStorage.getItem('token');
+            const headers = {
+                "Content-Type": "application/json"
+            };
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        // Helper: Hiển thị thông báo
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Format currency
+        function formatPrice(price) {
+            if (!price && price !== 0) return '—';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(price);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        // Get status badge class
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'ACTIVE': return 'status-active';
+                case 'EXPIRED': return 'status-expired';
+                case 'DISABLED': return 'status-disabled';
+                default: return 'status-disabled';
+            }
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            switch (status) {
+                case 'ACTIVE': return 'Active';
+                case 'EXPIRED': return 'Expired';
+                case 'DISABLED': return 'Disabled';
+                default: return status;
+            }
+        }
+
+        // LOAD DISCOUNTS
+        function loadDiscounts() {
+            console.log('Loading discounts...');
+            const tbody = document.getElementById('discountTableBody');
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">Loading discounts...</td></tr>';
+
+            fetch(DISCOUNT_API, {
+                method: 'GET',
+                headers: getHeaders()
+            })
+                .then(async res => {
+                    console.log('Response status:', res.status);
+                    const text = await res.text();
+                    console.log('Raw response:', text);
+
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('Invalid JSON response: ' + text.substring(0, 100));
+                    }
+
+                    if (!res.ok) {
+                        throw new Error(data.message || `HTTP ${res.status}`);
+                    }
+
+                    return data;
+                })
+                .then(response => {
+                    console.log('Parsed response:', response);
+                    // Cấu trúc ApiResponse: { success, message, data }
+                    const discounts = response.data;
+
+                    if (!discounts || discounts.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No discounts found. Create your first discount!</td></tr>';
+                        return;
+                    }
+
+                    let html = "";
+                    discounts.forEach(d => {
+                        const discountValue = d.discountType === 'PERCENT'
+                            ? `${d.discountValue}%`
+                            : formatPrice(d.discountValue);
+
+                        const validPeriod = `${formatDate(d.startDate)} → ${formatDate(d.endDate)}`;
+                        const usage = `${d.usedCount || 0}${d.maxUsage ? ` / ${d.maxUsage}` : ''}`;
+
+                        // Check if discount is expired
+                        const today = new Date();
+                        const endDate = new Date(d.endDate);
+                        let status = d.status;
+                        if (status === 'ACTIVE' && endDate < today) {
+                            status = 'EXPIRED';
+                        }
+
+                        html += `
+                        <tr>
+                            <td>${d.id}</td>
+                            <td><strong>${escapeHtml(d.code)}</strong></td>
+                            <td>${d.discountType === 'PERCENT' ? 'Percentage' : 'Fixed'}</td>
+                            <td>${discountValue}</td>
+                            <td>${d.minOrderValue ? formatPrice(d.minOrderValue) : '—'}</td>
+                            <td style="font-size: 0.8rem;">${validPeriod}</td>
+                            <td>${usage}</td>
+                            <td><span class="status-badge ${getStatusBadgeClass(status)}">${getStatusText(status)}</span></td>
+                            <td class="action-buttons">
+                                <button onclick="viewDiscount(${d.id})" class="btn-info">View</button>
+                                <button onclick="showEditModal(${d.id})" class="btn-warning">Edit</button>
+                                <button onclick="deleteDiscount(${d.id})" class="btn-danger">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    });
+                    tbody.innerHTML = html;
+                    showToast('Discounts loaded successfully!', 'success');
+                })
+                .catch(error => {
+                    console.error('Error loading discounts:', error);
+                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Error: ${error.message}<br><br>
+                    <button onclick="loadDiscounts()" class="btn-success" style="margin-top: 1rem;">Retry</button>
+                </td></tr>`;
+                    showToast('Error: ' + error.message, 'error');
+                });
+        }
+
+        // VIEW DISCOUNT DETAILS
+        function viewDiscount(id) {
+            fetch(`${DISCOUNT_API}/${id}`, {
+                headers: getHeaders()
+            })
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Failed to fetch discount details');
+                    return data;
+                })
+                .then(response => {
+                    const d = response.data;
+                    const discountValue = d.discountType === 'PERCENT'
+                        ? `${d.discountValue}%`
+                        : formatPrice(d.discountValue);
+
+                    // Check if discount is expired
+                    const today = new Date();
+                    const endDate = new Date(d.endDate);
+                    let status = d.status;
+                    if (status === 'ACTIVE' && endDate < today) {
+                        status = 'EXPIRED';
+                    }
+
+                    document.getElementById("detail").innerHTML = `
+                    <p><strong>🏷️ Code:</strong> <code>${escapeHtml(d.code)}</code></p>
+                    <p><strong>📊 Type:</strong> ${d.discountType === 'PERCENT' ? 'Percentage (%)' : 'Fixed Amount (VND)'}</p>
+                    <p><strong>💰 Value:</strong> ${discountValue}</p>
+                    <p><strong>🛒 Minimum Order:</strong> ${d.minOrderValue ? formatPrice(d.minOrderValue) : 'No minimum'}</p>
+                    <p><strong>📅 Valid From:</strong> ${formatDate(d.startDate)}</p>
+                    <p><strong>📅 Valid To:</strong> ${formatDate(d.endDate)}</p>
+                    <p><strong>🔢 Usage Statistics:</strong></p>
+                    <ul style="margin-left: 1rem;">
+                        <li>Used: <strong>${d.usedCount || 0}</strong> times</li>
+                        ${d.maxUsage ? `<li>Max total: <strong>${d.maxUsage}</strong> times</li>` : ''}
+                        ${d.maxUsagePerUser ? `<li>Max per user: <strong>${d.maxUsagePerUser}</strong> times</li>` : ''}
+                    </ul>
+                    <p><strong>⚡ Status:</strong> <span class="status-badge ${getStatusBadgeClass(status)}">${getStatusText(status)}</span></p>
+                `;
+                })
+                .catch(error => {
+                    console.error('Error loading discount details:', error);
+                    document.getElementById("detail").innerHTML = `
+                    <p style="color: #ef4444;">Error loading discount details: ${error.message}</p>
+                `;
+                    showToast('Error loading discount details: ' + error.message, 'error');
+                });
+        }
+
+        // SHOW CREATE MODAL
+        function showCreateModal() {
+            currentEditId = null;
+            document.getElementById('modalTitle').innerText = 'Create New Discount';
+            document.getElementById('discountId').value = '';
+            document.getElementById('code').value = '';
+            document.getElementById('discountType').value = 'PERCENT';
+            document.getElementById('discountValue').value = '';
+            document.getElementById('minOrderValue').value = '';
+
+            // Set default dates (today to next month)
+            const today = new Date().toISOString().split('T')[0];
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            const nextMonthStr = nextMonth.toISOString().split('T')[0];
+
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = nextMonthStr;
+            document.getElementById('maxUsage').value = '';
+            document.getElementById('maxUsagePerUser').value = '';
+            document.getElementById('status').value = 'ACTIVE';
+
+            document.getElementById('discountModal').style.display = 'flex';
+        }
+
+        // SHOW EDIT MODAL
+        function showEditModal(id) {
+            fetch(`${DISCOUNT_API}/${id}`, {
+                headers: getHeaders()
+            })
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Failed to fetch discount details');
+                    return data;
+                })
+                .then(response => {
+                    const d = response.data;
+                    currentEditId = id;
+                    document.getElementById('modalTitle').innerText = 'Edit Discount';
+                    document.getElementById('discountId').value = d.id;
+                    document.getElementById('code').value = d.code || '';
+                    document.getElementById('discountType').value = d.discountType || 'PERCENT';
+                    document.getElementById('discountValue').value = d.discountValue || '';
+                    document.getElementById('minOrderValue').value = d.minOrderValue || '';
+                    document.getElementById('startDate').value = d.startDate ? d.startDate.split('T')[0] : '';
+                    document.getElementById('endDate').value = d.endDate ? d.endDate.split('T')[0] : '';
+                    document.getElementById('maxUsage').value = d.maxUsage || '';
+                    document.getElementById('maxUsagePerUser').value = d.maxUsagePerUser || '';
+                    document.getElementById('status').value = d.status || 'ACTIVE';
+                    document.getElementById('discountModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error loading discount for edit:', error);
+                    showToast('Error loading discount for edit: ' + error.message, 'error');
+                });
+        }
+
+        // SAVE DISCOUNT (CREATE OR UPDATE)
+        function saveDiscount() {
+            const code = document.getElementById('code').value.trim().toUpperCase();
+            const discountType = document.getElementById('discountType').value;
+            const discountValue = parseFloat(document.getElementById('discountValue').value);
+            const minOrderValue = document.getElementById('minOrderValue').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const maxUsage = document.getElementById('maxUsage').value;
+            const maxUsagePerUser = document.getElementById('maxUsagePerUser').value;
+            const status = document.getElementById('status').value;
+
+            // Validation
+            if (!code) {
+                showToast('Discount code is required!', 'error');
+                return;
+            }
+
+            if (isNaN(discountValue) || discountValue <= 0) {
+                showToast('Please enter a valid discount value!', 'error');
+                return;
+            }
+
+            if (discountType === 'PERCENT' && discountValue > 100) {
+                showToast('Percentage discount cannot exceed 100%!', 'error');
+                return;
+            }
+
+            if (!startDate) {
+                showToast('Start date is required!', 'error');
+                return;
+            }
+
+            if (!endDate) {
+                showToast('End date is required!', 'error');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('End date must be after start date!', 'error');
+                return;
+            }
+
+            const discountData = {
+                code: code,
+                discountType: discountType,
+                discountValue: discountValue,
+                minOrderValue: minOrderValue ? parseFloat(minOrderValue) : null,
+                startDate: startDate,
+                endDate: endDate,
+                maxUsage: maxUsage ? parseInt(maxUsage) : null,
+                maxUsagePerUser: maxUsagePerUser ? parseInt(maxUsagePerUser) : null,
+                status: status
+            };
+
+            console.log('Saving discount data:', discountData);
+
+            let url = DISCOUNT_API;
+            let method = 'POST';
+
+            if (currentEditId) {
+                url = `${DISCOUNT_API}/${currentEditId}`;
+                method = 'PUT';
+            }
+
+            fetch(url, {
+                method: method,
+                headers: getHeaders(),
+                body: JSON.stringify(discountData)
+            })
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.message || 'Failed to save discount');
+                    }
+                    return data;
+                })
+                .then(() => {
+                    closeModal();
+                    loadDiscounts();
+                    const message = currentEditId ? 'Discount updated successfully!' : 'Discount created successfully!';
+                    showToast(message, 'success');
+                    document.getElementById("detail").innerHTML = `
+                    <p style="color: #64748b;">${message} Select a discount to view details</p>
+                `;
+                })
+                .catch(error => {
+                    console.error('Error saving discount:', error);
+                    showToast(error.message, 'error');
+                });
+        }
+
+        // DELETE DISCOUNT
+        function deleteDiscount(id) {
+            if (confirm('Are you sure you want to delete this discount? This action cannot be undone.')) {
+                fetch(`${DISCOUNT_API}/${id}`, {
+                    method: "DELETE",
+                    headers: getHeaders()
+                })
+                    .then(async res => {
+                        if (!res.ok) {
+                            const data = await res.json();
+                            throw new Error(data.message || 'Failed to delete discount');
+                        }
+                        loadDiscounts();
+                        showToast('Discount deleted successfully!', 'success');
+                        document.getElementById("detail").innerHTML = `
+                        <p style="color: #64748b;">Discount deleted successfully. Select a discount to view details</p>
+                    `;
+                    })
+                    .catch(error => {
+                        console.error('Error deleting discount:', error);
+                        showToast('Error deleting discount: ' + error.message, 'error');
+                    });
+            }
+        }
+
+        // CLOSE MODAL
+        function closeModal() {
+            document.getElementById('discountModal').style.display = 'none';
+            currentEditId = null;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('discountModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load discounts on page load
+        loadDiscounts();
+    </script>
+</body>
+
+</html>
