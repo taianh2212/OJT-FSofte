@@ -1,6 +1,7 @@
 package com.tourbooking.booking.service.impl;
 
 import java.util.List;
+import java.util.HashSet;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -105,6 +106,9 @@ public class TourServiceImpl implements TourService {
 
     private void processCollections(Tour tour, TourRequest request) {
         if (request.getHighlights() != null) {
+            if (tour.getHighlights() == null) {
+                tour.setHighlights(new HashSet<>());
+            }
             tour.getHighlights().clear();
             request.getHighlights().forEach(h -> {
                 TourHighlight highlight = new TourHighlight();
@@ -114,6 +118,9 @@ public class TourServiceImpl implements TourService {
             });
         }
         if (request.getImageUrls() != null) {
+            if (tour.getImages() == null) {
+                tour.setImages(new HashSet<>());
+            }
             tour.getImages().clear();
             request.getImageUrls().forEach(url -> {
                 TourImage image = new TourImage();
@@ -123,6 +130,9 @@ public class TourServiceImpl implements TourService {
             });
         }
         if (request.getSchedules() != null) {
+            if (tour.getSchedules() == null) {
+                tour.setSchedules(new HashSet<>());
+            }
             tour.getSchedules().clear();
             request.getSchedules().forEach(sReq -> {
                 TourSchedule schedule = TourMapper.toScheduleEntity(sReq);

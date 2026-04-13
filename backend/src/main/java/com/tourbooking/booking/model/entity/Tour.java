@@ -4,6 +4,7 @@ package com.tourbooking.booking.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -122,20 +123,25 @@ public class Tour extends Base {
     @Column(name = "Rating")
     private Double rating = 0.0;
 
+    @Builder.Default
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<TourImage> images;
+    private Set<TourImage> images = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<TourSchedule> schedules;
+    private Set<TourSchedule> schedules = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<TourHighlight> highlights;
+    private Set<TourHighlight> highlights = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<TourFaq> faqs;
+    private Set<TourFaq> faqs = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Review> reviews;
+    private Set<Review> reviews = new HashSet<>();
 
     @Builder.Default
     @Column(name = "Source", columnDefinition = "NVARCHAR(50)")
