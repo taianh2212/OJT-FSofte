@@ -56,7 +56,13 @@ public class UserServiceImpl implements UserService {
 
         User user = UserMapper.toEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setIsActive(false); // Require verification
+        
+        // Respect isActive if explicitly provided (e.g., from Admin Dashboard), otherwise false (require verification)
+        if (request.getIsActive() != null) {
+            user.setIsActive(request.getIsActive());
+        } else {
+            user.setIsActive(false);
+        }
 
         User savedUser = userRepository.save(user);
         return UserMapper.toResponse(savedUser);
