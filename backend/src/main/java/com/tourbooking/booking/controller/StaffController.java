@@ -72,6 +72,16 @@ public class StaffController {
                 .build();
     }
 
+    @GetMapping("/schedules/{id}")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<com.tourbooking.booking.model.dto.response.TourScheduleResponse> getScheduleDetails(@PathVariable Long id) {
+        return ApiResponse.<com.tourbooking.booking.model.dto.response.TourScheduleResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Schedule details retrieved successfully")
+                .data(staffService.getScheduleDetails(id))
+                .build();
+    }
+
     @GetMapping("/refunds")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<List<RefundResponse>> listRefundRequests() {

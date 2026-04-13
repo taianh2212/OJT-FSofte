@@ -25,7 +25,7 @@
 
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 2rem; border-radius: 16px; width: 400px; max-width: 90%; }
+        .modal-content { background: white; padding: 2rem; border-radius: 16px; width: 400px; max-width: 95%; max-height: 90vh; overflow-y: auto; }
         .modal-content h2 { margin-top: 0; margin-bottom: 1rem; }
         .modal-content select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 1rem; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
@@ -75,6 +75,31 @@
             <div class="modal-actions">
                 <button class="action-btn" style="background:#64748b;" onclick="closeModal()">Close</button>
                 <button class="action-btn" onclick="submitAssignment()">Assign</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress & Photos Details Modal -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content" style="width: 650px; max-width: 95%; max-height: 85vh; overflow-y: auto;">
+            <h2 id="detailsTitle">Tour Progress Details</h2>
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="color: #64748b; margin-bottom: 0.5rem; font-size: 0.9rem;">CURRENT PROGRESS</h4>
+                <div id="detailsProgress" style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #0f766e; min-height: 50px; max-height: 300px; overflow-y: auto;"></div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="color: #64748b; margin-bottom: 0.5rem; font-size: 0.9rem;">FINAL REPORT</h4>
+                <div id="detailsReport" style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #64748b; min-height: 50px; max-height: 120px; overflow-y: auto; font-size: 0.95rem; line-height: 1.5;"></div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="color: #64748b; margin-bottom: 0.5rem; font-size: 0.9rem;">ACTIVITY PHOTOS</h4>
+                <div id="detailsPhotos" style="display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;"></div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="action-btn" style="background:#64748b;" onclick="closeDetailsModal()">Close</button>
             </div>
         </div>
     </div>

@@ -46,9 +46,11 @@
             <h2 class="section-title">Update Progress</h2>
             <div class="form-group">
                 <label>Current Location or Status</label>
-                <input type="text" id="progressInput" class="form-input" placeholder="e.g. Arrived at Ba Na Hills">
+                <div class="input-group">
+                <textarea id="progressInput" placeholder="What's happening now?" class="form-input"></textarea>
+                <button class="btn-action" onclick="updateProgress()">Save Progress</button>
             </div>
-            <button class="btn-action" onclick="updateProgress()">Save Progress</button>
+            <div id="progressHistory" style="margin-top: 1rem; max-height: 200px; overflow-y: auto;"></div>
         </div>
 
         <!-- UC29: Upload Images -->
@@ -63,6 +65,7 @@
                 <div id="previewImages"></div>
             </div>
             <button class="btn-action btn-outline" id="uploadBtn" onclick="uploadPhotos()">Upload Photos</button>
+            <div id="uploadedGallery" style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;"></div>
         </div>
 
         <!-- UC30: Submit Report -->

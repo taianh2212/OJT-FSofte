@@ -12,6 +12,7 @@ import com.tourbooking.booking.model.entity.enums.RefundStatus;
 import com.tourbooking.booking.model.entity.enums.UserRole;
 import com.tourbooking.booking.repository.BookingRepository;
 import com.tourbooking.booking.repository.RefundRequestRepository;
+import com.tourbooking.booking.repository.TourProgressLogRepository;
 import com.tourbooking.booking.repository.TourScheduleRepository;
 import com.tourbooking.booking.repository.UserRepository;
 import com.tourbooking.booking.service.StaffService;
@@ -32,6 +33,7 @@ public class StaffServiceImpl implements StaffService {
     private final TourScheduleRepository tourScheduleRepository;
     private final UserRepository userRepository;
     private final RefundRequestRepository refundRequestRepository;
+    private final TourProgressLogRepository tourProgressLogRepository;
 
     @Override
     @Transactional
@@ -131,21 +133,64 @@ public class StaffServiceImpl implements StaffService {
 
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public com.tourbooking.booking.model.dto.response.TourScheduleResponse getScheduleDetails(Long id) {
+        TourSchedule schedule = tourScheduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tour schedule not found"));
+        return mapToResponse(schedule, true); // Include full logs
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<com.tourbooking.booking.model.dto.response.TourScheduleResponse> listSchedules() {
         return tourScheduleRepository.findAll().stream()
-                .map(schedule -> com.tourbooking.booking.model.dto.response.TourScheduleResponse.builder()
-                        .id(schedule.getId())
-                        .tourId(schedule.getTour() != null ? schedule.getTour().getId() : null)
-                        .tourName(schedule.getTour() != null ? schedule.getTour().getTourName() : null)
-                        .guideId(schedule.getGuide() != null ? schedule.getGuide().getId() : null)
-                        .startDate(schedule.getStartDate())
-                        .endDate(schedule.getEndDate())
-                        .availableSlots(schedule.getAvailableSlots())
-                        .status(schedule.getStatus() != null ? schedule.getStatus().name() : null)
-                        .currentProgress(schedule.getCurrentProgress())
-                        .reportContent(schedule.getReportContent())
-                        .reportSubmittedAt(schedule.getReportSubmittedAt())
-                        .build())
-                .toList();
+                .map(s -> mapToResponse(s, false)) // Minimal logs for list
+                .collect(Collectors.toList());
+    }
+
+    private com.tourbooking.booking.model.dto.response.TourScheduleResponse mapToResponse(TourSchedule schedule, boolean includeFullLogs) {
+        try {
+            var res = com.tourbooking.booking.model.dto.response.TourScheduleResponse.builder()
+                    .id(schedule.getId())
+                    .tourId(schedule.getTour() != null ? schedule.getTour().getId() : null)
+                    .tourName(schedule.getTour() != null ? schedule.getTour().getTourName() : null)
+                    .guideId(schedule.getGuide() != null ? schedule.getGuide().getId() : null)
+                    .startDate(schedule.getStartDate())
+                    .endDate(schedule.getEndDate())
+                    .availableSlots(schedule.getAvailableSlots())
+                    .status(schedule.getStatus() != null ? schedule.getStatus().name() : null)
+                    .currentProgress(schedule.getCurrentProgress())
+                    .reportContent(schedule.getReportContent())
+                    .reportSubmittedAt(schedule.getReportSubmittedAt())
+                    .build();
+
+            if (schedule.getActivityImages() != null) {
+                res.setImageUrls(schedule.getActivityImages().stream()
+                        .filter(img -> img != null)
+                        .map(img -> img.getImageUrl())
+                        .collect(Collectors.toList()));
+            } else {
+                res.setImageUrls(new java.util.ArrayList<>());
+            }
+
+            if (includeFullLogs) {
+                res.setProgressLogs(tourProgressLogRepository.findByScheduleOrderByCreatedAtDesc(schedule).stream()
+                        .filter(l -> l != null)
+                        .map(l -> com.tourbooking.booking.model.dto.response.ProgressLogResponse.builder()
+                                .id(l.getId())
+                                .content(l.getContent())
+                                .createdAt(l.getCreatedAt())
+                                .build())
+                        .collect(Collectors.toList()));
+            } else {
+                res.setProgressLogs(new java.util.ArrayList<>());
+            }
+            
+            return res;
+        } catch (Exception e) {
+            return com.tourbooking.booking.model.dto.response.TourScheduleResponse.builder()
+                    .id(schedule.getId())
+                    .tourName("Error Loading")
+                    .build();
+        }
     }
 }
