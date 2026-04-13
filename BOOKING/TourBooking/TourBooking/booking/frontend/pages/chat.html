@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Support - TourBooking</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    form input {
+      flex: 1;
+    }
+
+    .escalation-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .escalation-status {
+      font-size: 0.85rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-shell wrap">
+      <div class="content-pad">
+        <div class="top">
+          <a class="back-link" href="./index.html">← Home</a>
+          <span class="pill" id="who">Guest</span>
+          <span class="pill" id="who">Admin</span>
+        </div>
+
+        <div class="hero-grid" style="grid-template-columns:0.9fr 1.1fr;margin-top:18px;">
+          <div class="card hero-art">
+            <div class="stack">
+              <div class="eyebrow"
+                style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.18);color:rgb(8, 3, 3);">
+                Support Desk</div>
+              <h2>Ask about bookings, tours, or itinerary details in one thread.</h2>
+              <p>Messages are stored, and the AI helper can answer quickly while staff context remains visible.</p>
+            </div>
+          </div>
+
+          <div class="card panel">
+            <h2 class="section-title">Chat Support</h2>
+            <p class="section-copy" style="margin-top:8px;">Need help deciding or fixing a booking issue? Drop a message
+              here.</p>
+            <div id="chatBox" class="chat-box" style="margin-top:16px;"></div>
+            <form id="form">
+              <input id="text" placeholder="Type a message..." />
+              <button class="btn" type="submit">Send</button>
+            </form>
+            <div class="escalation-actions">
+              <button id="escalateBtn" class="btn btn-secondary" type="button">Talk to staff</button>
+              <button id="endSessionBtn" class="btn btn-outline" type="button" hidden>End chat</button>
+              <div id="escalationStatus" class="escalation-status" hidden></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/chat.js"></script>
+</body>
+
+</html>

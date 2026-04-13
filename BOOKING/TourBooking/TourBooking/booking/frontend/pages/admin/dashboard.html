@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TourBooking</title>
+    <style>
+        :root {
+            --text-main: #1e293b;
+            --primary: #3b82f6;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--text-main);
+            color: white;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar .logo {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            display: block;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 5%;
+            background-color: #f1f5f9;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+            color: var(--primary);
+        }
+
+        .btn-secondary {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary:hover {
+            background: #dc2626;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <a href="#" class="logo"><strong>TourBooking</strong> Admin</a>
+            <nav>
+                <a href="#" class="nav-item active">Dashboard</a>
+                <a href="./manageTours.html" class="nav-item">Manager Tours</a>
+                <a href="./manageCatelories.html" class="nav-item">Manager Categories</a>
+                <a href="./manageUsers.html" class="nav-item">Manager User</a>
+                <a href="./manageReview.html" class="nav-item">Manager Review</a>
+                <a href="./financialReport.html" class="nav-item">Financial Report</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Dashboard Overview</h1>
+                <div class="user-actions">
+                    <span id="userInfo" style="font-weight: 600;"></span>
+                    <button id="logoutBtn" class="btn-secondary" style="margin-left: 1rem;">Logout</button>
+                </div>
+            </header>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="totalUsers">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenue (Month)</div>
+                    <div class="stat-value" id="totalRevenue">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Bookings</div>
+                    <div class="stat-value" id="activeBookings">--</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Hàm hiển thị lỗi
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Kiểm tra đăng nhập và role ADMIN
+        try {
+            const userStr = localStorage.getItem('user');
+            console.log('User from localStorage:', userStr);
+
+            if (!userStr) {
+                console.log('No user found, redirecting to login');
+                window.location.href = '/pages/auth/login.html';
+                throw new Error('No user found');
+            }
+
+            const user = JSON.parse(userStr);
+            console.log('Parsed user:', user);
+
+            if (!user || user.role !== 'ADMIN') {
+                console.log('User is not ADMIN, redirecting');
+                window.location.href = '/pages/auth/login.html';
+                throw new Error('Not authorized');
+            }
+
+            // Hiển thị thông tin user
+            const userName = user.fullName || user.FullName || user.email || 'Admin';
+            document.getElementById('userInfo').innerText = userName;
+
+            // Load dữ liệu thống kê
+            loadStats();
+
+        } catch (error) {
+            console.error('Error:', error);
+            showError('Please login again');
+            setTimeout(() => {
+                window.location.href = '/pages/auth/login.html';
+            }, 2000);
+        }
+
+        // Hàm load dữ liệu thống kê từ API
+        async function loadStats() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+
+                // Gọi API lấy tổng số users
+                const usersResponse = await fetch('/api/v1/admin/users/count', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (usersResponse.ok) {
+                    const data = await usersResponse.json();
+                    document.getElementById('totalUsers').innerText = data.count || '0';
+                }
+
+                // Gọi API lấy doanh thu
+                const revenueResponse = await fetch('/api/v1/admin/revenue/month', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (revenueResponse.ok) {
+                    const data = await revenueResponse.json();
+                    document.getElementById('totalRevenue').innerText = '$' + (data.revenue || '0');
+                }
+
+                // Gọi API lấy booking đang active
+                const bookingsResponse = await fetch('/api/v1/admin/bookings/active', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (bookingsResponse.ok) {
+                    const data = await bookingsResponse.json();
+                    document.getElementById('activeBookings').innerText = data.count || '0';
+                }
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Hiển thị dữ liệu mẫu nếu API chưa có
+                document.getElementById('totalUsers').innerText = '1,284';
+                document.getElementById('totalRevenue').innerText = '$12,450';
+                document.getElementById('activeBookings').innerText = '45';
+            }
+        }
+
+        // Xử lý logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            window.location.href = '/pages/auth/login.html';
+        });
+    </script>
+</body>
+
+</html>

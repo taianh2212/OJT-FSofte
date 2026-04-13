@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thông tin thanh toán PayOS - TourBooking</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .payment-wrap { max-width: 860px; margin: 24px auto; }
+    .payment-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+    .qr-box { background: #fff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 12px; padding: 16px; text-align: center; }
+    .qr-box img { width: 100%; max-width: 260px; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.08); }
+    .meta-box { background: #fff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 12px; padding: 18px; }
+    .meta-row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed rgba(0, 0, 0, 0.12); padding: 10px 0; }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-key { color: #64748b; }
+    .meta-val { font-weight: 700; text-align: right; word-break: break-word; }
+    .actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .hint { color: #0f766e; margin-top: 12px; font-size: 0.95rem; }
+    @media (max-width: 860px) { .payment-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container"><div class="page-shell"><div class="content-pad payment-wrap">
+    <div class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a>
+    </div>
+
+    <div class="card panel">
+      <h2 class="section-title" id="panelTitle">Thanh toán qua PayOS</h2>
+      <p id="panelDesc">Quét mã QR bên dưới hoặc bấm <strong>Mở trang PayOS</strong> để thanh toán VietQR qua PayOS. Sau khi thanh toán xong, bạn được chuyển về trang kết quả và hệ thống gửi email xác nhận.</p>
+      <div id="lostSessionBox" class="card panel" style="display:none;background:rgba(254,243,199,0.5);border:1px solid rgba(245,158,11,0.4);margin-top:12px;">
+        <p style="margin:0 0 12px;">Không có link PayOS (ví dụ mở lại tab cũ hoặc hết phiên). Vui lòng quay lại bước đặt tour để tạo link mới.</p>
+        <button type="button" class="btn" onclick="window.location.href='checkout.html'">Quay lại thanh toán</button>
+      </div>
+      <div class="payment-grid" id="paymentGrid" style="margin-top: 16px;">
+        <div class="qr-box" id="qrBox">
+          <img id="qrImage" alt="QR thanh toán">
+          <div class="hint" id="qrHint">Nếu app ngân hàng không quét được, hãy bấm &quot;Mở trang PayOS&quot;.</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-row"><span class="meta-key">Booking ID</span><span class="meta-val" id="bookingId">-</span></div>
+          <div class="meta-row"><span class="meta-key">Payment ID</span><span class="meta-val" id="paymentId">-</span></div>
+          <div class="meta-row"><span class="meta-key">Order Code</span><span class="meta-val" id="orderCode">-</span></div>
+          <div class="meta-row"><span class="meta-key">Số tiền</span><span class="meta-val" id="amount">-</span></div>
+          <div class="meta-row bank-static-only"><span class="meta-key">Ngân hàng</span><span class="meta-val" id="bankName">MB Bank</span></div>
+          <div class="meta-row bank-static-only"><span class="meta-key">Số tài khoản</span><span class="meta-val" id="bankAccount">0001012657781</span></div>
+          <div class="meta-row bank-static-only"><span class="meta-key">Chủ tài khoản</span><span class="meta-val" id="accountName">BUI NGUYEN MINH TUE</span></div>
+          <div class="meta-row"><span class="meta-key">Cổng thanh toán</span><span class="meta-val" id="gatewayLabel">PayOS</span></div>
+          <p id="payosUrlHint" class="hint" style="display:none;margin-top:8px;"></p>
+          <div class="actions">
+            <button type="button" class="btn" id="openPayosBtn">Mở trang PayOS</button>
+            <button type="button" class="btn btn-outline" id="confirmTransferBtn">Tôi đã chuyển khoản (Demo)</button>
+            <button type="button" class="btn btn-outline" onclick="window.location.href='history.html'">Xem lịch sử đơn</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script>
+    function moneyFormat(v) {
+      const n = Number(v || 0);
+      return n.toLocaleString('vi-VN') + ' VND';
+    }
+
+    (function initPaymentInfo() {
+      const params = new URLSearchParams(window.location.search);
+      const bookingId = params.get('bookingId') || '-';
+      let paymentId = params.get('paymentId') || '-';
+      let orderCode = params.get('orderCode') || '-';
+      let amount = params.get('amount') || '0';
+      const useStaticQr = params.get('staticQr') === '1';
+      const staticQrPath = '../../assets/images/my-qr.png';
+      const hintEl = document.getElementById('payosUrlHint');
+
+      let checkoutUrl = (params.get('checkoutUrl') || '').trim();
+
+      if (!useStaticQr && bookingId && bookingId !== '-') {
+        try {
+          const raw = sessionStorage.getItem('payosCheckoutCurrent');
+          if (raw) {
+            const st = JSON.parse(raw);
+            if (String(st.bookingId) === String(bookingId) && st.checkoutUrl && typeof st.checkoutUrl === 'string') {
+              checkoutUrl = st.checkoutUrl.trim();
+              if (st.paymentId != null && st.paymentId !== '') paymentId = String(st.paymentId);
+              if (st.orderCode) orderCode = String(st.orderCode);
+              if (st.amount != null && st.amount !== '') amount = String(st.amount);
+            }
+          }
+        } catch (e) {
+          console.warn('payosCheckoutCurrent:', e);
+        }
+      }
+
+      const payosLinkOk = Boolean(checkoutUrl) && /^https?:\/\//i.test(checkoutUrl) && !useStaticQr;
+
+      document.getElementById('bookingId').innerText = bookingId;
+      document.getElementById('paymentId').innerText = paymentId;
+      document.getElementById('orderCode').innerText = orderCode;
+      document.getElementById('amount').innerText = moneyFormat(amount);
+
+      const qrImage = document.getElementById('qrImage');
+      const openPayosBtn = document.getElementById('openPayosBtn');
+      const confirmTransferBtn = document.getElementById('confirmTransferBtn');
+      const panelTitle = document.getElementById('panelTitle');
+      const panelDesc = document.getElementById('panelDesc');
+      const paymentGrid = document.getElementById('paymentGrid');
+      const lostSessionBox = document.getElementById('lostSessionBox');
+      const qrHint = document.getElementById('qrHint');
+      const gatewayLabel = document.getElementById('gatewayLabel');
+
+      function setBankStaticVisible(show) {
+        document.querySelectorAll('.bank-static-only').forEach(function (el) {
+          el.style.display = show ? 'flex' : 'none';
+        });
+      }
+
+      if (payosLinkOk) {
+        setBankStaticVisible(false);
+        gatewayLabel.innerText = 'PayOS (VietQR)';
+        qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(checkoutUrl);
+        qrHint.textContent = 'Quét QR hoặc bấm &quot;Mở trang PayOS&quot; để thanh toán.';
+        openPayosBtn.style.display = 'inline-flex';
+        openPayosBtn.disabled = false;
+        openPayosBtn.addEventListener('click', function () {
+          window.location.href = checkoutUrl;
+        });
+        confirmTransferBtn.style.display = 'none';
+      } else if (useStaticQr) {
+        setBankStaticVisible(true);
+        panelTitle.innerText = 'Chuyển khoản dự phòng (PayOS không khả dụng)';
+        panelDesc.innerHTML = 'Hệ thống <strong>không tạo được link PayOS</strong> lúc này. Bạn có thể chuyển khoản theo QR / thông tin bên dưới, sau đó bấm <strong>Tôi đã chuyển khoản</strong> để nhân viên hoặc hệ thống xác nhận (demo).';
+        gatewayLabel.innerText = 'Chuyển khoản thủ công';
+        qrImage.src = staticQrPath;
+        qrHint.textContent = 'Quét mã QR cố định hoặc chuyển khoản đúng số tiền và nội dung ghi nhận booking.';
+        openPayosBtn.style.display = 'none';
+        hintEl.style.display = 'block';
+        hintEl.textContent = 'Đây là trang dự phòng — chỉ hiện khi không kết nối được PayOS để tạo link thanh toán.';
+        confirmTransferBtn.style.display = 'inline-flex';
+      } else {
+        setBankStaticVisible(false);
+        paymentGrid.style.display = 'none';
+        lostSessionBox.style.display = 'block';
+        panelTitle.innerText = 'Thiếu thông tin thanh toán PayOS';
+        panelDesc.style.display = 'none';
+        openPayosBtn.style.display = 'none';
+        confirmTransferBtn.style.display = 'none';
+        hintEl.style.display = 'none';
+      }
+
+      confirmTransferBtn.addEventListener('click', async () => {
+        const bookingIdNum = Number(bookingId || 0);
+        if (!bookingIdNum) {
+          alert('Không tìm thấy bookingId để xác nhận.');
+          return;
+        }
+        try {
+          await TB.apiFetch('/api/v1/payments/manual/confirm', {
+            method: 'POST',
+            body: JSON.stringify({
+              bookingId: bookingIdNum,
+              paymentMethod: 'BANK_TRANSFER'
+            })
+          });
+          alert('Đã xác nhận thanh toán thủ công thành công. Hệ thống sẽ gửi email nếu cấu hình SMTP hợp lệ.');
+          window.location.href = 'history.html';
+        } catch (e) {
+          alert(e?.message || 'Không thể xác nhận thanh toán thủ công.');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

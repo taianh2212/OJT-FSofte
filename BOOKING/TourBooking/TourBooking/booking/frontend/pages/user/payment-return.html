@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kết quả thanh toán PayOS - TourBooking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <style>
+    .wrap { max-width: 640px; margin: 32px auto; text-align: center; }
+    .status-msg { font-size: 1.1rem; margin: 16px 0; line-height: 1.5; }
+    .detail { color: #64748b; font-size: 0.95rem; margin-top: 8px; }
+    .actions { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="container"><div class="page-shell"><div class="content-pad wrap">
+    <div class="topbar" style="text-align:left">
+      <a class="brand" href="../index.html"><span class="brand-mark">TB</span><span class="brand-copy"><strong>TourBooking</strong><span>An tâm tận hưởng</span></span></a>
+    </div>
+    <div class="card panel">
+      <h2 class="section-title" id="title">Đang xác nhận thanh toán</h2>
+      <p class="status-msg" id="statusText">Đang đồng bộ với PayOS và kích hoạt đơn tour của bạn…</p>
+      <p class="detail" id="detail"></p>
+      <div class="actions">
+        <a class="btn" href="history.html" id="historyBtn" style="display:none">Xem đơn đã đặt</a>
+        <a class="btn btn-outline" href="checkout.html" id="retryBtn" style="display:none">Đặt tour khác</a>
+      </div>
+    </div>
+  </div></div></div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script>
+    const PAYOS_PENDING_CODE = 1013;
+
+    function sleep(ms) {
+      return new Promise(function (resolve) { setTimeout(resolve, ms); });
+    }
+
+    async function confirmPayOs(orderCode) {
+      return TB.apiFetch('/api/v1/payments/payos/confirm-return', {
+        method: 'POST',
+        body: JSON.stringify({ orderCode: orderCode })
+      });
+    }
+
+    async function confirmWithRetries(orderCode) {
+      for (var i = 0; i < 25; i++) {
+        try {
+          var res = await confirmPayOs(orderCode);
+          if (res && res.data && res.data.status === 'SUCCESS') {
+            return { ok: true, res: res };
+          }
+        } catch (e) {
+          var c = e.body && e.body.code;
+          if (c === PAYOS_PENDING_CODE) {
+            await sleep(2000);
+            continue;
+          }
+          return { ok: false, err: e };
+        }
+        await sleep(1500);
+      }
+      return { ok: false, err: new Error('Hết thời gian chờ xác nhận PayOS.') };
+    }
+
+    (async function main() {
+      var params = new URLSearchParams(window.location.search);
+      var cancel = params.get('cancel') === 'true';
+      var status = (params.get('status') || '').toUpperCase();
+      var code = params.get('code') || '';
+      var orderCode = Number(params.get('orderCode') || 0);
+      var detail = document.getElementById('detail');
+      var statusText = document.getElementById('statusText');
+      var title = document.getElementById('title');
+
+      if (cancel || status === 'CANCELLED') {
+        title.innerText = 'Thanh toán chưa hoàn tất';
+        statusText.innerText = 'Bạn đã hủy hoặc giao dịch không thành công trên PayOS. Đơn tour vẫn có thể ở trạng thái chờ thanh toán.';
+        detail.innerText = 'Mã đơn PayOS: ' + (orderCode || '—');
+        document.getElementById('retryBtn').style.display = 'inline-flex';
+        document.getElementById('historyBtn').style.display = 'inline-flex';
+        return;
+      }
+
+      if (!orderCode) {
+        title.innerText = 'Thiếu thông tin';
+        statusText.innerText = 'Không có orderCode từ PayOS. Hãy quay lại từ trang thanh toán hoặc liên hệ hỗ trợ.';
+        document.getElementById('historyBtn').style.display = 'inline-flex';
+        return;
+      }
+
+      detail.innerText = 'Mã đơn PayOS: ' + orderCode + (status ? ' · Trạng thái redirect: ' + status : '');
+
+      var result = await confirmWithRetries(orderCode);
+      if (result.ok) {
+        title.innerText = 'Thanh toán thành công';
+        statusText.innerText = 'Đơn tour đã được xác nhận. Email xác nhận đã được gửi (nếu SMTP đã cấu hình đúng).';
+        document.getElementById('historyBtn').style.display = 'inline-flex';
+        return;
+      }
+
+      title.innerText = 'Chưa xác nhận được';
+      statusText.innerText = (result.err && result.err.message)
+        ? result.err.message
+        : 'Không đồng bộ được với PayOS. Bạn có thể thử lại sau ít phút hoặc xem trạng thái trong lịch sử đơn.';
+      document.getElementById('historyBtn').style.display = 'inline-flex';
+      document.getElementById('retryBtn').style.display = 'inline-flex';
+    })();
+  </script>
+</body>
+</html>

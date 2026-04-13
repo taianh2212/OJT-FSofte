@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tour Detail - TourBooking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .twoCol { display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; align-items:start; margin-top: 20px; }
+    .list { display:grid; gap:12px; }
+    .thumb { min-height: 260px; }
+    .pillRow { display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+    @media (max-width: 960px) {
+      .twoCol { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-shell">
+      <div class="content-pad">
+        <div class="top">
+          <a class="back-link" href="./tours.html">← Back to tours</a>
+          <div class="actions">
+            <button class="btn btn-secondary" id="addCompareBtn" type="button">Add to compare</button>
+            <a class="btn" href="./compare.html">Compare</a>
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div class="card panel">
+            <div id="gallery" class="gallery">
+              <div class="thumb">Featured Tour</div>
+            </div>
+            <h1 id="title" class="headline" style="margin-top:20px; font-size: 2.4rem;"></h1>
+            <div class="pillRow" id="pills"></div>
+            <p id="desc" class="lead" style="margin-top:16px; line-height: 1.7;"></p>
+
+            <h3 class="section-title" style="margin-top:28px; font-size:1.6rem;">Highlights</h3>
+            <div id="highlights" class="list" style="margin-top:12px;"></div>
+          </div>
+
+          <div class="glass-list">
+            <div class="card panel" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);">
+              <div class="eyebrow">Inventory Summary</div>
+              <div class="list" style="margin-top:14px;">
+                <div class="list-item"><strong>Price:</strong> <span id="price" style="color:var(--primary); font-weight:800; font-size:1.2rem;"></span></div>
+                <div class="list-item"><strong>Rating:</strong> <span id="rating" style="font-weight:600;"></span></div>
+                <div class="list-item"><strong>Duration:</strong> <span id="duration"></span></div>
+                <div class="list-item"><strong>Route:</strong> <span id="route"></span></div>
+                <div class="list-item"><strong>Category:</strong> <span id="category" class="pill"></span></div>
+              </div>
+            </div>
+
+            <div class="card panel" style="margin-top:18px;">
+              <div class="eyebrow">Available Schedules</div>
+              <p class="section-copy" style="margin-top:8px; font-size:0.85rem;">Select your preferred dates. Sign in to confirm your booking.</p>
+              <div id="schedules" class="list" style="margin-top:16px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .gallery { 
+      display: grid; 
+      grid-template-columns: 2fr 1fr; 
+      gap: 12px; 
+      min-height: 320px; 
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .gallery img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      transition: transform 0.3s;
+    }
+    .gallery img:hover { transform: scale(1.02); }
+    .gallery-main { grid-row: span 2; }
+    .gallery-item { height: 154px; }
+  </style>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/tour-detail.js"></script>
+</body>
+</html>
