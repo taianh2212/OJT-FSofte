@@ -51,6 +51,8 @@
 
   // Track which server message IDs are already rendered
   const renderedIds = new Set();
+  // Track AI messages appended locally (by text content) to avoid re-render from polling
+  const localAiTexts = new Set();
   let greetingShown = false;
 
   function buildMsgDiv(m) {
@@ -88,7 +90,13 @@
     msgs.forEach(m => {
       const idStr = m.id ? String(m.id) : null;
       if (idStr && renderedIds.has(idStr)) return; // already rendered
-      // Remove local echo for same message (matched by content + senderType)
+      // Skip AI messages that were already appended locally (prevent duplicate from polling)
+      const senderType = (m.senderType || '').toUpperCase();
+      if (senderType === 'AI' && localAiTexts.has(m.message)) {
+        // Register the real ID so future polls skip it properly
+        if (idStr) renderedIds.add(idStr);
+        return;
+      }
       const typing = document.getElementById('typing-indicator');
       const div = buildMsgDiv(m);
       if (typing) {
@@ -112,11 +120,12 @@
     box.appendChild(div);
   }
 
-  // Format AI text: xuống dòng, in đậm **text**
+  // Format AI text: xuống dòng, in đậm **text**, render markdown link
   function formatAiText(text) {
     if (!text) return '';
     return escapeHtml(text)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color: #007bff; text-decoration: underline; font-weight: 500;">$1</a>')
       .replace(/\n/g, '<br>');
   }
 
@@ -168,8 +177,8 @@
         delete myMsg.dataset.local;
         renderedIds.add(String(saved.data.id));
       }
-      // Trigger AI response after a short delay
-      setTimeout(() => getAiResponse(content), 600);
+      // Trigger AI response immediately
+      getAiResponse(content);
     } catch (err) {
       alert('Failed to send message');
     }
@@ -199,6 +208,8 @@
 
       // Lấy đúng field reply từ backend
       const aiContent = res.data?.reply || res.data?.response || 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại!';
+      // Track this text so polling doesn't render it again
+      localAiTexts.add(aiContent);
       const aiMsg = document.createElement('div');
       aiMsg.className = 'msg ai';
       aiMsg.innerHTML = `<div style="font-size:0.75rem;opacity:0.7;margin-bottom:4px;">🤖 Trợ lý AI</div><div>${formatAiText(aiContent)}</div>`;
