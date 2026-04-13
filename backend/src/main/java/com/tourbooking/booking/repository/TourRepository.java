@@ -24,8 +24,11 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
 
     List<Tour> findByCategoryId(Long categoryId);
 
-    @Query("SELECT DISTINCT t FROM Tour t LEFT JOIN t.schedules ts WHERE " +
-           "(:keyword IS NULL OR LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+    @Query("SELECT DISTINCT t FROM Tour t LEFT JOIN t.schedules ts LEFT JOIN t.city tc WHERE " +
+           "(:keyword IS NULL OR LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(t.startLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(t.endLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(tc.cityName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:minPrice IS NULL OR t.price >= :minPrice) AND " +
            "(:maxPrice IS NULL OR t.price <= :maxPrice) AND " +
            "(:minRating IS NULL OR t.rating >= :minRating) AND " +
@@ -36,8 +39,11 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                                       @Param("minRating") Double minRating, 
                                       @Param("startDate") LocalDate startDate);
 
-    @Query("SELECT DISTINCT t FROM Tour t LEFT JOIN t.schedules ts WHERE " +
-           "(:keyword IS NULL OR LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+    @Query("SELECT DISTINCT t FROM Tour t LEFT JOIN t.schedules ts LEFT JOIN t.city tc WHERE " +
+           "(:keyword IS NULL OR LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(t.startLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(t.endLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(tc.cityName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:minPrice IS NULL OR t.price >= :minPrice) AND " +
            "(:maxPrice IS NULL OR t.price <= :maxPrice) AND " +
            "(:minRating IS NULL OR t.rating >= :minRating) AND " +
@@ -65,6 +71,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     @Query(value = """
         SELECT t.*
         FROM dbo.Tours t
+        LEFT JOIN dbo.Cities tc ON t.CityID = tc.CityID
         LEFT JOIN (
             SELECT s.TourID, COUNT(b.BookingID) as BookingCount
             FROM dbo.TourSchedules s
@@ -72,7 +79,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
             GROUP BY s.TourID
         ) bc ON bc.TourID = t.TourID
         WHERE
-            (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.EndLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(tc.CityName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
@@ -92,8 +99,9 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
         countQuery = """
         SELECT COUNT(*)
         FROM dbo.Tours t
+        LEFT JOIN dbo.Cities tc ON t.CityID = tc.CityID
         WHERE
-            (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.EndLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(tc.CityName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
@@ -126,9 +134,10 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     @Query(value = """
         SELECT t.*
         FROM dbo.Tours t
+        LEFT JOIN dbo.Cities tc ON t.CityID = tc.CityID
         WHERE
             t.Latitude IS NOT NULL AND t.Longitude IS NOT NULL
-            AND (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            AND (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.EndLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(tc.CityName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
@@ -154,9 +163,10 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
         countQuery = """
         SELECT COUNT(*)
         FROM dbo.Tours t
+        LEFT JOIN dbo.Cities tc ON t.CityID = tc.CityID
         WHERE
             t.Latitude IS NOT NULL AND t.Longitude IS NOT NULL
-            AND (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            AND (:keyword IS NULL OR LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.EndLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(tc.CityName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
