@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,7 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-/** PayOS: tạo link thanh toán VietQR / Napas và xác minh chữ ký (tài liệu payos.vn — kiểm tra dữ liệu với signature). */
+/**
+ * PayOS Service - Đầy đủ hàm + Signature đã sửa đúng chuẩn
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,10 +41,22 @@ public class PayOSService {
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    // ====================== TẠO LINK THANH TOÁN (ĐÃ SỬA) ======================
     public String createPaymentLink(Long orderCode, int amount, String description) {
-        if (!StringUtils.hasText(payOSProperties.getClientId()) || !StringUtils.hasText(payOSProperties.getApiKey())) {
-            throw new AppException(ErrorCode.PAYOS_NOT_CONFIGURED);
+        if (!StringUtils.hasText(payOSProperties.getClientId()) ||
+            !StringUtils.hasText(payOSProperties.getApiKey()) ||
+            !StringUtils.hasText(payOSProperties.getChecksumKey())) {
+            throw new AppException(ErrorCode.PAYOS_NOT_CONFIGURED, "Thiếu cấu hình PayOS");
         }
+
+        if (orderCode == null || orderCode <= 0) {
+            throw new AppException(ErrorCode.PAYOS_LINK_FAILED, "orderCode không hợp lệ");
+        }
+        if (amount < 1000) {
+            throw new AppException(ErrorCode.PAYOS_LINK_FAILED, "Số tiền tối thiểu là 1.000 VND");
+        }
+
+        description = StringUtils.hasText(description) ? description.trim() : "Thanh toán booking " + orderCode;
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("orderCode", orderCode);
@@ -52,6 +65,18 @@ public class PayOSService {
         body.put("returnUrl", payOSProperties.getReturnUrl());
         body.put("cancelUrl", payOSProperties.getCancelUrl());
 
+        String signature = createPaymentRequestSignature(body);
+        body.put("signature", signature);
+
+        // Debug log
+        log.info("=== [PAYOS] CREATE PAYMENT LINK ===");
+        log.info("orderCode   : {}", orderCode);
+        log.info("amount      : {}", amount);
+        log.info("description : {}", description);
+        log.info("returnUrl   : {}", payOSProperties.getReturnUrl());
+        log.info("cancelUrl   : {}", payOSProperties.getCancelUrl());
+        log.info("Signature   : {}", signature);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-client-id", payOSProperties.getClientId().trim());
@@ -59,51 +84,64 @@ public class PayOSService {
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response;
         try {
-            response = restTemplate.exchange(
+            ResponseEntity<String> response = restTemplate.exchange(
                     payOSProperties.getBaseUrl() + "/v2/payment-requests",
-                    HttpMethod.POST,
-                    requestEntity,
-                    String.class
-            );
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            log.warn("PayOS payment-requests HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new AppException(ErrorCode.PAYOS_LINK_FAILED);
-        } catch (RestClientException e) {
-            log.warn("PayOS payment-requests network: {}", e.getMessage());
-            throw new AppException(ErrorCode.PAYOS_LINK_FAILED);
-        }
+                    HttpMethod.POST, requestEntity, String.class);
 
-        try {
             JsonNode root = objectMapper.readTree(response.getBody());
-            JsonNode data = root.path("data");
-            String checkoutUrl = data.path("checkoutUrl").asText();
-            if (checkoutUrl == null || checkoutUrl.isBlank()) {
-                log.warn("PayOS response missing checkoutUrl: {}", response.getBody());
-                throw new AppException(ErrorCode.PAYOS_LINK_FAILED);
+            if (!"00".equals(root.path("code").asText())) {
+                String desc = root.path("desc").asText("Unknown error");
+                log.error("PayOS từ chối: code={} desc={}", root.path("code").asText(), desc);
+                throw new AppException(ErrorCode.PAYOS_LINK_FAILED, desc);
             }
+
+            String checkoutUrl = root.path("data").path("checkoutUrl").asText().trim();
+            log.info("✅ Tạo link PayOS thành công: {}", checkoutUrl);
             return checkoutUrl;
-        } catch (AppException ex) {
-            throw ex;
+
+        } catch (HttpClientErrorException e) {
+            String respBody = e.getResponseBodyAsString();
+            log.error("=== PAYOS 400 BAD REQUEST ===");
+            log.error("Response: {}", respBody);
+            throw new AppException(ErrorCode.PAYOS_LINK_FAILED, "PayOS lỗi: " + respBody);
         } catch (Exception e) {
-            log.warn("PayOS parse error: {}", e.getMessage());
+            log.error("Lỗi gọi PayOS", e);
             throw new AppException(ErrorCode.PAYOS_LINK_FAILED);
         }
     }
 
-    /**
-     * Xác minh chữ ký trên object {@code data} (webhook hoặc body trả về từ API lấy thông tin link).
-     */
+    /** Signature đúng theo tài liệu PayOS */
+    private String createPaymentRequestSignature(Map<String, Object> body) {
+        try {
+            String payload = String.format(
+                "amount=%s&cancelUrl=%s&description=%s&orderCode=%s&returnUrl=%s",
+                body.get("amount"),
+                body.get("cancelUrl"),
+                body.get("description"),
+                body.get("orderCode"),
+                body.get("returnUrl")
+            );
+
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(payOSProperties.getChecksumKey().getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+            return bytesToHex(hash);
+        } catch (Exception e) {
+            log.error("Tạo signature thất bại", e);
+            throw new AppException(ErrorCode.PAYOS_LINK_FAILED);
+        }
+    }
+
+    // ====================== CÁC HÀM CŨ (để PaymentServiceImpl biên dịch được) ======================
     public boolean verifyPayOsDataSignature(JsonNode dataNode, String providedSignature) {
-        if (providedSignature == null || providedSignature.isBlank()
-                || dataNode == null || dataNode.isNull() || !dataNode.isObject()) {
+        if (providedSignature == null || providedSignature.isBlank() ||
+            dataNode == null || dataNode.isNull() || !dataNode.isObject()) {
             return false;
         }
         String checksumKey = payOSProperties.getChecksumKey();
-        if (checksumKey == null || checksumKey.isBlank()) {
-            return false;
-        }
+        if (!StringUtils.hasText(checksumKey)) return false;
+
         try {
             String payload = buildSignatureQueryString(dataNode);
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -112,79 +150,71 @@ public class PayOSService {
             String hex = bytesToHex(hash);
             return hex.equalsIgnoreCase(providedSignature.trim());
         } catch (Exception e) {
+            log.warn("Verify signature error", e);
             return false;
         }
     }
 
-    /**
-     * Gọi PayOS GET /v2/payment-requests/{orderCode} — xác minh chữ ký phần {@code data} nếu có {@code signature}.
-     */
     public Optional<JsonNode> fetchPaymentRequestByOrderCode(long orderCode) {
-        if (payOSProperties.getClientId() == null || payOSProperties.getApiKey() == null) {
+        if (!StringUtils.hasText(payOSProperties.getClientId()) ||
+            !StringUtils.hasText(payOSProperties.getApiKey())) {
             return Optional.empty();
         }
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-client-id", payOSProperties.getClientId());
         headers.set("x-api-key", payOSProperties.getApiKey());
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         try {
             ResponseEntity<String> response = restTemplate.exchange(
                     payOSProperties.getBaseUrl() + "/v2/payment-requests/" + orderCode,
-                    HttpMethod.GET,
-                    entity,
-                    String.class
-            );
+                    HttpMethod.GET, new HttpEntity<>(headers), String.class);
+
             JsonNode root = objectMapper.readTree(response.getBody());
             if (!"00".equals(root.path("code").asText())) {
                 return Optional.empty();
             }
+
             JsonNode data = root.path("data");
-            if (!data.isObject()) {
-                return Optional.empty();
-            }
             String sig = root.path("signature").asText("");
             if (!sig.isBlank() && !verifyPayOsDataSignature(data, sig)) {
                 return Optional.empty();
             }
             return Optional.of(data);
         } catch (Exception e) {
+            log.warn("Fetch payment request error", e);
             return Optional.empty();
         }
     }
 
-    String buildSignatureQueryString(JsonNode data) {
+    public static boolean amountsMatch(BigDecimal paymentAmount, JsonNode payOsData) {
+        if (paymentAmount == null || payOsData == null || !payOsData.has("amount")) {
+            return true;
+        }
+        long remote = payOsData.path("amount").asLong(-1);
+        if (remote < 0) return true;
+        return paymentAmount.compareTo(BigDecimal.valueOf(remote)) == 0;
+    }
+
+    // ====================== Hỗ trợ signature (giữ nguyên từ code cũ) ======================
+    private String buildSignatureQueryString(JsonNode data) {
         TreeMap<String, JsonNode> sorted = new TreeMap<>();
         data.fields().forEachRemaining(e -> sorted.put(e.getKey(), e.getValue()));
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, JsonNode> e : sorted.entrySet()) {
-            if (!sb.isEmpty()) {
-                sb.append('&');
-            }
-            sb.append(e.getKey()).append('=');
-            sb.append(serializeSignatureValue(e.getValue()));
+            if (!sb.isEmpty()) sb.append('&');
+            sb.append(e.getKey()).append('=').append(serializeSignatureValue(e.getValue()));
         }
         return sb.toString();
     }
 
     private String serializeSignatureValue(JsonNode val) {
-        if (val == null || val.isNull()) {
-            return "";
-        }
-        if (val.isBoolean()) {
-            return val.booleanValue() ? "true" : "false";
-        }
-        if (val.isIntegralNumber()) {
-            return Long.toString(val.longValue());
-        }
-        if (val.isNumber()) {
-            return val.decimalValue().stripTrailingZeros().toPlainString();
-        }
-        if (val.isTextual()) {
-            return val.asText();
-        }
-        if (val.isArray()) {
-            return serializeArrayForSignature((ArrayNode) val);
-        }
+        if (val == null || val.isNull()) return "";
+        if (val.isBoolean()) return val.booleanValue() ? "true" : "false";
+        if (val.isIntegralNumber()) return Long.toString(val.longValue());
+        if (val.isNumber()) return val.decimalValue().stripTrailingZeros().toPlainString();
+        if (val.isTextual()) return val.asText();
+        if (val.isArray()) return serializeArrayForSignature((ArrayNode) val);
         if (val.isObject()) {
             try {
                 return objectMapper.writeValueAsString(sortKeysObjectNode(val));
@@ -225,19 +255,5 @@ public class PayOSService {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    /**
-     * So khớp số tiền webhook/API với bản ghi payment (VND nguyên).
-     */
-    public static boolean amountsMatch(BigDecimal paymentAmount, JsonNode payOsData) {
-        if (paymentAmount == null || payOsData == null || !payOsData.has("amount")) {
-            return true;
-        }
-        long remote = payOsData.path("amount").asLong(-1);
-        if (remote < 0) {
-            return true;
-        }
-        return paymentAmount.compareTo(BigDecimal.valueOf(remote)) == 0;
     }
 }

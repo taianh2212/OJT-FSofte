@@ -103,7 +103,7 @@
       title.innerText = 'Chưa xác nhận được';
       statusText.innerText = (result.err && result.err.message)
         ? result.err.message
-        : 'Không đồng bộ được với PayOS. Bạn có thể chờ thêm (webhook) hoặc xem trạng thái trong lịch sử đơn.';
+        : 'Không đồng bộ được với PayOS. Bạn có thể thử lại sau ít phút hoặc xem trạng thái trong lịch sử đơn.';
       document.getElementById('historyBtn').style.display = 'inline-flex';
       document.getElementById('retryBtn').style.display = 'inline-flex';
     })();

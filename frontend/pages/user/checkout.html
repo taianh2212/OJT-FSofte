@@ -216,12 +216,7 @@
               console.warn('sessionStorage PayOS:', e);
             }
 
-            const paymentInfoUrl = new URL('./payment-info.html', window.location.href);
-            paymentInfoUrl.searchParams.set('bookingId', String(booking.id));
-            paymentInfoUrl.searchParams.set('paymentId', String(payData.paymentId || ''));
-            paymentInfoUrl.searchParams.set('orderCode', String(payData.orderCode || ''));
-            paymentInfoUrl.searchParams.set('amount', String(payData.amount || finalTotal));
-            window.location.href = paymentInfoUrl.toString();
+            window.location.href = payData.checkoutUrl;
             return;
           } catch (payosError) {
             try {
