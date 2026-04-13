@@ -15,7 +15,7 @@ public class TourRequest {
     private String endLocation;
     private String transportType;
     private Long categoryId;
-    
+
     private String inclusions;
     private String exclusions;
     private String tips;
@@ -23,12 +23,12 @@ public class TourRequest {
     private String paymentPolicy;
     private String cancellationPolicy;
     private String childPolicy;
-    
+
     private Boolean hasPickup;
     private Boolean hasLunch;
     private Boolean isInstantConfirmation;
     private Boolean isDaily;
-    
+
     private BigDecimal minDepositRate;
     private Integer refundGracePeriod;
     private String metaTitle;

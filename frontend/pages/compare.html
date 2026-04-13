@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compare Tours - TourBooking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .row { display:grid; gap: 8px; margin-top: 12px; color: var(--text-soft); }
+  </style>
+</head>
 <html lang="vi">
 
 <head>
@@ -333,6 +345,21 @@
   <div class="container">
     <div class="page-shell">
       <div class="content-pad">
+        <div class="top">
+          <a class="back-link" href="./tours.html">← Back to tours</a>
+          <button class="btn btn-secondary" id="clearBtn" type="button">Clear Selection</button>
+        </div>
+
+        <div class="hero-grid" style="grid-template-columns:1fr 0.9fr;margin-top:18px;">
+          <div class="card panel">
+            <div class="eyebrow">Compare Picks</div>
+            <h1 class="headline" style="font-size:clamp(2rem, 4vw, 3.4rem);margin-top:12px;">See strengths, trade-offs, and pricing side by side.</h1>
+            <p class="lead" style="margin-top:14px;">Keep at least two tours selected to make this page useful. Remove weaker options as you narrow down.</p>
+          </div>
+          <div class="card hero-art">
+            <div class="stack">
+              <h3>Selection tip</h3>
+              <p>Compare tours with similar duration or route profile first. It makes pricing and transport differences easier to judge.</p>
 
         <!-- Top bar -->
         <div class="top">
@@ -361,6 +388,11 @@
           </div>
         </div>
 
+        <div id="empty" class="card empty-state" style="display:none;margin-top:20px;">
+          No tours selected. Go back and choose at least 2 tours to compare.
+        </div>
+
+        <div id="grid" class="grid"></div>
         <!-- Loading state -->
         <div id="loadingState" style="margin-top:24px; display:none;">
           <div class="skeleton-row"></div>
@@ -390,6 +422,9 @@
   </div>
 
   <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/compare.js"></script>
+</body>
+</html>
   <script>
     (() => {
       // ── Utilities ──────────────────────────────────────────────────────────
