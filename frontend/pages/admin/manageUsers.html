@@ -51,43 +51,92 @@
         /* Sidebar */
         .sidebar {
             width: 260px;
-            background: var(--text-main);
+            background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
             color: var(--text-white);
-            padding: 2rem 1.5rem;
+            padding: 1.75rem 1.25rem;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
         }
 
-        .sidebar .logo {
-            color: var(--text-white);
-            font-size: 1.5rem;
-            margin-bottom: 3rem;
-            display: block;
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0 0.5rem;
+            margin-bottom: 2rem;
             text-decoration: none;
-            font-weight: bold;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: #4f46e5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .logo-text span {
+            color: #818cf8;
+            font-size: 0.75rem;
+            font-weight: 400;
+            display: block;
+        }
+
+        .nav-section-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.3);
+            padding: 0.75rem 0.75rem 0.25rem;
+            font-weight: 600;
         }
 
         .nav-item {
-            padding: 0.75rem 1rem;
-            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.75rem;
+            color: rgba(255, 255, 255, 0.65);
             text-decoration: none;
-            display: block;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
+            border-radius: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 500;
             transition: all 0.2s;
+            margin-bottom: 0.125rem;
             cursor: pointer;
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             color: var(--text-white);
         }
 
         .nav-item.active {
-            background: var(--primary);
+            background: #4f46e5;
             color: var(--text-white);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .nav-item .icon {
+            font-size: 1.05rem;
+            width: 20px;
+            text-align: center;
         }
 
         /* Main Content */
@@ -434,15 +483,29 @@
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="./dashboard.html" class="logo"><strong>🏨 TourBooking</strong> Admin</a>
-            <nav>
-                <a href="./dashboard.html" class="nav-item">📊 Dashboard</a>
-                <a href="./manageTours.html" class="nav-item">✈️ Manager Tours</a>
-                <a href="./manageCatelories.html" class="nav-item">📁 Manager Categories</a>
-                <a href="./manageUsers.html" class="nav-item active">👥 Manager Users</a>
-                <a href="./manageReview.html" class="nav-item">⭐ Manager Reviews</a>
-                <a href="./financialReport.html" class="nav-item">💰 Financial Report</a>
-            </nav>
+            <a href="./dashboard.html" class="sidebar-logo">
+                <div class="logo-icon"></div>
+                <div class="logo-text">TourBooking<span>Admin Panel</span></div>
+            </a>
+            <div class="nav-section-label">Menu chính</div>
+            <a href="./dashboard.html" class="nav-item">
+                <span class="icon"></span> Dashboard
+            </a>
+            <a href="./manageTours.html" class="nav-item">
+                <span class="icon"></span> Manage Tours
+            </a>
+            <a href="./manageCatelories.html" class="nav-item">
+                <span class="icon"></span> Manage Categories
+            </a>
+            <a href="./manageUsers.html" class="nav-item active">
+                <span class="icon"></span> Manage Users
+            </a>
+            <a href="./manageReview.html" class="nav-item">
+                <span class="icon"></span> Manage Reviews
+            </a>
+            <a href="./financialReport.html" class="nav-item">
+                <span class="icon"></span> Financial Report
+            </a>
         </aside>
 
         <main class="main-content">
@@ -494,7 +557,7 @@
             <input type="hidden" id="userId">
 
             <div class="form-group">
-                <label>📧 Email *</label>
+                <label> Email *</label>
                 <input type="email" id="email" placeholder="Enter email address">
             </div>
 
@@ -505,29 +568,31 @@
             </div>
 
             <div class="form-group">
-                <label>👤 Full Name *</label>
+                <label> Full Name *</label>
                 <input type="text" id="fullName" placeholder="Enter full name">
             </div>
 
             <div class="form-group">
-                <label>🎭 Role</label>
+                <label> Role</label>
                 <select id="role">
-                    <option value="USER">👤 User</option>
-                    <option value="ADMIN">👑 Admin</option>
+                    <option value="CUSTOMER"> Customer</option>
+                    <option value="ADMIN"> Admin</option>
+                    <option value="STAFF"> Staff</option>
+                    <option value="GUIDE"> Guide</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>🔘 Status</label>
                 <select id="isActive">
-                    <option value="true">✅ Active</option>
-                    <option value="false">⛔ Blocked</option>
+                    <option value="true"> Active</option>
+                    <option value="false"> Blocked</option>
                 </select>
             </div>
 
             <div class="modal-buttons">
-                <button onclick="closeModal()" class="btn-secondary">❌ Cancel</button>
-                <button onclick="saveUser()" class="btn-primary">💾 Save</button>
+                <button onclick="closeModal()" class="btn-secondary"> Cancel</button>
+                <button onclick="saveUser()" class="btn-primary"> Save</button>
             </div>
         </div>
     </div>
@@ -549,7 +614,7 @@
                     window.location.href = '/pages/auth/login.html';
                     return false;
                 }
-                
+
                 if (user.role === 'STAFF') {
                     window.location.href = '/pages/staff/dashboard.html';
                     return false;
@@ -560,7 +625,7 @@
                     return false;
                 }
 
-                document.getElementById('userInfo').innerHTML = `👤 ${user.fullName || user.FullName || user.email}`;
+                document.getElementById('userInfo').innerHTML = ` ${user.fullName || user.FullName || user.email}`;
                 return true;
             } catch (error) {
                 console.error('Auth error:', error);
@@ -599,7 +664,7 @@
                 if (!data || data.length === 0) {
                     document.getElementById("userTable").innerHTML = `
                         <tr>
-                            <td colspan="6" class="empty-state">📭 No users found.</td>
+                            <td colspan="6" class="empty-state"> No users found.</td>
                         </tr>
                     `;
                     updateStats([]);
@@ -616,13 +681,16 @@
                             <td>${escapeHtml(u.email)}</td>
                             <td><strong>${escapeHtml(u.fullName)}</strong></td>
                             <td>
-                                <span class="role-badge ${u.role === 'ADMIN' ? 'role-admin' : 'role-user'}">
-                                    ${u.role === 'ADMIN' ? '👑 ADMIN' : '👤 USER'}
-                                </span>
+                               <span class="role-badge role-${u.role.toLowerCase()}">
+        ${u.role === 'ADMIN' ? 'ADMIN'
+                            : u.role === 'STAFF' ? 'STAFF'
+                                : u.role === 'GUIDE' ? 'GUIDE'
+                                    : 'USER'}
+    </span>
                             </td>
                             <td>
                                 <span class="status-badge ${u.isActive ? 'status-active' : 'status-blocked'}">
-                                    ${u.isActive ? '✅ Active' : '⛔ Blocked'}
+                                    ${u.isActive ? ' Active' : ' Blocked'}
                                 </span>
                             </td>
                             <td class="action-buttons">
@@ -778,7 +846,7 @@
                 console.log('Confirmation cancelled');
                 return;
             }
-            
+
             try {
                 const token = localStorage.getItem('token');
                 console.log('Sending request to:', `${API}/${id}/status`);

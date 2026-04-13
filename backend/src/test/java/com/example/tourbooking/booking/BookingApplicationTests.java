@@ -1,13 +1,10 @@
 package com.example.tourbooking.booking;
 
-import com.tourbooking.booking.backend.BookingApplication;
-import com.tourbooking.booking.backend.model.dto.response.UserResponse;
-import com.tourbooking.booking.backend.model.entity.enums.UserRole;
-import com.tourbooking.booking.backend.security.JwtService;
+import com.tourbooking.booking.BookingApplication;
+import com.tourbooking.booking.model.dto.response.UserResponse;
+import com.tourbooking.booking.model.entity.enums.UserRole;
+import com.tourbooking.booking.security.JwtService;
 import io.jsonwebtoken.Claims;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
