@@ -1,12 +1,6 @@
 package com.tourbooking.booking.mapper;
 
-import com.tourbooking.booking.backend.model.dto.request.TourRequest;
-import com.tourbooking.booking.backend.model.dto.response.TourDetailResponse;
-import com.tourbooking.booking.backend.model.dto.response.TourResponse;
-import com.tourbooking.booking.backend.model.entity.Tour;
-import com.tourbooking.booking.backend.model.entity.TourImage;
-import com.tourbooking.booking.backend.model.entity.TourHighlight;
-import com.tourbooking.booking.backend.model.entity.TourSchedule;
+
 
 import com.tourbooking.booking.model.dto.request.TourRequest;
 import com.tourbooking.booking.model.dto.request.TourScheduleRequest;
@@ -117,8 +111,6 @@ public class TourMapper {
         return response;
     }
 
-    private static TourDetailResponse.TourFaqSummary toFaqSummary(com.tourbooking.booking.backend.model.entity.TourFaq faq) {
-
     private static TourDetailResponse.TourFaqSummary toFaqSummary(TourFaq faq) {
         TourDetailResponse.TourFaqSummary s = new TourDetailResponse.TourFaqSummary();
         s.setQuestion(faq.getQuestion());
@@ -134,6 +126,16 @@ public class TourMapper {
         s.setAvailableSlots(schedule.getAvailableSlots());
         s.setStatus(schedule.getStatus() == null ? null : schedule.getStatus().name());
         return s;
+    }
+
+    public static TourSchedule toScheduleEntity(TourScheduleRequest sReq) {
+        if (sReq == null)
+            return null;
+        TourSchedule schedule = new TourSchedule();
+        schedule.setStartDate(sReq.getStartDate());
+        schedule.setEndDate(sReq.getEndDate());
+        schedule.setAvailableSlots(sReq.getAvailableSlots());
+        return schedule;
     }
 
     public static Tour toEntity(TourRequest request) {
