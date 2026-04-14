@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo UC46-UC50 | TourBooking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #8b8fa3;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+        .uc-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .uc-card:hover {
+            border-color: rgba(0,210,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,210,255,0.1);
+            transform: translateY(-2px);
+        }
+        .uc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .uc-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .uc-badge {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .uc-badge.high { background: linear-gradient(135deg, #f5576c, #ff6b6b); }
+        .uc-badge.medium { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .uc-badge.low { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .uc-name {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .uc-desc {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .uc-schedule {
+            color: #6b7280;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .uc-schedule span {
+            color: #00d2ff;
+            font-weight: 500;
+        }
+        .btn-trigger {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-trigger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+        }
+        .btn-trigger:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-trigger.running {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        .btn-trigger.success {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+        }
+        .result-box {
+            margin-top: 14px;
+            padding: 14px 18px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            color: #a5f3fc;
+            display: none;
+            white-space: pre-wrap;
+            border: 1px solid rgba(0,210,255,0.15);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .result-box.show { display: block; animation: fadeIn 0.3s ease; }
+        .result-box.error { border-color: rgba(245,87,108,0.3); color: #fca5a5; }
+
+        .btn-all-wrap {
+            text-align: center;
+            margin: 40px 0 20px;
+        }
+        .btn-all {
+            background: linear-gradient(135deg, #f5af19, #f12711);
+            color: #fff;
+            border: none;
+            padding: 14px 48px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+        .btn-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(241,39,17,0.4);
+        }
+        .btn-all:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            text-align: center;
+            color: #4b5563;
+            font-size: 0.8rem;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Demo System Automatic Use Cases</h1>
+        <p class="subtitle">Bấm nút để chạy từng UC ngay lập tức — không cần chờ lịch tự động</p>
+
+        <!-- UC46 -->
+        <div class="uc-card">
+            <div class="uc-header">
+                <div class="uc-title">
+                    <span class="uc-badge high">UC46</span>
+                    <span class="uc-name">Auto Update Slots</span>
+                </div>
+                <button class="btn-trigger" onclick="triggerUC('uc46', this)">▶ Chạy</button>
+            </div>
+            <p class="uc-desc">
+                Tự động cập nhật chỗ trống (slot) cho TourSchedule:<br>
+                • OPEN → FULL khi hết chỗ &nbsp;|&nbsp; FULL → OPEN khi có chỗ trở lại<br>
+                • Đánh COMPLETED cho schedule đã quá ngày khởi hành
+            </p>
+            <p class="uc-schedule">⏱ Lịch tự động: mỗi <span>5 phút</span></p>
+            <div class="result-box" id="result-uc46"></div>
+        </div>
+
+        <!-- UC47 -->
+        <div class="uc-card">
+            <div class="uc-header">
+                <div class="uc-title">
+                    <span class="uc-badge high">UC47</span>
+                    <span class="uc-name">Auto Cancel Unpaid Booking</span>
+                </div>
+                <button class="btn-trigger" onclick="triggerUC('uc47', this)">▶ Chạy</button>
+            </div>
+            <p class="uc-desc">
+                Hủy tự động booking PENDING quá 24 giờ chưa thanh toán:<br>
+                • Chuyển status → CANCELLED &nbsp;|&nbsp; Trả lại slot cho TourSchedule<br>
+                • Gửi email thông báo cho khách hàng (UC48)
+            </p>
+            <p class="uc-schedule">⏱ Lịch tự động: mỗi <span>1 giờ</span></p>
+            <div class="result-box" id="result-uc47"></div>
+        </div>
+
+        <!-- UC48 -->
+        <div class="uc-card">
+            <div class="uc-header">
+                <div class="uc-title">
+                    <span class="uc-badge high">UC48</span>
+                    <span class="uc-name">Send Email Notification</span>
+                </div>
+                <span style="color:#6b7280;font-size:0.85rem;">📩 Tự động khi có sự kiện</span>
+            </div>
+            <p class="uc-desc">
+                Gửi email tự động khi có sự kiện hệ thống:<br>
+                • Email xác thực tài khoản (Register) &nbsp;|&nbsp; Email reset mật khẩu<br>
+                • Email thông báo hủy booking (từ UC47) &nbsp;|&nbsp; Email báo cáo tháng (từ UC50)
+            </p>
+            <p class="uc-schedule">⏱ Kích hoạt: <span>Tự động khi UC47 hoặc UC50 chạy</span></p>
+        </div>
+
+        <!-- UC49 -->
+        <div class="uc-card">
+            <div class="uc-header">
+                <div class="uc-title">
+                    <span class="uc-badge medium">UC49</span>
+                    <span class="uc-name">Auto Update Loyalty Points</span>
+                </div>
+                <button class="btn-trigger" onclick="triggerUC('uc49', this)">▶ Chạy</button>
+            </div>
+            <p class="uc-desc">
+                Cộng điểm loyalty cho booking đã hoàn thành (COMPLETED):<br>
+                • Quy đổi: mỗi 100,000 VND = 1 điểm thưởng<br>
+                • Tạo LoyaltyPoint record tự động nếu user chưa có<br>
+                • Đánh dấu đã cộng để tránh cộng trùng lặp
+            </p>
+            <p class="uc-schedule">⏱ Lịch tự động: mỗi ngày lúc <span>2:00 AM</span></p>
+            <div class="result-box" id="result-uc49"></div>
+        </div>
+
+        <!-- UC50 -->
+        <div class="uc-card">
+            <div class="uc-header">
+                <div class="uc-title">
+                    <span class="uc-badge low">UC50</span>
+                    <span class="uc-name">Generate Monthly Report</span>
+                </div>
+                <button class="btn-trigger" onclick="triggerUC('uc50', this)">▶ Chạy</button>
+            </div>
+            <p class="uc-desc">
+                Tạo báo cáo kinh doanh tháng trước & gửi email cho Admin:<br>
+                • Thống kê: tổng booking, confirmed, cancelled, completed<br>
+                • Tính doanh thu tháng &nbsp;|&nbsp; Gửi email cho tất cả user ADMIN
+            </p>
+            <p class="uc-schedule">⏱ Lịch tự động: <span>ngày 1 hàng tháng lúc 8:00 AM</span></p>
+            <div class="result-box" id="result-uc50"></div>
+        </div>
+
+        <!-- Run All -->
+        <div class="btn-all-wrap">
+            <button class="btn-all" onclick="triggerAll(this)">🚀 Chạy Tất Cả UC (UC46 → UC50)</button>
+        </div>
+
+        <p class="footer">TourBooking System — Demo UC tự động | Chỉ dùng cho mục đích demo</p>
+    </div>
+
+    <script>
+        async function triggerUC(uc, btn) {
+            const resultBox = document.getElementById('result-' + uc);
+            btn.disabled = true;
+            btn.classList.add('running');
+            btn.textContent = '⏳ Đang chạy...';
+            resultBox.className = 'result-box show';
+            resultBox.textContent = 'Đang thực thi ' + uc.toUpperCase() + '...';
+
+            try {
+                const res = await fetch('/api/v1/demo/' + uc, { method: 'POST' });
+                const json = await res.json();
+
+                if (res.ok) {
+                    btn.classList.remove('running');
+                    btn.classList.add('success');
+                    btn.textContent = '✅ Hoàn tất';
+                    resultBox.textContent = '✅ ' + json.message + '\n\n' + JSON.stringify(json.data, null, 2);
+                    resultBox.classList.remove('error');
+                } else {
+                    throw new Error(json.message || 'Unknown error');
+                }
+            } catch (err) {
+                btn.classList.remove('running');
+                btn.textContent = '❌ Lỗi';
+                resultBox.textContent = '❌ Lỗi: ' + err.message;
+                resultBox.classList.add('error');
+            }
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('success');
+                btn.textContent = '▶ Chạy';
+            }, 3000);
+        }
+
+        async function triggerAll(btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang chạy tất cả...';
+
+            try {
+                const res = await fetch('/api/v1/demo/all', { method: 'POST' });
+                const json = await res.json();
+
+                if (res.ok) {
+                    btn.textContent = '✅ Tất cả hoàn tất!';
+                    // Update individual result boxes
+                    ['uc46', 'uc47', 'uc49', 'uc50'].forEach(uc => {
+                        const box = document.getElementById('result-' + uc);
+                        if (box) {
+                            box.className = 'result-box show';
+                            box.textContent = '✅ Đã chạy qua nút "Chạy Tất Cả"';
+                        }
+                    });
+                } else {
+                    throw new Error(json.message || 'Unknown error');
+                }
+            } catch (err) {
+                btn.textContent = '❌ Lỗi: ' + err.message;
+            }
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = '🚀 Chạy Tất Cả UC (UC46 → UC50)';
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

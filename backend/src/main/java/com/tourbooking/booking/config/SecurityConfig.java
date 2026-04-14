@@ -60,6 +60,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Read-only categories
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                // Demo UC endpoints (chỉ dùng khi demo, nên xóa trước khi production)
+                .requestMatchers("/api/v1/demo/**").permitAll()
                 // Everything else requires login (can be refined later)
                 .anyRequest().authenticated()
             );

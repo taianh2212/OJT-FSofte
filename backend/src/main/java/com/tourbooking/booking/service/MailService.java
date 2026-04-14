@@ -1,10 +1,12 @@
 package com.tourbooking.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -13,7 +15,7 @@ public class MailService {
     public void sendVerificationEmail(String toEmail, String token) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("krissv659@gmail.com"); // ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‹â€  BÃƒÂ¡Ã‚ÂºÃ‚Â®T BUÃƒÂ¡Ã‚Â»Ã‹Å“C
+            message.setFrom("krissv659@gmail.com");
             message.setTo(toEmail);
             message.setSubject("Verify your email - TourBooking");
 
@@ -22,59 +24,81 @@ public class MailService {
             message.setText("Click to verify your email: " + link);
 
             mailSender.send(message);
-            System.out.println("SEND MAIL SUCCESS");
+            log.info("[UC48] Send verification email to {} SUCCESS", toEmail);
         } catch (Exception e) {
-            e.printStackTrace(); // ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‹â€  QUAN TRÃƒÂ¡Ã‚Â»Ã…â€™NG
+            log.error("[UC48] Failed to send verification email to {}: {}", toEmail, e.getMessage());
         }
     }
 
     public void sendPasswordResetEmail(String toEmail, String resetUrl) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("krissv659@gmail.com"); // ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‹â€  BÃƒÂ¡Ã‚ÂºÃ‚Â®T BUÃƒÂ¡Ã‚Â»Ã‹Å“C
+            message.setFrom("krissv659@gmail.com");
             message.setTo(toEmail);
             message.setSubject("Password Reset - TourBooking");
             message.setText("Reset link: " + resetUrl);
 
             mailSender.send(message);
-            System.out.println("SEND RESET MAIL SUCCESS");
+            log.info("[UC48] Send reset password email to {} SUCCESS", toEmail);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[UC48] Failed to send reset email to {}: {}", toEmail, e.getMessage());
         }
     }
 
-    // UC48: GÃƒÂ¡Ã‚Â»Ã‚Â­i email thÃƒÆ’Ã‚Â´ng bÃƒÆ’Ã‚Â¡o hÃƒÂ¡Ã‚Â»Ã‚Â§y booking tÃƒÂ¡Ã‚Â»Ã‚Â± Ãƒâ€žÃ¢â‚¬ËœÃƒÂ¡Ã‚Â»Ã¢â€žÂ¢ng do chÃƒâ€ Ã‚Â°a thanh toÃƒÆ’Ã‚Â¡n
+    // UC48: Gui email thong bao huy booking tu dong vi chua thanh toan
     public void sendBookingCancelledEmail(String toEmail, String customerName, Long bookingId, java.math.BigDecimal amount) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("krissv659@gmail.com");
             message.setTo(toEmail);
-            message.setSubject("[TourBooking] Booking #" + bookingId + " Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â£ bÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¹ hÃƒÂ¡Ã‚Â»Ã‚Â§y");
+            message.setSubject("[TourBooking] Booking #" + bookingId + " da bi huy");
             message.setText(
-                "Xin chÃƒÆ’Ã‚Â o " + customerName + ",\n\n" +
-                "Booking #" + bookingId + " cÃƒÂ¡Ã‚Â»Ã‚Â§a bÃƒÂ¡Ã‚ÂºÃ‚Â¡n (tÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¢ng tiÃƒÂ¡Ã‚Â»Ã‚Ân: " + amount + " VND) " +
-                "Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â£ bÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¹ hÃƒÂ¡Ã‚Â»Ã‚Â§y tÃƒÂ¡Ã‚Â»Ã‚Â± Ãƒâ€žÃ¢â‚¬ËœÃƒÂ¡Ã‚Â»Ã¢â€žÂ¢ng vÃƒÆ’Ã‚Â¬ khÃƒÆ’Ã‚Â´ng cÃƒÆ’Ã‚Â³ thanh toÃƒÆ’Ã‚Â¡n trong vÃƒÆ’Ã‚Â²ng 24 giÃƒÂ¡Ã‚Â»Ã‚Â.\n\n" +
-                "NÃƒÂ¡Ã‚ÂºÃ‚Â¿u bÃƒÂ¡Ã‚ÂºÃ‚Â¡n vÃƒÂ¡Ã‚ÂºÃ‚Â«n muÃƒÂ¡Ã‚Â»Ã¢â‚¬Ëœn Ãƒâ€žÃ¢â‚¬ËœÃƒÂ¡Ã‚ÂºÃ‚Â·t tour, vui lÃƒÆ’Ã‚Â²ng truy cÃƒÂ¡Ã‚ÂºÃ‚Â­p lÃƒÂ¡Ã‚ÂºÃ‚Â¡i website.\n\n" +
-                "TrÃƒÆ’Ã‚Â¢n trÃƒÂ¡Ã‚Â»Ã‚Âng,\nÃƒâ€žÃ‚ÂÃƒÂ¡Ã‚Â»Ã¢â€žÂ¢i ngÃƒâ€¦Ã‚Â© TourBooking"
+                "Xin chao " + customerName + ",\n\n" +
+                "Booking #" + bookingId + " cua ban (tong tien: " + String.format("%,.0f", amount) + " VND) " +
+                "da bi huy tu dong vi khong co thanh toan trong vong 24 gio.\n\n" +
+                "Neu ban van muon dat tour, vui long truy cap lai website.\n\n" +
+                "Tran trong,\nDoi ngu TourBooking"
             );
             mailSender.send(message);
+            log.info("[UC48] Send booking cancelled email to {} for booking #{}", toEmail, bookingId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[UC48] Failed to send booking cancelled email to {}: {}", toEmail, e.getMessage());
         }
     }
 
-    // UC50: GÃƒÂ¡Ã‚Â»Ã‚Â­i bÃƒÆ’Ã‚Â¡o cÃƒÆ’Ã‚Â¡o thÃƒÆ’Ã‚Â¡ng cho admin
+    // UC48: Gui email xac nhan booking thanh cong
+    public void sendBookingConfirmedEmail(String toEmail, String customerName, Long bookingId, java.math.BigDecimal amount) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("krissv659@gmail.com");
+            message.setTo(toEmail);
+            message.setSubject("[TourBooking] Xac nhan Booking #" + bookingId);
+            message.setText(
+                "Xin chao " + customerName + ",\n\n" +
+                "Booking #" + bookingId + " cua ban da duoc xac nhan thanh cong!\n" +
+                "Tong tien: " + String.format("%,.0f", amount) + " VND\n\n" +
+                "Cam on ban da su dung dich vu cua TourBooking.\n\n" +
+                "Tran trong,\nDoi ngu TourBooking"
+            );
+            mailSender.send(message);
+            log.info("[UC48] Send booking confirmed email to {} for booking #{}", toEmail, bookingId);
+        } catch (Exception e) {
+            log.error("[UC48] Failed to send booking confirmed email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    // UC50: Gui bao cao thang cho admin
     public void sendMonthlyReportEmail(String toEmail, String reportContent, String monthYear) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("krissv659@gmail.com");
             message.setTo(toEmail);
-            message.setSubject("[TourBooking] BÃƒÆ’Ã‚Â¡o cÃƒÆ’Ã‚Â¡o thÃƒÆ’Ã‚Â¡ng " + monthYear);
+            message.setSubject("[TourBooking] Bao cao thang " + monthYear);
             message.setText(reportContent);
             mailSender.send(message);
-            System.out.println("SEND MONTHLY REPORT SUCCESS");
+            log.info("[UC50] Send monthly report to {} SUCCESS", toEmail);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("[UC50] Failed to send monthly report to {}: {}", toEmail, e.getMessage());
         }
     }
 }

@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Custom ###
+backend/.m2/
+*.log
+backend/compile_out.txt
+backend/run.log
+backend/run_utf8.log
+backend/boot_run.log
+backend/TestGemini.java
+backend/TestGeminiUrl.java
