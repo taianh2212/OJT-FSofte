@@ -34,7 +34,7 @@
       <span>📞 Hotline: 0913 599 745</span>
       <span style="margin-left: 20px;">📧 Email: info@danangbest.com</span>
     </div>
-    <div class="top-links">
+    <div class="top-links" id="authLinks">
       <a href="./auth/login.html">Đăng nhập</a>/
       <a href="./auth/register.html">Đăng ký</a>
     </div>
@@ -178,6 +178,7 @@
     // Login check
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
     if (user) {
+      if (document.getElementById('authLinks')) document.getElementById('authLinks').style.display = 'none';
       document.getElementById('navRight').innerHTML = `
         <div style="display: flex; align-items: center; gap: 20px;">
           <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">Chào, ${user.fullName || 'Bạn'}</span>

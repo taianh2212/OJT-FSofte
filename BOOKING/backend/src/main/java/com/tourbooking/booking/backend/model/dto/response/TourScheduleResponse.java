@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,6 +16,7 @@ public class TourScheduleResponse {
     private Long id;
     private Long tourId;
     private String tourName;
+    private Long guideId;
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer availableSlots;
@@ -21,4 +24,6 @@ public class TourScheduleResponse {
     private String currentProgress;
     private String reportContent;
     private java.time.LocalDateTime reportSubmittedAt;
+    private List<String> imageUrls;
+    private List<ProgressLogResponse> progressLogs;
 }

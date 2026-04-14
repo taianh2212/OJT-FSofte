@@ -11,6 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     
+    java.util.List<User> findByRole(com.tourbooking.booking.backend.model.entity.enums.UserRole role);
+    
     java.util.List<User> findByIsActiveFalseAndCreatedAtBefore(java.time.LocalDateTime cutoff);
 
     long countByCurrentSessionIdIsNotNull();
