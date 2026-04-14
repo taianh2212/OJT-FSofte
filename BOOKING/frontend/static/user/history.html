@@ -49,14 +49,14 @@
         <div class="layout">
           <div class="card panel">
             <nav class="sidebar-menu">
-              <a href="profile.html">Tài khoản của tôi</a>
+              <a href="personal-info.html">Thông tin cá nhân</a>
+              <a href="profile.html">Cập nhật hồ sơ</a>
               <a href="history.html" class="active">Lịch sử đặt tour</a>
-              <a href="#">Thông báo</a>
             </nav>
           </div>
 
           <div class="card panel">
-            <h2 class="section-title">Lịch Sử Đặt Tour (UC19)</h2>
+            <h2 class="section-title">Lịch Sử Đặt Tour</h2>
             <div style="display:flex; gap:10px; margin-bottom:20px;">
               <button class="btn" id="filterAll" style="background:var(--primary); color:white;">Tất cả</button>
               <button class="btn btn-secondary" id="filterPending">Đang chờ</button>
@@ -72,14 +72,14 @@
     </div>
   </div>
 
-  <!-- Modal Hủy Tour (UC20 & UC21) -->
+  <!-- Modal Hủy Tour -->
   <div class="modal-overlay" id="cancelModal">
     <div class="modal-box">
-      <h3 style="margin-top:0;">Hủy Đặt Tour (UC20)</h3>
+      <h3 style="margin-top:0;">Hủy Đặt Tour</h3>
       <p style="font-size:0.9rem; color:var(--text-faint);">Bạn có chắc chắn muốn hủy đặt tour <strong id="cancelCode"></strong> không?</p>
       
       <div style="margin-top:16px; padding:12px; background:#f0f9ff; border-radius:8px; border:1px solid #bae6fd;">
-        <strong>Yêu Cầu Hoàn Tiền (UC21)</strong>
+        <strong>Yêu Cầu Hoàn Tiền</strong>
         <p style="font-size:0.85rem; margin:4px 0 0;">Vì bạn hủy trước 7 ngày, bạn sẽ được hoàn 100% số tiền. Vui lòng nhập tài khoản ngân hàng để nhận lại tiền.</p>
         <textarea rows="2" placeholder="Tên NH - Số TK - Chủ Tài Khoản" id="refundInfo"></textarea>
       </div>
@@ -91,10 +91,10 @@
     </div>
   </div>
 
-  <!-- Modal Đánh Giá Tour (UC23) -->
+  <!-- Modal Đánh Giá Tour -->
   <div class="modal-overlay" id="reviewModal">
     <div class="modal-box">
-      <h3 style="margin-top:0;">Viết Đánh Giá (UC23)</h3>
+      <h3 style="margin-top:0;">Viết Đánh Giá</h3>
       <p style="font-size:0.9rem; color:var(--text-faint);">Chia sẻ trải nghiệm của bạn về mã tour <strong id="reviewCode"></strong>.</p>
       
       <div style="margin-top:12px;">
@@ -166,9 +166,9 @@
               <div><strong style="color:var(--text-faint);">Giảm giá:</strong> ${formatCurrency(b.discountAmount)}</div>
             </div>
             <div class="booking-actions">
-              <button class="btn btn-secondary" onclick="downloadInvoice(${b.id})">Tải Hóa Đơn PDF (UC22)</button>
-              ${canCancel ? `<button class="btn btn-secondary" style="color:#ef4444; border-color:#fee2e2; background:#fef2f2;" onclick="openCancelModal(${b.id})">Hủy Đặt Tour (UC20)</button>` : ''}
-              ${canReview ? `<button class="btn" style="background:#0284c7; color:white;" onclick="openReviewModal(${b.id})">Đánh Giá Chuyến Đi (UC23)</button>` : ''}
+              <button class="btn btn-secondary" onclick="downloadInvoice(${b.id})">Tải Hóa Đơn PDF</button>
+              ${canCancel ? `<button class="btn btn-secondary" style="color:#ef4444; border-color:#fee2e2; background:#fef2f2;" onclick="openCancelModal(${b.id})">Hủy Đặt Tour</button>` : ''}
+              ${canReview ? `<button class="btn" style="background:#0284c7; color:white;" onclick="openReviewModal(${b.id})">Đánh Giá Chuyến Đi</button>` : ''}
             </div>
           </div>
         `;
@@ -252,10 +252,10 @@
         return;
       }
 
-      // UC20: cancel
+      // cancel
       await TB.apiFetch(`/api/v1/bookings/${encodeURIComponent(currentBooking.id)}/cancel`, { method: 'POST' });
 
-      // UC21: request refund (if eligible) - store info in reason for now
+      // request refund (if eligible) - store info in reason for now
       const refundReq = { bookingId: currentBooking.id, reason: info };
       try {
         await TB.apiFetch(`/api/v1/bookings/${encodeURIComponent(currentBooking.id)}/refund`, {
