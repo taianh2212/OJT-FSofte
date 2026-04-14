@@ -75,7 +75,11 @@
               localStorage.setItem('token', result.data.token);
               localStorage.setItem('user', JSON.stringify(result.data.user));
               // Điều hướng dựa trên quyền
-              window.location.href = result.data.user.role === 'ADMIN' ? '../admin/dashboard.html' : '/';
+              const role = (result.data.user.role || "").toUpperCase();
+              if (role === 'ADMIN') window.location.href = '../admin/dashboard.html';
+              else if (role === 'STAFF') window.location.href = '../staff/dashboard.html';
+              else if (role === 'GUIDE') window.location.href = '../guide/dashboard.html';
+              else window.location.href = '/';
             } else {
               alert('Đăng nhập thất bại: ' + result.message);
             }
@@ -115,7 +119,11 @@
                 if (result.code === 200) {
                     localStorage.setItem('token', result.data.token);
                     localStorage.setItem('user', JSON.stringify(result.data.user));
-                    window.location.href = result.data.user.role === 'ADMIN' ? '/pages/admin/dashboard.html' : '/';
+                    const role = (result.data.user.role || "").toUpperCase();
+                    if (role === 'ADMIN') window.location.href = '/pages/admin/dashboard.html';
+                    else if (role === 'STAFF') window.location.href = '/pages/staff/dashboard.html';
+                    else if (role === 'GUIDE') window.location.href = '/pages/guide/dashboard.html';
+                    else window.location.href = '/';
                 } else {
                     alert('Lỗi đăng nhập Google: ' + result.message);
                 }

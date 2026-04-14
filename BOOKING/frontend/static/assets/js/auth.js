@@ -39,11 +39,14 @@
         msgEl.textContent = 'Login successful!';
         
         // Điều hướng theo vai trò (Role-based redirection)
-        const role = res.data.user.role;
+        const role = (res.data.user.role || '').toString().toUpperCase();
+        console.log('Login successful. Role:', role);
+        
         let target = '/pages/index.html';
         if (role === 'STAFF') target = '/pages/staff/dashboard.html';
         else if (role === 'GUIDE') target = '/pages/guide/dashboard.html';
         
+        console.log('Redirecting to:', target);
         setTimeout(() => window.location.href = target, 700);
       } catch (err) {
         msgEl.style.color = 'red';
