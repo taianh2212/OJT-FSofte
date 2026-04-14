@@ -12,6 +12,7 @@ import lombok.*;
 @AttributeOverride(name = "id", column = @Column(name = "ImageID", nullable = false, unique = true, columnDefinition = "BIGINT"))
 public class TourImage extends Base {
 
+    @com.fasterxml.jackson.annotation.JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TourID", columnDefinition = "BIGINT")
     private Tour tour;

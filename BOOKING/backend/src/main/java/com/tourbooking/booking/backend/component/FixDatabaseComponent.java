@@ -3,48 +3,75 @@ package com.tourbooking.booking.backend.component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class FixDatabaseComponent implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void run(String... args) {
-        log.info("Starting Database Fix for User Roles and Reporting...");
+    public void run(String... args) throws Exception {
+        log.info("--- STARTING DATABASE INITIALIZATION ---");
 
         try {
-            // Ensure optional profile columns exist (UC25)
-            jdbcTemplate.execute("IF COL_LENGTH('Users','PhoneNumber') IS NULL ALTER TABLE Users ADD PhoneNumber NVARCHAR(20) NULL");
-            jdbcTemplate.execute("IF COL_LENGTH('Users','Address') IS NULL ALTER TABLE Users ADD Address NVARCHAR(255) NULL");
+            // 1. Update Tour Images & Itineraries
+            seedTourData();
 
-            // Update Check Constraint for Roles
-            try {
-                jdbcTemplate.execute("ALTER TABLE Users DROP CONSTRAINT chk_user_role");
-                log.info("Dropped old constraint chk_user_role");
-            } catch (Exception e) {
-                log.warn("Constraint chk_user_role not found or already dropped. Message: {}", e.getMessage());
-            }
-
-            jdbcTemplate.execute("ALTER TABLE Users ADD CONSTRAINT chk_user_role CHECK (Role IN ('ADMIN', 'CUSTOMER', 'GUIDE', 'STAFF'))");
-            log.info("Added new constraint with ADMIN, CUSTOMER, GUIDE, STAFF");
-
-            // Ensure bookings have dates + status sanity for sample data
-            jdbcTemplate.execute("UPDATE Bookings SET CreatedAt = GETDATE() WHERE CreatedAt IS NULL");
-            jdbcTemplate.execute("UPDATE Bookings SET UpdatedAt = GETDATE() WHERE UpdatedAt IS NULL");
-            int updated = jdbcTemplate.update("UPDATE Bookings SET Status = 'SUCCESS' WHERE Status = 'PENDING' OR Status = 'CONFIRMED' OR Status IS NULL");
-            log.info("Sanitized bookings: Updated {} records to have dates and SUCCESS status.", updated);
+            // 2. Seed Admin User
+            seedAdminUser();
 
         } catch (Exception e) {
-            log.error("Failed to fix database: {}", e.getMessage());
+            log.error("Initialization error (continuing app startup): {}", e.getMessage());
+        }
+
+        log.info("--- DATABASE INITIALIZATION COMPLETED ---");
+    }
+
+    private void seedTourData() {
+        try {
+            // Sơn Trà JSON Itinerary
+            String sonTraItinerary = "[{\"title\":\"08:00 - Khởi hành\",\"content\":\"Bắt đầu tour Sơn Trà.\"},{\"title\":\"09:30 - Linh Ứng\",\"content\":\"Tham quan chùa Linh Ứng.\"},{\"title\":\"12:00 - Ăn trưa\",\"content\":\"Bữa trưa tại Sơn Trà.\"},{\"title\":\"14:00 - Kết thúc\",\"content\":\"Trở về khách sạn.\"}]";
+            
+            jdbcTemplate.update("UPDATE Tours SET Description = ?, Itinerary = ?, ChildPolicy = ?, WhyChooseUs = ?, IsActive = 1 WHERE TourName LIKE ?", 
+                "Khám phá linh hồn của Đà Nẵng tại Bán đảo Sơn Trà.",
+                sonTraItinerary,
+                "Trẻ em dưới 1m miễn phí.",
+                "Dịch vụ cao cấp, xe đời mới, trải nghiệm tuyệt vời.",
+                "%Sơn Trà%");
+                
+            log.info("Seed: Sơn Trà data updated.");
+        } catch (Exception e) {
+            log.warn("Tour seeding warning: {}", e.getMessage());
+        }
+    }
+
+    private void seedAdminUser() {
+        try {
+            String adminEmail = "admin@dana.com";
+            // BCrypt hash cho "123456"
+            String passwordHash = "$2a$10$7vj26Aptw/yE0uT/8f6BGe.1e.W0U9WfNn0/2fV9rUfB5W1N8yD9w";
+            
+            List<Map<String, Object>> users = jdbcTemplate.queryForList("SELECT UserID FROM Users WHERE Email = ?", adminEmail);
+            
+            if (users.isEmpty()) {
+                jdbcTemplate.update(
+                    "INSERT INTO Users (Email, FullName, PasswordHash, Role, IsActive, CreatedAt, UpdatedAt) VALUES (?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                    adminEmail, "DANA Admin", passwordHash, "ADMIN"
+                );
+                log.info("Seed: Created admin user {}", adminEmail);
+            } else {
+                jdbcTemplate.update("UPDATE Users SET PasswordHash = ?, IsActive = 1, Role = 'ADMIN' WHERE Email = ?", passwordHash, adminEmail);
+                log.info("Seed: Updated admin user {}", adminEmail);
+            }
+        } catch (Exception e) {
+            log.error("Admin seeding error: {}", e.getMessage());
         }
     }
 }
-

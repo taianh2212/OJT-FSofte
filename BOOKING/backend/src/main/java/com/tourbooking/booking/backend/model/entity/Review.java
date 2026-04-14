@@ -17,6 +17,7 @@ public class Review extends Base {
     @JoinColumn(name = "UserID", columnDefinition = "BIGINT")
     private User user;
 
+    @com.fasterxml.jackson.annotation.JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TourID", columnDefinition = "BIGINT")
     private Tour tour;

@@ -16,5 +16,6 @@ public class TourResponse {
     private Double rating;
     private String transportType;
     private List<String> imageUrls;
+    private String imageUrl;
 
 }

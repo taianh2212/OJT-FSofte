@@ -104,10 +104,6 @@ public class BookingServiceImpl implements BookingService {
         var totalPrice = price.multiply(
                 java.math.BigDecimal.valueOf(request.getNumberOfPeople()));
 
-        // UC15 ✅ FIX ĐÚNG CHỖ
-        if (request.getVoucherCode() != null && !request.getVoucherCode().isBlank()) {
-            totalPrice = totalPrice.multiply(java.math.BigDecimal.valueOf(0.9));
-        }
 
         Booking booking = new Booking();
         booking.setUser(user);
@@ -127,29 +123,38 @@ public class BookingServiceImpl implements BookingService {
 
         // Handle Discount
         if (request.getDiscountCode() != null && !request.getDiscountCode().isEmpty()) {
-            Discount discount = discountRepository.findByCode(request.getDiscountCode())
-                    .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND)); // Or a better error code
+            String code = request.getDiscountCode().toUpperCase();
+            BigDecimal discountAmt = BigDecimal.ZERO;
+            boolean applied = false;
 
-            // Basic validation (duplicated from service for safety)
-            if (discount.getIsActive() && 
-                (discount.getStartDate() == null || !LocalDateTime.now().isBefore(discount.getStartDate())) &&
-                (discount.getEndDate() == null || !LocalDateTime.now().isAfter(discount.getEndDate())) &&
-                (discount.getUsageLimit() == null || discount.getCurrentUsage() < discount.getUsageLimit())) {
-                
-                BigDecimal discountAmount = BigDecimal.ZERO;
-                if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
-                    discountAmount = booking.getTotalPrice().multiply(discount.getValue()).divide(new BigDecimal(100), RoundingMode.HALF_UP);
-                } else {
-                    discountAmount = discount.getValue();
+            if ("SUMMER".equals(code)) {
+                discountAmt = booking.getTotalPrice().multiply(new BigDecimal("20")).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
+                booking.setDiscountCode("SUMMER");
+                applied = true;
+            } else {
+                Discount discount = discountRepository.findByCode(code).orElse(null);
+                if (discount != null && discount.getIsActive() && 
+                    (discount.getStartDate() == null || !LocalDateTime.now().isBefore(discount.getStartDate())) &&
+                    (discount.getEndDate() == null || !LocalDateTime.now().isAfter(discount.getEndDate())) &&
+                    (discount.getUsageLimit() == null || discount.getCurrentUsage() < discount.getUsageLimit())) {
+                    
+                    if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
+                        discountAmt = booking.getTotalPrice().multiply(discount.getValue()).divide(new BigDecimal(100), 0, RoundingMode.HALF_UP);
+                    } else {
+                        discountAmt = discount.getValue();
+                    }
+                    booking.setDiscountCode(discount.getCode());
+                    applied = true;
+                    
+                    // Update usage
+                    discount.setCurrentUsage(discount.getCurrentUsage() + 1);
+                    discountRepository.save(discount);
                 }
-                
-                booking.setDiscountAmount(discountAmount);
-                booking.setDiscountCode(discount.getCode());
-                booking.setTotalPrice(booking.getTotalPrice().subtract(discountAmount));
-                
-                // Update usage
-                discount.setCurrentUsage(discount.getCurrentUsage() + 1);
-                discountRepository.save(discount);
+            }
+
+            if (applied) {
+                booking.setDiscountAmount(discountAmt);
+                booking.setTotalPrice(booking.getTotalPrice().subtract(discountAmt));
             }
         }
         
@@ -365,24 +370,59 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public VoucherResponse applyVoucher(VoucherRequest request) {
-        BigDecimal discount = BigDecimal.ZERO;
-        String message = "Voucher không hợp lệ";
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        String message = "Mã giảm giá không hợp lệ hoặc đã hết hạn";
         boolean isValid = false;
         
-        if ("SUMMER2026".equalsIgnoreCase(request.getVoucherCode())) {
-            discount = new BigDecimal("500000");
+        // Check for specific hardcoded voucher first (legacy)
+        if ("SUMMER".equalsIgnoreCase(request.getVoucherCode())) {
+            discountAmount = request.getCurrentTotal().multiply(new BigDecimal("20")).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
             isValid = true;
-            message = "Áp dụng mã thành công";
+            message = "Áp dụng mã SUMMER thành công (-20%)";
+        } else if ("SUMMER2026".equalsIgnoreCase(request.getVoucherCode())) {
+            discountAmount = new BigDecimal("500000");
+            isValid = true;
+            message = "Áp dụng mã SUMMER2026 thành công (-500,000đ)";
+        } else {
+            // Check Database Discounts
+            java.util.Optional<Discount> discountOpt = discountRepository.findByCode(request.getVoucherCode());
+            if (discountOpt.isPresent()) {
+                Discount discount = discountOpt.get();
+                LocalDateTime now = LocalDateTime.now();
+                
+                // Validate discount
+                if (!Boolean.TRUE.equals(discount.getIsActive())) {
+                    message = "Mã giảm giá này hiện không còn hoạt động";
+                } else if (discount.getStartDate() != null && now.isBefore(discount.getStartDate())) {
+                    message = "Chương trình giảm giá chưa bắt đầu";
+                } else if (discount.getEndDate() != null && now.isAfter(discount.getEndDate())) {
+                    message = "Mã giảm giá đã hết hạn";
+                } else if (discount.getUsageLimit() != null && discount.getCurrentUsage() >= discount.getUsageLimit()) {
+                    message = "Mã giảm giá đã hết lượt sử dụng";
+                } else if (discount.getMinimumBookingAmount() != null && request.getCurrentTotal().compareTo(discount.getMinimumBookingAmount()) < 0) {
+                    message = "Đơn hàng chưa đạt giá trị tối thiểu " + discount.getMinimumBookingAmount().longValue() + "đ";
+                } else {
+                    // Valid!
+                    isValid = true;
+                    if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
+                        discountAmount = request.getCurrentTotal().multiply(discount.getValue()).divide(new BigDecimal(100), 0, RoundingMode.HALF_UP);
+                        message = "Áp dụng mã thành công (-" + discount.getValue() + "%)";
+                    } else {
+                        discountAmount = discount.getValue();
+                        message = "Áp dụng mã thành công (-" + discountAmount.longValue() + "đ)";
+                    }
+                }
+            }
         }
         
-        BigDecimal finalTotal = request.getCurrentTotal().subtract(discount);
+        BigDecimal finalTotal = request.getCurrentTotal().subtract(discountAmount);
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
         
         return VoucherResponse.builder()
                 .isValid(isValid)
-                .discountAmount(discount)
+                .discountAmount(discountAmount)
                 .finalTotal(finalTotal)
                 .message(message)
                 .build();
@@ -464,6 +504,42 @@ public class BookingServiceImpl implements BookingService {
             return baos.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException("Could not generate invoice PDF", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void generateTestData() {
+        User admin = userRepository.findByEmail("admin@gmail.com").orElse(null);
+        if (admin == null) {
+            List<User> users = userRepository.findAll();
+            if (!users.isEmpty()) admin = users.get(0);
+        }
+        
+        List<TourSchedule> schedules = tourScheduleRepository.findAll();
+        if (schedules.isEmpty() || admin == null) return;
+        
+        TourSchedule schedule = schedules.get(0);
+        
+        for (int i = 0; i < 5; i++) {
+            Booking booking = new Booking();
+            booking.setUser(admin);
+            booking.setSchedule(schedule);
+            booking.setNumberOfPeople(2);
+            BigDecimal price = schedule.getTour() != null ? schedule.getTour().getPrice() : new BigDecimal(1000000);
+            booking.setTotalPrice(price.multiply(new BigDecimal(2)));
+            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setBookingDate(LocalDateTime.now().minusDays(i));
+            booking = bookingRepository.save(booking);
+            
+            Payment payment = new Payment();
+            payment.setBooking(booking);
+            payment.setAmount(booking.getTotalPrice());
+            payment.setPaymentMethod("TEST_DATA");
+            payment.setTransactionCode("TEST_" + System.currentTimeMillis() + i);
+            payment.setPaymentDate(LocalDateTime.now().minusDays(i));
+            payment.setStatus(PaymentStatus.SUCCESS);
+            paymentRepository.save(payment);
         }
     }
 }

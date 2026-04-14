@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/toast.js"></script>
 </head>
 
@@ -64,42 +65,43 @@
                             <option value="CANCELLED">Cancellations Only</option>
                         </select>
                     </div>
-                    <button onclick="loadReport()" class="btn btn-primary">Generate</button>
+                    <button onclick="loadReport()" class="btn btn-primary" style="padding: 0 25px; min-height: 48px;">Generate</button>
+                    <button onclick="seedTestData()" class="btn btn-secondary" style="margin-left: 0.5rem; opacity: 0.7;">Seed Test Data</button>
                     <div style="flex: 1;"></div>
-                    <button onclick="exportToExcel()" class="btn btn-success">Excel</button>
-                    <button onclick="exportToPDF()" class="btn btn-danger">PDF</button>
+                    <button onclick="exportToExcel()" class="btn btn-success" style="padding: 0 20px; min-height: 40px;">Excel</button>
+                    <button onclick="exportToPDF()" class="btn btn-danger" style="padding: 0 20px; min-height: 40px;">PDF</button>
                 </div>
             </div>
 
             <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                <div class="card" style="text-align: center; border-top: 4px solid var(--primary);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Revenue</small>
-                    <h2 id="totalRevenue" style="margin: 0.5rem 0; color: var(--primary);">₫0</h2>
+                <div class="card" style="text-align: center; border-top: 4px solid var(--primary); padding: 2rem;">
+                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Total Revenue</small>
+                    <h2 id="totalRevenue" style="margin: 0.5rem 0; color: var(--primary); font-size: 2rem;">₫0</h2>
                 </div>
-                <div class="card" style="text-align: center; border-top: 4px solid var(--success);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Bookings</small>
-                    <h2 id="totalBookings" style="margin: 0.5rem 0; color: var(--success);">0</h2>
+                <div class="card" style="text-align: center; border-top: 4px solid var(--success); padding: 2rem;">
+                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Total Bookings</small>
+                    <h2 id="totalBookings" style="margin: 0.5rem 0; color: var(--success); font-size: 2rem;">0</h2>
                 </div>
-                <div class="card" style="text-align: center; border-top: 4px solid var(--warning);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Avg. Value</small>
-                    <h2 id="avgOrderValue" style="margin: 0.5rem 0; color: var(--warning);">₫0</h2>
+                <div class="card" style="text-align: center; border-top: 4px solid var(--warning); padding: 2rem;">
+                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Avg. Value</small>
+                    <h2 id="avgOrderValue" style="margin: 0.5rem 0; color: var(--warning); font-size: 2rem;">₫0</h2>
                 </div>
-                <div class="card" style="text-align: center; border-top: 4px solid var(--danger);">
-                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Cancel Rate</small>
-                    <h2 id="cancelRate" style="margin: 0.5rem 0; color: var(--danger);">0%</h2>
+                <div class="card" style="text-align: center; border-top: 4px solid var(--danger); padding: 2rem;">
+                    <small style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Cancel Rate</small>
+                    <h2 id="cancelRate" style="margin: 0.5rem 0; color: var(--danger); font-size: 2rem;">0%</h2>
                 </div>
             </div>
 
             <div class="grid" style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2.5rem;">
-                <div class="card">
-                    <h3>Revenue Trends</h3>
-                    <div style="height: 300px; position: relative;">
+                <div class="card" style="padding: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;">Revenue Trends</h3>
+                    <div style="height: 350px; position: relative;">
                         <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" style="padding: 1.5rem;">
                 <div class="table-container">
                     <table id="reportTable">
                         <thead>
@@ -113,7 +115,7 @@
                         </thead>
                         <tbody id="reportBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: 2rem;">Select date range to generate report</td>
+                                <td colspan="5" style="text-align: center; padding: 3rem;">No data available. Click Generate to load.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -123,7 +125,7 @@
     </div>
 
     <script>
-        const API_BASE = "http://localhost:8080/api/v1";
+        const API = "/api/v1/admin/financial-report";
         let currentReportData = [];
         let revenueChart;
 
@@ -136,9 +138,13 @@
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            if (window.TB && TB.logout) {
+                TB.logout();
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/pages/auth/login.html';
+            }
         });
 
         // Set default dates
@@ -159,28 +165,39 @@
             }
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE}/admin/financial-report?start=${startDate}&end=${endDate}&type=${reportType}&status=${status}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const result = await response.json();
-                const data = result.data || [];
+                const response = await TB.apiFetch(`${API}?start=${startDate}&end=${endDate}&type=${reportType}&status=${status}`);
+                const data = response.data || response || [];
                 currentReportData = data;
                 
                 renderReport(data);
                 updateStats(data);
                 updateChart(data);
-                showToast('Report generated successfully', 'success');
+                if (data.length > 0) {
+                    showToast('Report generated successfully', 'success');
+                } else {
+                    showToast('No data found for this period', 'info');
+                }
             } catch (error) {
                 console.error('Error loading report:', error);
-                showToast('Failed to load report', 'error');
+                showToast('Failed to load report: ' + error.message, 'error');
+            }
+        }
+
+        async function seedTestData() {
+            if (!confirm('This will generate 5 sample successful bookings to test the report. Continue?')) return;
+            try {
+                await TB.apiFetch('/api/v1/admin/generate-test-data', { method: 'POST' });
+                showToast('Test data generated!', 'success');
+                loadReport();
+            } catch (error) {
+                showToast('Failed to seed data: ' + error.message, 'error');
             }
         }
 
         function renderReport(data) {
             const tbody = document.getElementById('reportBody');
             if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No data available for selected period</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">No data available for selected period</td></tr>';
                 return;
             }
 
@@ -188,9 +205,9 @@
                 <tr>
                     <td><strong>${item.period || item.date}</strong></td>
                     <td>${item.bookingCount || 0}</td>
-                    <td style="color: var(--primary); font-weight: 600;">${formatCurrency(item.revenue || 0)}</td>
+                    <td style="color: var(--primary); font-weight: 700;">${formatCurrency(item.revenue || 0)}</td>
                     <td>${formatCurrency(item.averageValue || 0)}</td>
-                    <td><span class="badge badge-danger">${item.cancellations || 0}</span></td>
+                    <td><span class="badge badge-danger" style="background: #fee2e2; color: #dc2626;">${item.cancellations || 0}</span></td>
                 </tr>
             `).join('');
         }
@@ -212,6 +229,11 @@
             const ctx = document.getElementById('revenueChart').getContext('2d');
             if (revenueChart) revenueChart.destroy();
 
+            if (!data || data.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                return;
+            }
+
             revenueChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -220,8 +242,8 @@
                         {
                             label: 'Revenue',
                             data: data.map(item => item.revenue || 0),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
                             fill: true,
                             tension: 0.4,
                             yAxisID: 'y'
@@ -229,7 +251,7 @@
                         {
                             label: 'Bookings',
                             data: data.map(item => item.bookingCount || 0),
-                            borderColor: '#10b981',
+                            borderColor: '#d97706',
                             backgroundColor: 'transparent',
                             borderDash: [5, 5],
                             tension: 0.4,
@@ -241,17 +263,21 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top' }
+                        legend: { position: 'top', labels: { usePointStyle: true, font: { weight: '700' } } }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: (v) => v >= 1000000 ? (v/1000000)+'M' : v }
+                            ticks: { 
+                                font: { weight: '600' },
+                                callback: (v) => v >= 1000000 ? (v/1000000)+'M' : (v >= 1000 ? (v/1000)+'K' : v) 
+                            }
                         },
                         y1: {
                             beginAtZero: true,
                             position: 'right',
-                            grid: { drawOnChartArea: false }
+                            grid: { drawOnChartArea: false },
+                            ticks: { font: { weight: '600' } }
                         }
                     }
                 }
@@ -282,7 +308,7 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'FinancialData');
             XLSX.writeFile(wb, `Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showToast('Excel exported', 'success');
+            showToast('Excel exported successfully', 'success');
         }
 
         async function exportToPDF() {
@@ -295,10 +321,12 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'landscape' });
 
-                doc.setFontSize(20);
+                doc.setFontSize(22);
+                doc.setTextColor(6, 78, 59); // var(--primary-dark)
                 doc.text('Financial Report', 14, 20);
                 
                 doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
                 doc.text(`Period: ${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}`, 14, 30);
                 doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 35);
 
@@ -315,12 +343,14 @@
                     head: [['Period', 'Bookings', 'Revenue', 'Avg. Value', 'Cancellations']],
                     body: tableData,
                     theme: 'grid',
-                    headStyles: { fillColor: [59, 130, 246] }
+                    headStyles: { fillColor: [6, 78, 59], fontSize: 11 },
+                    alternateRowStyles: { fillColor: [249, 250, 251] }
                 });
 
-                doc.save(`Report_${new Date().toISOString().split('T')[0]}.pdf`);
-                showToast('PDF exported', 'success');
+                doc.save(`Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+                showToast('PDF exported successfully', 'success');
             } catch (error) {
+                console.error('PDF Export error:', error);
                 showToast('PDF Export failed', 'error');
             }
         }
@@ -330,11 +360,7 @@
         }
 
         // Initial load
-        loadReport();
+        window.addEventListener('load', loadReport);
     </script>
 </body>
-
-</html>
-
-
-</html>
+</html>

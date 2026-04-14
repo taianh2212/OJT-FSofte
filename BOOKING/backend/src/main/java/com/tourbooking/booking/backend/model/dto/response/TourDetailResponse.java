@@ -22,6 +22,7 @@ public class TourDetailResponse {
     private String childPolicy;
     private String whyChooseUs;
     private List<String> imageUrls;
+    private String imageUrl;
     private List<String> highlights;
     private List<TourScheduleSummary> schedules;
 

@@ -190,4 +190,14 @@ public class AdminController {
                 .data(data)
                 .build();
     }
+
+    @PostMapping("/generate-test-data")
+    public ApiResponse<String> generateTestData() {
+        bookingService.generateTestData();
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Test data generated successfully")
+                .data("5 sample successful bookings created.")
+                .build();
+    }
 }

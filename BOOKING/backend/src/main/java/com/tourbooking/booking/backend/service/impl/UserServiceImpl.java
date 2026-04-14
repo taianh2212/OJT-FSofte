@@ -70,6 +70,9 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = UserMapper.toEntity(request);
+        if (user.getRole() == null) {
+            user.setRole(com.tourbooking.booking.backend.model.entity.enums.UserRole.CUSTOMER);
+        }
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setIsActive(false); // Require verification
 

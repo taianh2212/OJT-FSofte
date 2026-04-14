@@ -69,15 +69,19 @@ public class Tour extends Base {
     @Column(name = "Rating")
     private Double rating = 0.0;
 
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TourImage> images;
 
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TourSchedule> schedules;
 
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TourHighlight> highlights;
 
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     @OneToMany(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Review> reviews;
 

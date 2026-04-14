@@ -28,8 +28,9 @@ public class TourMapper {
         response.setRating(tour.getRating());
         response.setTransportType(tour.getTransportType());
 
-        if (tour.getImages() != null) {
+        if (tour.getImages() != null && !tour.getImages().isEmpty()) {
             response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
+            response.setImageUrl(tour.getImages().get(0).getImageUrl());
         }
 
         return response;
@@ -53,8 +54,9 @@ public class TourMapper {
             response.setCategoryName(tour.getCategory().getCategoryName());
         }
 
-        if (tour.getImages() != null) {
+        if (tour.getImages() != null && !tour.getImages().isEmpty()) {
             response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
+            response.setImageUrl(tour.getImages().get(0).getImageUrl());
         }
 
         if (tour.getHighlights() != null) {

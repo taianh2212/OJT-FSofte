@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Tours - TourBooking Admin</title>
     <link rel="stylesheet" href="../../assets/css/admin-common.css">
+    <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/toast.js"></script>
 </head>
 
@@ -129,8 +130,8 @@
     </div>
 
     <script>
-        const API = "http://localhost:8080/api/v1/admin/tours";
-        const PUBLIC_API = "http://localhost:8080/api/v1/tours";
+        const API = "/api/v1/admin/tours";
+        const PUBLIC_API = "/api/v1/tours";
 
         // Kiểm tra quyền ADMIN
         function checkAuth() {
@@ -158,9 +159,13 @@
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            if (window.TB && TB.logout) {
+                TB.logout();
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/pages/auth/login.html';
+            }
         });
 
         let currentEditId = null;
@@ -177,96 +182,78 @@
             return headers;
         }
 
-        // LOAD TOURS
-        function loadTours() {
-            fetch(PUBLIC_API, {
-                headers: getHeaders()
-            })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Failed to fetch tours');
-                    return data;
-                })
-                .then(response => {
-                    const tours = response.data;
+        async function loadTours() {
+            try {
+                const response = await TB.apiFetch(PUBLIC_API);
+                const tours = response.data || response;
 
-                    if (!tours || tours.length === 0) {
-                        document.getElementById("tourTable").innerHTML = `
-                            <tr>
-                                <td colspan="6" style="text-align: center; padding: 2rem;">No tours found.</td>
-                            </tr>
-                        `;
-                        return;
-                    }
-
-                    let html = "";
-                    tours.forEach(t => {
-                        const location = `${t.startLocation || '?'} - ${t.endLocation || '?'}`;
-                        html += `
-                            <tr>
-                                <td>${t.id}</td>
-                                <td><strong>${escapeHtml(t.tourName)}</strong></td>
-                                <td>${formatPrice(t.price)}</td>
-                                <td>${t.duration || '-'} days</td>
-                                <td>${escapeHtml(location)}</td>
-                                <td class="action-buttons">
-                                    <button onclick="viewTour(${t.id})" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</button>
-                                    <button onclick="showEditModal(${t.id})" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
-                                    <button onclick="deleteTour(${t.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById("tourTable").innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error loading tours:', error);
+                if (!tours || tours.length === 0) {
                     document.getElementById("tourTable").innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);">Error: ${error.message}</td>
+                            <td colspan="6" style="text-align: center; padding: 2rem;">No tours found.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                let html = "";
+                tours.forEach(t => {
+                    const location = `${t.startLocation || '?'} - ${t.endLocation || '?'}`;
+                    html += `
+                        <tr>
+                            <td>${t.id}</td>
+                            <td><strong>${escapeHtml(t.tourName)}</strong></td>
+                            <td>${formatPrice(t.price)}</td>
+                            <td>${t.duration || '-'} days</td>
+                            <td>${escapeHtml(location)}</td>
+                            <td class="action-buttons">
+                                <button onclick="viewTour(${t.id})" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</button>
+                                <button onclick="showEditModal(${t.id})" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
+                                <button onclick="deleteTour(${t.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
+                            </td>
                         </tr>
                     `;
                 });
+                document.getElementById("tourTable").innerHTML = html;
+            } catch (error) {
+                console.error('Error loading tours:', error);
+                document.getElementById("tourTable").innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);">Error: ${error.message}</td>
+                    </tr>
+                `;
+            }
         }
 
-        // VIEW TOUR DETAILS
-        function viewTour(id) {
-            fetch(`${PUBLIC_API}/${id}`, {
-                headers: getHeaders()
-            })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Failed to fetch tour details');
-                    return data;
-                })
-                .then(response => {
-                    const t = response.data;
-                    document.getElementById("detail").innerHTML = `
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                            <p><strong>Tour Name:</strong> ${escapeHtml(t.tourName)}</p>
-                            <p><strong>Price:</strong> ${formatPrice(t.price)}</p>
-                            <p><strong>Duration:</strong> ${t.duration} days</p>
-                            <p><strong>Start Location:</strong> ${escapeHtml(t.startLocation || 'N/A')}</p>
-                            <p><strong>End Location:</strong> ${escapeHtml(t.endLocation || 'N/A')}</p>
-                            <p><strong>Rating:</strong> ${t.rating || 'No ratings'}</p>
+        async function viewTour(id) {
+            try {
+                const response = await TB.apiFetch(`${PUBLIC_API}/${id}`);
+                const t = response.data || response;
+                document.getElementById("detail").innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        <p><strong>Tour Name:</strong> ${escapeHtml(t.tourName)}</p>
+                        <p><strong>Price:</strong> ${formatPrice(t.price)}</p>
+                        <p><strong>Duration:</strong> ${t.duration} days</p>
+                        <p><strong>Start Location:</strong> ${escapeHtml(t.startLocation || 'N/A')}</p>
+                        <p><strong>End Location:</strong> ${escapeHtml(t.endLocation || 'N/A')}</p>
+                        <p><strong>Rating:</strong> ${t.rating || 'No ratings'}</p>
+                    </div>
+                    <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                        <p><strong>Description:</strong></p>
+                        <p>${escapeHtml(t.description || 'No description available')}</p>
+                    </div>
+                    ${t.imageUrls && t.imageUrls.length > 0 ? `
+                    <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                        <p><strong>Images:</strong></p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            ${t.imageUrls.map(url => `<img src="http://localhost:8080${url}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">`).join('')}
                         </div>
-                        <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
-                            <p><strong>Description:</strong></p>
-                            <p>${escapeHtml(t.description || 'No description available')}</p>
-                        </div>
-                        ${t.imageUrls && t.imageUrls.length > 0 ? `
-                        <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
-                            <p><strong>Images:</strong></p>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                                ${t.imageUrls.map(url => `<img src="http://localhost:8080${url}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">`).join('')}
-                            </div>
-                        </div>` : ''}
-                    `;
-                })
-                .catch(error => {
-                    console.error('Error loading tour details:', error);
-                    showToast('Error loading tour details: ' + error.message, 'error');
-                });
+                    </div>` : ''}
+                `;
+            } catch (error) {
+                console.error('Error loading tour details:', error);
+                showToast('Error loading tour details: ' + error.message, 'error');
+            }
         }
 
         // SHOW CREATE MODAL
@@ -316,9 +303,9 @@
                     const previewContainer = document.getElementById('imagePreviewContainer');
                     previewContainer.innerHTML = '';
                     if (t.imageUrls && t.imageUrls.length > 0) {
-                        t.imageUrls.forEach(url => {
+                        t.imageUrls.forEach(urlOrData => {
                             const img = document.createElement('img');
-                            img.src = "http://localhost:8080" + url;
+                            img.src = urlOrData.startsWith('http') ? urlOrData : (urlOrData.startsWith('/uploads') ? 'http://localhost:8080' + urlOrData : urlOrData);
                             img.className = 'preview-img';
                             img.style.width = '80px';
                             img.style.height = '80px';
@@ -421,55 +408,33 @@
                 imageUrls: finalImageUrls.length > 0 ? finalImageUrls : null
             };
 
-            let url = API;
-            let method = 'POST';
-
-            if (currentEditId) {
-                url = `${API}/${currentEditId}`;
-                method = 'PUT';
-            }
-
-            fetch(url, {
-                method: method,
-                headers: getHeaders(),
-                body: JSON.stringify(tourData)
-            })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Failed to save tour');
-                    return data;
-                })
-                .then(() => {
-                    closeModal();
-                    loadTours();
-                    showToast(currentEditId ? 'Tour updated successfully!' : 'Tour created successfully!', 'success');
-                })
-                .catch(error => {
-                    console.error('Error saving tour:', error);
-                    showToast('Error: ' + error.message, 'error');
+            try {
+                await TB.apiFetch(url, {
+                    method: method,
+                    body: JSON.stringify(tourData)
                 });
+                closeModal();
+                loadTours();
+                showToast(currentEditId ? 'Tour updated successfully!' : 'Tour created successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving tour:', error);
+                showToast('Error: ' + error.message, 'error');
+            }
         }
 
-        // DELETE TOUR
-        function deleteTour(id) {
+        async function deleteTour(id) {
             if (confirm('Are you sure you want to delete this tour?')) {
-                fetch(`${API}/${id}`, {
-                    method: "DELETE",
-                    headers: getHeaders()
-                })
-                    .then(async res => {
-                        if (!res.ok) {
-                            const data = await res.json();
-                            throw new Error(data.message || 'Failed to delete tour');
-                        }
-                        loadTours();
-                        showToast('Tour deleted successfully!', 'success');
-                        document.getElementById("detail").innerHTML = `<p style="color: var(--text-muted);">Tour deleted. Select a tour to view details</p>`;
-                    })
-                    .catch(error => {
-                        console.error('Error deleting tour:', error);
-                        showToast('Error: ' + error.message, 'error');
+                try {
+                    await TB.apiFetch(`${API}/${id}`, {
+                        method: "DELETE"
                     });
+                    loadTours();
+                    showToast('Tour deleted successfully!', 'success');
+                    document.getElementById("detail").innerHTML = `<p style="color: var(--text-muted);">Tour deleted. Select a tour to view details</p>`;
+                } catch (error) {
+                    console.error('Error deleting tour:', error);
+                    showToast('Error: ' + error.message, 'error');
+                }
             }
         }
 
@@ -505,14 +470,6 @@
         if (checkAuth()) {
             loadTours();
         }
-    </script>
-</body>
-
-</html>
-  }
-
-        // Load tours on page load
-        loadTours();
     </script>
 </body>
 

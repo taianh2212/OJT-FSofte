@@ -4,61 +4,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>So sánh Tour - DANANGBEST</title>
+  <title>So sánh Tour - DANA</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
-    .compare-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 30px;
-      margin-top: 40px;
+    .compare-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 50px;
+      padding-bottom: 30px;
     }
 
-    .compare-card {
+    .compare-table {
+      width: 100%;
+      min-width: 1100px;
+      table-layout: fixed; /* Ép mọi cột (trừ cột label) bằng nhau */
+      border-collapse: separate;
+      border-spacing: 0;
       background: white;
       border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xl);
       overflow: hidden;
-      box-shadow: var(--shadow-md);
-      transition: transform 0.3s;
     }
 
-    .compare-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .compare-section {
-      padding: 15px 25px;
+    .compare-table th, .compare-table td {
+      padding: 20px;
+      border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      word-wrap: break-word; /* Chống vỡ khung khi text quá dài */
     }
 
-    .compare-section:last-child {
-      border-bottom: none;
-    }
-
-    .section-label {
-      font-size: 0.75rem;
+    .label-cell {
+      width: 200px;
+      background: #f8fafc;
+      color: var(--primary-dark);
       font-weight: 800;
-      color: var(--text-faint);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      border-right: 2px solid var(--border) !important;
     }
 
-    .section-value {
-      font-weight: 700;
-      color: var(--text-main);
-      font-size: 1rem;
+    .tour-header-cell {
+      text-align: center;
+      background: white;
     }
 
-    .price-value {
-      font-size: 1.5rem;
+    .tour-title {
+      font-size: 1.15rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+      line-height: 1.4;
       font-weight: 800;
+    }
+
+    .itinerary-summary {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      line-height: 1.7;
+    }
+
+    .policy-box {
+      background: #f0fdf4;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      line-height: 1.5;
+    }
+
+    .why-box {
+      background: #fffbeb;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      line-height: 1.5;
+    }
+
+    .schedule-tag {
+      display: inline-block;
+      padding: 6px 12px;
+      background: var(--bg-section);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin: 4px;
+      color: var(--primary);
+    }
+
+    .remove-btn-table {
+      cursor: pointer;
       color: var(--price);
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-top: 15px;
+      background: transparent;
+      border: none;
+      text-decoration: underline;
     }
 
     @media (max-width: 720px) {
@@ -73,7 +124,7 @@
   <div class="top-bar">
     <div class="top-info">
       <span>📞 Hotline: 0913 599 745</span>
-      <span style="margin-left: 20px;">📧 Email: info@danangbest.com</span>
+      <span style="margin-left: 20px;">📧 Email: info@dana.com</span>
     </div>
     <div class="top-links">
       <a href="./auth/login.html">Đăng nhập</a>/
@@ -86,8 +137,8 @@
       <a class="brand" href="./index.html">
         <div class="brand-mark">DB</div>
         <div class="brand-copy">
-          <strong style="font-size: 1.4rem; color: var(--primary);">DANANGBEST</strong>
-          <span style="display: block; font-size: 0.7rem; color: var(--text-faint); font-weight: 800; text-transform: uppercase;">Premium Travel Experience</span>
+          <strong>DANA</strong>
+          <span>Trao niềm tin - Nhận giá thực</span>
         </div>
       </a>
       <nav>
@@ -119,14 +170,19 @@
       <a href="./tours.html" class="btn">QUAY LẠI DANH SÁCH</a>
     </div>
 
-    <div id="grid" class="compare-container"></div>
+    <div id="gridWrapper" class="compare-wrapper" style="display: none;">
+      <table class="compare-table">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
   </main>
 
   <footer style="background: #064e3b; color: white; padding: 80px 5% 40px; margin-top: 100px;">
     <div
       style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 60px; margin-bottom: 80px;">
       <div>
-        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANANGBEST</h3>
+        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANA</h3>
         <p style="opacity: 0.8; line-height: 2; margin-bottom: 30px;">Trao niềm tin - Nhận giá thực. Chúng tôi cam kết
           mang lại những chuyến đi đáng nhớ nhất cho mọi khách hàng.</p>
       </div>
@@ -147,7 +203,7 @@
     </div>
     <div
       style="text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
-      &copy; 2024 DANANGBEST. All rights reserved.
+      &copy; 2024 DANA. All rights reserved.
     </div>
   </footer>
 

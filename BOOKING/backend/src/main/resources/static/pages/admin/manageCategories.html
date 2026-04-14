@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Categories - TourBooking Admin</title>
     <link rel="stylesheet" href="../../assets/css/admin-common.css">
+    <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/toast.js"></script>
 </head>
 
@@ -81,7 +82,7 @@
     </div>
 
     <script>
-        const API = "http://localhost:8080/api/v1/categories";
+        const API = "/api/v1/categories";
 
         // Kiểm tra quyền ADMIN
         function checkAuth() {
@@ -109,9 +110,13 @@
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            if (window.TB && TB.logout) {
+                TB.logout();
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/pages/auth/login.html';
+            }
         });
 
         let currentEditId = null;
@@ -127,49 +132,42 @@
             return headers;
         }
 
-        function loadCategories() {
-            fetch(API, {
-                headers: getHeaders()
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Failed to fetch categories');
-                    return res.json();
-                })
-                .then(response => {
-                    const data = response.data || [];
-                    if (!data || data.length === 0) {
-                        document.getElementById("categoryTable").innerHTML = `
-                            <tr>
-                                <td colspan="4" style="text-align: center; padding: 2rem;">No categories found.</td>
-                            </tr>
-                        `;
-                        return;
-                    }
-
-                    let html = "";
-                    data.forEach(c => {
-                        html += `
-                            <tr>
-                                <td>${c.id}</td>
-                                <td><strong>${escapeHtml(c.categoryName)}</strong></td>
-                                <td>${escapeHtml(c.description || "-")}</td>
-                                <td class="action-buttons">
-                                    <button onclick="showEditModal(${c.id}, '${escapeHtml(c.categoryName)}', '${escapeHtml(c.description || "")}')" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
-                                    <button onclick="deleteCategory(${c.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById("categoryTable").innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error loading categories:', error);
+        async function loadCategories() {
+            try {
+                const response = await TB.apiFetch(API);
+                const data = response.data || response;
+                if (!data || data.length === 0) {
                     document.getElementById("categoryTable").innerHTML = `
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading categories.</td>
+                            <td colspan="4" style="text-align: center; padding: 2rem;">No categories found.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                let html = "";
+                data.forEach(c => {
+                    html += `
+                        <tr>
+                            <td>${c.id}</td>
+                            <td><strong>${escapeHtml(c.categoryName)}</strong></td>
+                            <td>${escapeHtml(c.description || "-")}</td>
+                            <td class="action-buttons">
+                                <button onclick="showEditModal(${c.id}, '${escapeHtml(c.categoryName)}', '${escapeHtml(c.description || "")}')" class="btn btn-warning" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
+                                <button onclick="deleteCategory(${c.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
+                            </td>
                         </tr>
                     `;
                 });
+                document.getElementById("categoryTable").innerHTML = html;
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                document.getElementById("categoryTable").innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading categories.</td>
+                    </tr>
+                `;
+            }
         }
 
         function showCreateModal() {
@@ -190,7 +188,7 @@
             document.getElementById('categoryModal').style.display = 'flex';
         }
 
-        function saveCategory() {
+        async function saveCategory() {
             const name = document.getElementById('categoryName').value.trim();
             const desc = document.getElementById('categoryDesc').value.trim();
 
@@ -212,45 +210,31 @@
                 method = 'PUT';
             }
 
-            fetch(url, {
-                method: method,
-                headers: getHeaders(),
-                body: JSON.stringify(categoryData)
-            })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Failed to save category');
-                    return data;
-                })
-                .then(() => {
-                    closeModal();
-                    loadCategories();
-                    showToast(currentEditId ? 'Category updated successfully!' : 'Category created successfully!', 'success');
-                })
-                .catch(error => {
-                    console.error('Error saving category:', error);
-                    showToast('Error: ' + error.message, 'error');
+            try {
+                await TB.apiFetch(url, {
+                    method: method,
+                    body: JSON.stringify(categoryData)
                 });
+                closeModal();
+                loadCategories();
+                showToast(currentEditId ? 'Category updated successfully!' : 'Category created successfully!', 'success');
+            } catch (error) {
+                console.error('Error saving category:', error);
+                showToast('Error: ' + (error.message || 'Unknown error'), 'error');
+            }
         }
 
-        function deleteCategory(id) {
-            if (confirm('Are you sure you want to delete this category?')) {
-                fetch(`${API}/${id}`, {
-                    method: "DELETE",
-                    headers: getHeaders()
-                })
-                    .then(async res => {
-                        if (!res.ok) {
-                            const data = await res.json();
-                            throw new Error(data.message || 'Failed to delete category');
-                        }
-                        loadCategories();
-                        showToast('Category deleted successfully!', 'success');
-                    })
-                    .catch(error => {
-                        console.error('Error deleting category:', error);
-                        showToast('Error: ' + error.message, 'error');
-                    });
+        async function deleteCategory(id) {
+            if (!confirm('Are you sure you want to delete this category?')) return;
+            try {
+                await TB.apiFetch(`${API}/${id}`, {
+                    method: "DELETE"
+                });
+                loadCategories();
+                showToast('Category deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showToast('Error: ' + error.message, 'error');
             }
         }
 

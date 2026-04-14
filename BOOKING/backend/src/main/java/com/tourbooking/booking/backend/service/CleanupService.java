@@ -20,7 +20,7 @@ public class CleanupService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
-    @Scheduled(fixedRate = 60000)
+    // @Scheduled(fixedRate = 60000)
     @Transactional
     public void deleteUnverifiedUsers() {
 
