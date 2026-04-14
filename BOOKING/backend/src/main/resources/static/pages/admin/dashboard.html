@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/admin-common.css">
+    <script src="../../assets/js/api.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -560,15 +561,14 @@
 
             try {
                 const [usersRes, revenueRes, bookingsRes] = await Promise.allSettled([
-                    fetch('/api/v1/admin/users/count', { headers }),
-                    fetch('/api/v1/admin/revenue/month', { headers }),
-                    fetch('/api/v1/admin/bookings/active', { headers })
+                    TB.apiFetch('/api/v1/admin/users/count'),
+                    TB.apiFetch('/api/v1/admin/revenue/month'),
+                    TB.apiFetch('/api/v1/admin/bookings/active')
                 ]);
 
                 // ── Total + Online Users
-                if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
-                    const resp = await usersRes.value.json();
-                    const d = resp.data || resp;
+                if (usersRes.status === 'fulfilled' && usersRes.value) {
+                    const d = usersRes.value.data || usersRes.value;
                     const total = d.total ?? 0;
                     const online = d.online ?? 0;
 
@@ -590,9 +590,8 @@
                 }
 
                 // ── Monthly Revenue
-                if (revenueRes.status === 'fulfilled' && revenueRes.value.ok) {
-                    const resp = await revenueRes.value.json();
-                    const d = resp.data || resp;
+                if (revenueRes.status === 'fulfilled' && revenueRes.value) {
+                    const d = revenueRes.value.data || revenueRes.value;
                     const rev = d.revenue ?? 0;
                     document.getElementById('totalRevenue').textContent = formatCurrency(rev);
                     document.getElementById('revenueSub').innerHTML =
@@ -603,9 +602,8 @@
                 }
 
                 // ── Active Bookings
-                if (bookingsRes.status === 'fulfilled' && bookingsRes.value.ok) {
-                    const resp = await bookingsRes.value.json();
-                    const d = resp.data || resp;
+                if (bookingsRes.status === 'fulfilled' && bookingsRes.value) {
+                    const d = bookingsRes.value.data || bookingsRes.value;
                     const cnt = d.count ?? 0;
                     document.getElementById('activeBookings').textContent = formatNumber(cnt);
                     document.getElementById('bookingsSub').innerHTML =
@@ -658,9 +656,13 @@
 
         // ── Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            if (window.TB && TB.logout) {
+                TB.logout();
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/pages/auth/login.html';
+            }
         });
     </script>
 </body>

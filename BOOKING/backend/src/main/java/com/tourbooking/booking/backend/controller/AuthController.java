@@ -1,12 +1,14 @@
 package com.tourbooking.booking.backend.controller;
 
 import com.tourbooking.booking.backend.model.dto.request.AuthRequest;
+import com.tourbooking.booking.backend.model.dto.request.GoogleLoginRequest;
 import com.tourbooking.booking.backend.model.dto.request.UserRequest;
 import com.tourbooking.booking.backend.model.dto.response.ApiResponse;
 import com.tourbooking.booking.backend.model.dto.response.AuthResponse;
 import com.tourbooking.booking.backend.model.dto.response.UserResponse;
 import com.tourbooking.booking.backend.security.JwtService;
 import com.tourbooking.booking.backend.service.AuthSessionNotificationService;
+import com.tourbooking.booking.backend.service.GoogleAuthService;
 import com.tourbooking.booking.backend.service.MailService;
 import com.tourbooking.booking.backend.service.RateLimiterService;
 import com.tourbooking.booking.backend.service.UserService;
@@ -33,6 +35,7 @@ public class AuthController {
     private final RateLimiterService rateLimiterService;
     private final AuthSessionNotificationService authSessionNotificationService;
     private final JwtService jwtService;
+    private final GoogleAuthService googleAuthService;
 
     @Value("${app.public-base-url:http://localhost:8080}")
     private String publicBaseUrl;
@@ -43,7 +46,8 @@ public class AuthController {
             MailService mailService,
             RateLimiterService rateLimiterService,
             AuthSessionNotificationService authSessionNotificationService,
-            JwtService jwtService
+            JwtService jwtService,
+            GoogleAuthService googleAuthService
     ) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
@@ -51,6 +55,7 @@ public class AuthController {
         this.rateLimiterService = rateLimiterService;
         this.authSessionNotificationService = authSessionNotificationService;
         this.jwtService = jwtService;
+        this.googleAuthService = googleAuthService;
     }
 
     // ================= LOGIN =================
@@ -225,6 +230,46 @@ public class AuthController {
                 .message("Logout successful")
                 .data(null)
                 .build();
+    }
+
+    // ================= GOOGLE LOGIN =================
+    @PostMapping("/google")
+    public ApiResponse<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        try {
+            UserResponse user = googleAuthService.authenticateGoogleUser(request.getIdToken());
+
+            if (user.getIsActive() == null || !user.getIsActive()) {
+                return ApiResponse.<AuthResponse>builder()
+                        .code(HttpStatus.UNAUTHORIZED.value())
+                        .message("Account is not active")
+                        .data(null)
+                        .build();
+            }
+
+            String sessionId = userService.rotateSession(user.getEmail());
+            AuthResponse authResponse = AuthResponse.builder()
+                    .token(jwtService.generateToken(user, sessionId))
+                    .user(user)
+                    .build();
+
+            authSessionNotificationService.notifySessionInvalidated(
+                    user.getEmail(),
+                    "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại."
+            );
+
+            return ApiResponse.<AuthResponse>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Google login successful")
+                    .data(authResponse)
+                    .build();
+        } catch (Exception e) {
+            log.error("Google login failed", e);
+            return ApiResponse.<AuthResponse>builder()
+                    .code(HttpStatus.UNAUTHORIZED.value())
+                    .message(e.getMessage() != null ? e.getMessage() : "Google login failed")
+                    .data(null)
+                    .build();
+        }
     }
 
     // SSE: notify when session is invalidated (frontend watches this stream)

@@ -36,7 +36,11 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
                                       @Param("startDate") LocalDate startDate);
 
     @Query("SELECT DISTINCT t FROM Tour t LEFT JOIN t.schedules ts WHERE " +
-           "(:keyword IS NULL OR (LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.startLocation) LIKE LOWER(CONCAT('%', :keyword, '%')))) AND " +
+           "(:keyword IS NULL OR (" +
+           "LOWER(t.tourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(t.startLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(t.itinerary) LIKE LOWER(CONCAT('%', :keyword, '%')))) AND " +
            "(:minPrice IS NULL OR t.price >= :minPrice) AND " +
            "(:maxPrice IS NULL OR t.price <= :maxPrice) AND " +
            "(:minRating IS NULL OR t.rating >= :minRating) AND " +
@@ -58,7 +62,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
         FROM dbo.Tours t
         LEFT JOIN dbo.TourBookingStats s ON s.TourID = t.TourID
         WHERE
-            (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Itinerary) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
@@ -75,7 +79,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
         SELECT COUNT(*)
         FROM dbo.Tours t
         WHERE
-            (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Itinerary) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
@@ -102,7 +106,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
         FROM dbo.Tours t
         WHERE
             t.Latitude IS NOT NULL AND t.Longitude IS NOT NULL
-            AND (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            AND (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Itinerary) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)
@@ -126,7 +130,7 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
         FROM dbo.Tours t
         WHERE
             t.Latitude IS NOT NULL AND t.Longitude IS NOT NULL
-            AND (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+            AND (:keyword IS NULL OR (LOWER(t.TourName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.StartLocation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.Itinerary) LIKE LOWER(CONCAT('%', :keyword, '%'))))
             AND (:minPrice IS NULL OR t.Price >= :minPrice)
             AND (:maxPrice IS NULL OR t.Price <= :maxPrice)
             AND (:minRating IS NULL OR t.Rating >= :minRating)

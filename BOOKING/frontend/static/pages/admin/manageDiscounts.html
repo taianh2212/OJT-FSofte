@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Discounts - TourBooking Admin</title>
+    <title>Manage Discounts - DANA Admin</title>
     <link rel="stylesheet" href="../../assets/css/admin-common.css">
+    <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/toast.js"></script>
 </head>
 
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="./dashboard.html" class="logo">TourBooking</a>
+            <a href="./dashboard.html" class="logo">DANA</a>
             <nav>
                 <a href="./dashboard.html" class="nav-item">Dashboard</a>
                 <a href="./manageTours.html" class="nav-item">Tours</a>
@@ -118,21 +119,20 @@
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            if (window.TB && TB.logout) {
+                TB.logout();
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/pages/auth/login.html';
+            }
         });
 
         async function loadDiscounts() {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(API_URL, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error('Failed to fetch discounts');
-                
-                const response = await res.json();
-                const data = response.data || [];
+                const response = await TB.apiFetch(API_URL);
+                const data = response.data || response;
                 const table = document.getElementById('discountTable');
                 
                 if (data.length === 0) {
@@ -197,23 +197,14 @@
             const url = id ? `${API_URL}/${id}` : API_URL;
 
             try {
-                const res = await fetch(url, {
-                    method,
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                const res = await TB.apiFetch(url, {
+                    method: method,
                     body: JSON.stringify(body)
                 });
 
-                if (res.ok) {
-                    showToast(id ? 'Discount updated successfully' : 'Discount created successfully', 'success');
-                    closeModal();
-                    loadDiscounts();
-                } else {
-                    const error = await res.json();
-                    throw new Error(error.message || 'Error saving discount');
-                }
+                showToast(id ? 'Discount updated successfully' : 'Discount created successfully', 'success');
+                closeModal();
+                loadDiscounts();
             } catch (error) {
                 showToast(error.message, 'error');
             }
@@ -222,10 +213,8 @@
         async function editDiscount(id) {
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`${API_URL}/${id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const { data } = await res.json();
+                const response = await TB.apiFetch(`${API_URL}/${id}`);
+                const data = response.data || response;
                 document.getElementById('discountId').value = data.id;
                 document.getElementById('code').value = data.code;
                 document.getElementById('discountType').value = data.discountType;
@@ -251,18 +240,13 @@
         async function deleteDiscount(id) {
             if (confirm('Delete this discount?')) {
                 const token = localStorage.getItem('token');
-                try {
-                    const res = await fetch(`${API_URL}/${id}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        showToast('Discount deleted successfully', 'success');
-                        loadDiscounts();
-                    } else {
-                        throw new Error('Failed to delete discount');
-                    }
-                } catch (error) {
+            try {
+                await TB.apiFetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+                showToast('Discount deleted successfully', 'success');
+                loadDiscounts();
+            } catch (error) {
                     showToast(error.message, 'error');
                 }
             }

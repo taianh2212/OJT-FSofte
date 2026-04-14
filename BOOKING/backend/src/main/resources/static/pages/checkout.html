@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thanh toán - DANANGBEST</title>
+  <title>Thanh toán - DANA</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
@@ -137,7 +137,7 @@
     <a class="brand" href="./index.html">
         <div class="brand-mark">DB</div>
         <div class="brand-copy">
-          <strong style="font-size: 1.25rem; color: var(--primary);">DANANGBEST</strong>
+          <strong style="font-size: 1.25rem; color: var(--primary);">DANA</strong>
           <span>Thanh toán đơn hàng</span>
         </div>
     </a>
@@ -170,13 +170,23 @@
         </div>
 
         <div class="checkout-step reveal visible" style="animation-delay: 0.1s;">
-            <h2><span class="step-number">2</span> Số lượng khách</h2>
-            <div class="form-group">
-              <label>Tổng số người đi</label>
-              <div style="display: flex; align-items: center; gap: 20px;">
-                <button class="btn btn-outline" id="minusBtn" style="width: 50px; min-height: 50px; padding: 0;">-</button>
-                <input type="number" id="numPeople" value="1" min="1" style="text-align: center; width: 80px;">
-                <button class="btn btn-outline" id="plusBtn" style="width: 50px; min-height: 50px; padding: 0;">+</button>
+            <h2><span class="step-number">2</span> Số lượng khách & Giảm giá</h2>
+            <div class="info-grid">
+              <div class="form-group">
+                <label>Tổng số người đi</label>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                  <button class="btn btn-outline" id="minusBtn" style="width: 50px; min-height: 50px; padding: 0;">-</button>
+                  <input type="number" id="numPeople" value="1" min="1" style="text-align: center; width: 80px;">
+                  <button class="btn btn-outline" id="plusBtn" style="width: 50px; min-height: 50px; padding: 0;">+</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Mã giảm giá / Voucher</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="voucherCode" placeholder="Nhập mã (nếu có)..." style="text-transform: uppercase;">
+                    <button class="btn btn-secondary" id="applyVoucherBtn" style="white-space: nowrap; height: 50px;">Áp dụng</button>
+                </div>
+                <div id="voucherMsg" style="font-size: 0.75rem; margin-top: 5px; font-weight: 600;"></div>
               </div>
             </div>
         </div>
@@ -221,6 +231,10 @@
             <span>Số người:</span>
             <strong id="summaryPeople">1</strong>
           </div>
+          <div class="summary-item" id="discountItem" style="display: none; color: #ffeb3b;">
+            <span>Giảm giá (<span id="summaryVoucherCode">...</span>):</span>
+            <strong id="summaryDiscountAmount">0</strong>
+          </div>
 
           <div class="summary-total">
             <span>TỔNG CỘNG</span>
@@ -233,7 +247,7 @@
           <button class="btn" id="confirmBtn" style="width: 100%; height: 60px; margin-top: 40px; background: white; color: var(--primary); font-size: 1.1rem; border-radius: 15px;">XÁC NHẬN ĐẶT TOUR</button>
           
           <p style="margin-top: 20px; font-size: 0.75rem; text-align: center; opacity: 0.6; line-height: 1.5;">
-            Bằng cách nhấp vào nút "Xác nhận", bạn đồng ý với các Điều khoản & Chính sách của Danangbest.
+            Bằng cách nhấp vào nút "Xác nhận", bạn đồng ý với các Điều khoản & Chính sách của Dana.
           </p>
         </div>
       </aside>
@@ -242,7 +256,7 @@
 
   <footer style="background: #064e3b; color: white; padding: 60px 0; margin-top: 80px;">
     <div class="container" style="text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
-      &copy; 2024 DANANGBEST. Trao niềm tin - Nhận giá thực.
+      &copy; 2024 DANA. Trao niềm tin - Nhận giá thực.
     </div>
   </footer>
 

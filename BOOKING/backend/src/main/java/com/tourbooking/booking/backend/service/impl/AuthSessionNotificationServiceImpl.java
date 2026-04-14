@@ -67,10 +67,11 @@ public class AuthSessionNotificationServiceImpl implements AuthSessionNotificati
         for (ClientConnection connection : currentConnections) {
             try {
                 connection.emitter().send(Objects.requireNonNullElse(message, "Tài khoản đã được đăng nhập ở nơi khác. Vui lòng đăng nhập lại."));
-            } catch (IOException ignored) {
-                // If the client is already gone, the cleanup below will discard it.
-            } finally {
                 connection.emitter().complete();
+            } catch (Exception ignored) {
+                // If the client is already gone or an error occurred, 
+                // the container handles the cleanup. We avoid calling complete() 
+                // in a finally block to prevent AsyncContext race conditions.
             }
         }
     }

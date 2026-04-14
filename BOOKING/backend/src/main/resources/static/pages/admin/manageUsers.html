@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users - TourBooking Admin</title>
     <link rel="stylesheet" href="../../assets/css/admin-common.css">
+    <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/toast.js"></script>
 </head>
 
@@ -122,7 +123,7 @@
     </div>
 
     <script>
-        const API = "http://localhost:8080/api/v1/admin/users";
+        const API = "/api/v1/admin/users";
 
         // Kiểm tra quyền ADMIN
         function checkAuth() {
@@ -150,9 +151,13 @@
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            window.location.href = '/pages/auth/login.html';
+            if (window.TB && TB.logout) {
+                TB.logout();
+            } else {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/pages/auth/login.html';
+            }
         });
 
         let currentEditId = null;
@@ -160,20 +165,8 @@
         // LOAD USERS
         async function loadUsers() {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) throw new Error('No token');
-
-                const response = await fetch(API, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch users');
-
-                const responseData = await response.json();
-                const data = responseData.data;
+                const response = await TB.apiFetch(API);
+                const data = response.data || response;
 
                 if (!data || data.length === 0) {
                     document.getElementById("userTable").innerHTML = `
@@ -258,18 +251,8 @@
         // EDIT USER
         async function editUser(id) {
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API}/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch user details');
-
-                const responseData = await response.json();
-                const u = responseData.data;
+                const response = await TB.apiFetch(`${API}/${id}`);
+                const u = response.data || response;
                 currentEditId = id;
                 document.getElementById('modalTitle').innerText = 'Edit User';
                 document.getElementById('userId').value = u.id;
@@ -328,20 +311,10 @@
             }
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(url, {
+                await TB.apiFetch(url, {
                     method: method,
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
                     body: JSON.stringify(userData)
                 });
-
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text || 'Failed to save user');
-                }
 
                 showToast(currentEditId ? 'User updated successfully' : 'User created successfully', 'success');
                 closeModal();
@@ -360,20 +333,10 @@
             }
             
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API}/${id}/status`, {
+                await TB.apiFetch(`${API}/${id}/status`, {
                     method: "PUT",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
                     body: JSON.stringify({ isActive: !isActive })
                 });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || 'Failed to update user status');
-                }
 
                 showToast(`User ${action}ed successfully`, 'success');
                 loadUsers();

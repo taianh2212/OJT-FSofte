@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DaNangBest - Khám Phá Đà Nẵng Đích Thực</title>
+  <title>Dana - Khám Phá Đà Nẵng Đích Thực</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap"
     rel="stylesheet">
@@ -17,110 +17,119 @@
       <span>📞 Hotline: 0913 599 745</span>
       <span style="margin-left: 20px;">📧 Email: info@danangbest.com</span>
     </div>
-    <div class="top-links">
+    <div class="top-links" id="topLinks">
       <a href="./auth/login.html">Đăng nhập</a>/
       <a href="./auth/register.html">Đăng ký</a>
     </div>
   </div>
 
   <header class="site-header" id="siteHeader">
-    <a class="brand" href="./index.html">
-      <div class="brand-mark">DB</div>
-      <div class="brand-copy">
-        <strong>DANANGBEST</strong>
-        <span>Trao niềm tin - Nhận giá thực</span>
-      </div>
-    </a>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="./index.html" class="active">Trang chủ</a></li>
-        <li><a href="./tours.html">Tour Đà Nẵng</a></li>
-        <li><a href="./tours.html?cat=1-day">Tour 1 Ngày</a></li>
-        <li><a href="./compare.html">So sánh</a></li>
-        <li><a href="./chat.html">Tư vấn AI</a></li>
-      </ul>
-    </nav>
-    <div id="navRight" class="actions"></div>
+    <div class="header-container">
+      <a class="brand" href="./index.html">
+        <div class="brand-mark">DB</div>
+        <div class="brand-copy">
+          <strong>DANA</strong>
+          <span>Trao niềm tin - Nhận giá thực</span>
+        </div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="./index.html" class="active">Trang chủ</a></li>
+          <li><a href="./tours.html">Tour Đà Nẵng</a></li>
+          <li><a href="./tours.html?cat=1-day">Tour 1 Ngày</a></li>
+          <li><a href="./compare.html">So sánh</a></li>
+          <li><a href="./chat.html">Tư vấn AI</a></li>
+        </ul>
+      </nav>
+      <div id="navRight" class="actions"></div>
+    </div>
   </header>
 
   <main>
-    <section class="hero-banner"
-      style="background-image: url('https://danangbest.com/vnt_upload/weblink/banahill_1.jpg');">
+    <section class="hero-banner">
       <div class="hero-content">
         <h1 class="reveal">Khám Phá Đà Nẵng <br>Theo Cách Riêng Của Bạn</h1>
-        <p class="reveal" style="animation-delay: 0.2s;">Đặt tour trực tuyến giá tốt nhất, hỗ trợ 24/7 với đội ngũ
-          chuyên gia bản địa giàu kinh nghiệm.</p>
+        <p class="reveal" style="animation-delay: 0.2s;">
+          Đặt tour trực tuyến giá tốt nhất, hỗ trợ 24/7 với đội ngũ chuyên gia bản địa giàu kinh nghiệm.
+        </p>
       </div>
     </section>
 
-    <div class="container" style="display: flex; justify-content: center; position: relative;">
-      <div class="hero-search reveal" style="animation-delay: 0.4s;">
-        <div class="search-group">
+    <div class="container index-search-container">
+      <div class="horizontal-search reveal" style="animation-delay: 0.4s;">
+        <div class="search-segment">
           <label>Điểm đến</label>
-          <input type="text" placeholder="Bạn muốn đi đâu? (Bà Nà, Hội An...)">
+          <input type="text" id="searchInput" placeholder="Bạn muốn đi đâu? (Bà Nà, Hội An...)">
         </div>
-        <div class="search-group">
-          <label>Thời gian</label>
-          <select>
-            <option>Tất cả thời gian</option>
-            <option>Tour 1 ngày</option>
-            <option>Tour nhiều ngày</option>
+        <div class="search-segment">
+          <label>Loại hình</label>
+          <select id="catSelect">
+            <option value="">Tất cả tour</option>
+            <option value="1">Tour trong ngày</option>
+            <option value="2">Tour dài ngày</option>
           </select>
         </div>
-        <div class="search-group">
+        <div class="search-segment">
           <label>Ngân sách</label>
-          <select>
-            <option>Tất cả mức giá</option>
-            <option>Dưới 1 triệu</option>
-            <option>1 - 3 triệu</option>
-            <option>Trên 3 triệu</option>
+          <select id="priceSelect">
+            <option value="all">Mọi mức giá</option>
+            <option value="0-1000000">Dưới 1 triệu</option>
+            <option value="1000000-3000000">1 - 3 triệu</option>
+            <option value="3000000-plus">Trên 3 triệu</option>
           </select>
         </div>
-        <button class="btn btn-search">TÌM KIẾM</button>
+        <div style="padding: 5px;">
+          <button class="btn-search-main" onclick="handleSearch()">
+            <span class="icon">🔍</span>
+            <span>TÌM KIẾM</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <section class="section-full reveal" style="padding-top: 120px;">
-      <div style="text-align: center; margin-bottom: 60px;">
-        <h2 style="font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; font-weight: 800;">TOUR KHUYẾN MÃI HOT
-        </h2>
-        <div style="width: 80px; height: 5px; background: var(--accent); margin: 0 auto; border-radius: 999px;"></div>
+    <section class="section-full reveal" style="padding-top: 100px;">
+      <div style="text-align: center; margin-bottom: 80px;">
+        <span
+          style="color: var(--accent); font-weight: 800; font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase;">Handpicked
+          for you</span>
+        <h2
+          style="font-size: 3.2rem; color: var(--primary-dark); margin-top: 10px; font-weight: 900; letter-spacing: -0.04em;">
+          HÀNH TRÌNH NỔI BẬT</h2>
       </div>
 
-      <div id="featuredTours" class="tour-grid">
-        <div style="grid-column: 1/-1; text-align: center; padding: 100px; color: var(--text-faint);">
-          <div class="loader"></div>
-          <p style="margin-top: 20px;">Đang tìm những hành trình tuyệt vời nhất cho bạn...</p>
-        </div>
+      <div id="featuredTours" class="tour-grid" style="padding: 0;">
+        <!-- JS Render -->
       </div>
 
-      <div style="text-align: center; margin-top: 60px;">
-        <a href="./tours.html" class="btn btn-outline">XEM TẤT CẢ TOUR</a>
+      <div style="text-align: center; margin-top: 80px;">
+        <a href="./tours.html" class="btn btn-outline" style="border-radius: 12px; padding: 0 40px;">KHÁM PHÁ TẤT CẢ
+          TOUR</a>
       </div>
     </section>
 
-    <section class="section-full section-grey">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+    <section class="section-full" style="background: var(--bg-section); border-top: 1px solid var(--border);">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px;">
         <div class="reveal"
-          style="text-align: center; padding: 40px; background: white; border-radius: 20px; box-shadow: var(--shadow-sm);">
-          <div style="font-size: 3.5rem; margin-bottom: 25px;">🛡️</div>
-          <h3 style="color: var(--primary); margin-bottom: 15px; font-weight: 700;">UY TÍN HÀNG ĐẦU</h3>
-          <p style="color: var(--text-soft); line-height: 1.8;">Với hơn 10 năm kinh nghiệm, chúng tôi tự hào là đơn vị
-            lữ hành tin cậy nhất tại miền Trung.</p>
+          style="text-align: center; padding: 60px 40px; background: white; border-radius: 32px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+          <div style="font-size: 4rem; margin-bottom: 30px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">🛡️</div>
+          <h3 style="color: var(--primary); margin-bottom: 20px; font-weight: 800; font-size: 1.3rem;">UY TÍN HÀNG ĐẦU
+          </h3>
+          <p style="color: var(--text-soft); line-height: 1.8; font-weight: 500;">Hơn 10 năm kinh nghiệm dẫn dắt những
+            hành trình cảm xúc tại miền Trung Việt Nam.</p>
         </div>
         <div class="reveal"
-          style="text-align: center; padding: 40px; background: white; border-radius: 20px; box-shadow: var(--shadow-sm); animation-delay: 0.2s;">
-          <div style="font-size: 3.5rem; margin-bottom: 25px;">💰</div>
-          <h3 style="color: var(--primary); margin-bottom: 15px; font-weight: 700;">GIÁ TỐT NHẤT</h3>
-          <p style="color: var(--text-soft); line-height: 1.8;">Cam kết giá tour gốc từ đơn vị tổ chức, không qua trung
-            gian, không phát sinh chi phí ẩn.</p>
+          style="text-align: center; padding: 60px 40px; background: white; border-radius: 32px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); animation-delay: 0.2s;">
+          <div style="font-size: 4rem; margin-bottom: 30px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">💰</div>
+          <h3 style="color: var(--primary); margin-bottom: 20px; font-weight: 800; font-size: 1.3rem;">GIÁ TỐT NHẤT</h3>
+          <p style="color: var(--text-soft); line-height: 1.8; font-weight: 500;">Giá gốc từ đơn vị tổ chức, cam kết
+            chất lượng 5 sao với chi phí tối ưu nhất.</p>
         </div>
         <div class="reveal"
-          style="text-align: center; padding: 40px; background: white; border-radius: 20px; box-shadow: var(--shadow-sm); animation-delay: 0.4s;">
-          <div style="font-size: 3.5rem; margin-bottom: 25px;">🙋</div>
-          <h3 style="color: var(--primary); margin-bottom: 15px; font-weight: 700;">HỖ TRỢ TẬN TÂM</h3>
-          <p style="color: var(--text-soft); line-height: 1.8;">Đội ngũ nhân viên luôn sẵn sàng lắng nghe và tư vấn hành
-            trình phù hợp nhất với bạn 24/7.</p>
+          style="text-align: center; padding: 60px 40px; background: white; border-radius: 32px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); animation-delay: 0.4s;">
+          <div style="font-size: 4rem; margin-bottom: 30px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">🙋</div>
+          <h3 style="color: var(--primary); margin-bottom: 20px; font-weight: 800; font-size: 1.3rem;">HỖ TRỢ 24/7</h3>
+          <p style="color: var(--text-soft); line-height: 1.8; font-weight: 500;">Luôn đồng hành cùng bạn trên mọi nẻo
+            đường, giải quyết mọi yêu cầu tức thì.</p>
         </div>
       </div>
     </section>
@@ -130,7 +139,7 @@
     <div
       style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 60px; margin-bottom: 80px;">
       <div>
-        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANANGBEST</h3>
+        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANA</h3>
         <p style="opacity: 0.8; line-height: 2; margin-bottom: 30px;">Trao niềm tin - Nhận giá trị thực. Chúng tôi cam
           kết mang lại những chuyến đi đáng nhớ nhất cho mọi khách hàng.</p>
         <div style="display: flex; gap: 15px;">
@@ -165,16 +174,15 @@
     </div>
     <div
       style="text-align: center; color: rgba(255,255,255,0.3); font-size: 0.85rem; padding-top: 50px; border-top: 1px solid rgba(255,255,255,0.05);">
-      &copy; 2024 DANANGBEST. All rights reserved. Designed for excellence.
+      &copy; 2024 DANA. All rights reserved. Designed for excellence.
     </div>
   </footer>
 
   <script src="../assets/js/api.js"></script>
   <script>
+    const el = (id) => document.getElementById(id);
     const navRight = el('navRight');
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-
-    function el(id) { return document.getElementById(id); }
 
     // Header Scroll Effect
     window.addEventListener('scroll', () => {
@@ -186,24 +194,43 @@
     if (user) {
       const isAdmin = String(user.role || '').toUpperCase() === 'ADMIN';
       const adminLink = isAdmin
-        ? '<a class="btn" href="./admin/chat-escalations.html" style="font-size: 0.8rem; height: 40px; min-height: 40px;">QUẢN TRỊ</a>'
+        ? '<a class="btn" href="./admin/dashboard.html" style="font-size: 0.8rem; height: 40px; min-height: 40px; border-radius: 10px;">QUẢN TRỊ</a>'
         : '';
+      
+      // Update main nav
       navRight.innerHTML = `
         <div style="display: flex; align-items: center; gap: 20px;">
           <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">Chào, ${user.fullName || 'Bạn'}</span>
           ${adminLink}
-          <button class="btn btn-secondary" id="logoutBtn" style="padding: 0 20px; min-height: 40px; height: 40px; font-size: 0.8rem;">Đăng xuất</button>
+          <button class="btn btn-secondary" id="logoutBtn" style="padding: 0 20px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">Đăng xuất</button>
         </div>`;
+      
+      // Hide top bar links
+      if (el('topLinks')) el('topLinks').style.display = 'none';
+
       el('logoutBtn').onclick = () => {
         localStorage.clear();
         location.reload();
       };
+    } else {
+      navRight.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 15px;">
+           <a href="./auth/login.html" style="font-weight: 800; color: var(--text-soft); font-size: 0.9rem;">Đăng nhập</a>
+           <a href="./auth/register.html" class="btn" style="padding: 0 25px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">ĐĂNG KÝ</a>
+        </div>`;
     }
+
+    window.handleSearch = () => {
+      const keyword = el('searchInput').value;
+      const cat = el('catSelect').value;
+      const price = el('priceSelect').value;
+      window.location.href = `./tours.html?keyword=${encodeURIComponent(keyword)}&cat=${cat}&price=${price}`;
+    };
 
     // Load featured tours
     async function loadFeatured() {
       try {
-        const res = await TB.apiFetch('/api/v1/tours/browse?size=6&sortBy=popularity&sortDir=desc');
+        const res = await TB.apiFetch('/api/v1/tours/browse?size=6&sortBy=rating&sortDir=desc');
         const tours = res.data?.content || [];
         const grid = el('featuredTours');
         if (tours.length > 0) {
@@ -211,35 +238,35 @@
             <div class="tour-card reveal" style="animation-delay: ${idx * 0.1}s">
               <div class="tour-card-img-wrapper">
                 <img src="${t.imageUrl || 'https://danangbest.com/vnt_upload/tour/04_2023/banahill_4.jpg'}" class="tour-card-img" alt="${t.tourName}">
-                <div class="tour-card-badge">${t.categoryName || 'HOT TOUR'}</div>
+                <div class="tour-card-badge">✨ NỔI BẬT</div>
               </div>
               <div class="tour-card-body">
                 <h3 class="tour-card-title">${t.tourName}</h3>
                 <div class="tour-card-meta">
-                  <span>🕒 ${t.duration || 'Liên hệ'}</span>
-                  <span>📍 Đà Nẵng</span>
+                  <span>⌛ ${t.duration || 'Liên hệ'}</span>
+                  <span>📍 ${t.startLocation || 'Đà Nẵng'}</span>
                   <span>⭐ ${(t.rating || 5).toFixed(1)}</span>
                 </div>
                 <div class="tour-card-footer">
-                  <div class="tour-card-price">
-                    <span class="price-label">Giá trọn gói</span>
-                    <span class="price-value">${t.price ? Number(t.price).toLocaleString() : 'Liên hệ'}đ</span>
+                   <div class="tour-card-price">
+                    <span class="price-label">Giá chỉ từ:</span>
+                    <span class="price-value">${t.price ? Number(t.price).toLocaleString() : 'Liên hệ'}</span>
+                    <span class="price-currency">VNĐ</span>
                   </div>
-                  <a href="./tour-detail.html?id=${t.id}" class="btn" style="padding: 0 20px; min-height: 42px; font-size: 0.85rem;">CHI TIẾT</a>
+                  <a href="./tour-detail.html?id=${t.id}" class="btn" style="padding: 0 25px; min-height: 48px; font-size: 0.9rem; border-radius: 12px;">CHI TIẾT</a>
                 </div>
               </div>
             </div>
           `).join('');
           initReveal();
         } else {
-          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Hiện tại chưa có tour khuyến mãi.</div>';
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Hiện tại chưa có tour nổi bật.</div>';
         }
       } catch (err) {
         console.error('Failed to load tours', err);
         el('featuredTours').innerHTML = `
           <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--price);">
-            <p style="font-size: 1.2rem; font-weight: 700;">⚠️ Không thể kết nối với máy chủ!</p>
-            <p style="margin-top: 10px; color: var(--text-soft);">Vui lòng kiểm tra xem Backend (8080) đã được khởi động chưa.</p>
+            <p style="font-size: 1.2rem; font-weight: 700;">⚠️ Lỗi kết nối!</p>
             <button onclick="location.reload()" class="btn btn-outline" style="margin-top: 20px;">THỬ LẠI</button>
           </div>`;
       }
@@ -256,6 +283,24 @@
       document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     }
 
+    async function fetchCategories() {
+      try {
+        const res = await TB.apiFetch('/api/v1/categories');
+        const catsBody = el('catSelect');
+        if (res.data && catsBody) {
+          catsBody.innerHTML = `
+            <option value="">Tất cả tour</option>
+            ${res.data.map(c => `
+              <option value="${c.id}">${c.categoryName}</option>
+            `).join('')}
+          `;
+        }
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
+    }
+
+    fetchCategories();
     loadFeatured();
     initReveal();
   </script>

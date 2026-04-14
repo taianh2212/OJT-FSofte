@@ -19,6 +19,7 @@ public interface BookingService {
     long countActiveBookings();
 
     BigDecimal getMonthlyRevenue();
+    void generateTestData();
 
     // UC15
     com.tourbooking.booking.backend.model.dto.response.VoucherResponse applyVoucher(com.tourbooking.booking.backend.model.dto.request.VoucherRequest request);

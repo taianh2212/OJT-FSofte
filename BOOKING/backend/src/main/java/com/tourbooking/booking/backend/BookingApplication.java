@@ -21,7 +21,8 @@ public class BookingApplication {
     /**
      * Spring Boot không đọc file .env — nạp vào {@link System#setProperty} để khớp
      * {@code payos.client-id=${PAYOS_CLIENT_ID}} trong application.properties.
-     * Ưu tiên biến môi trường OS đã có (production); chỉ bổ sung từ .env khi chưa set.
+     * Ưu tiên biến môi trường OS đã có (production); chỉ bổ sung từ .env khi chưa
+     * set.
      */
     static void loadEnvFileIntoSystemProperties() {
         Path[] candidates = new Path[] {

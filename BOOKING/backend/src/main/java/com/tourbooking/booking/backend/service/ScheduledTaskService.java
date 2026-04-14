@@ -49,7 +49,7 @@ public class ScheduledTaskService {
     // UC46: Tự động cập nhật chỗ trống (AvailableSlots) cho TourSchedule
     // Chạy mỗi 5 phút
     // ================================================================
-    @Scheduled(fixedRate = 300_000)
+    // @Scheduled(fixedRate = 300_000)
     @Transactional
     public void autoUpdateSlots() {
         List<TourSchedule> openSchedules = tourScheduleRepository.findAllOpen();
@@ -86,7 +86,7 @@ public class ScheduledTaskService {
     // UC48: Gửi email thông báo cho khách hàng khi booking bị hủy
     // Chạy mỗi 1 giờ
     // ================================================================
-    @Scheduled(fixedRate = 3_600_000)
+    // @Scheduled(fixedRate = 3_600_000)
     @Transactional
     public void autoCancelUnpaidBookings() {
         LocalDateTime cutoff = LocalDateTime.now().minusHours(24);
@@ -132,7 +132,7 @@ public class ScheduledTaskService {
     // Lưu ý: Hiện tại schema chưa có bảng LoyaltyPoints, nên chỉ log
     //        Khi có bảng, implement logic cộng điểm thực tế tại đây
     // ================================================================
-    @Scheduled(cron = "0 0 2 * * *")
+    // @Scheduled(cron = "0 0 2 * * *")
     @Transactional
     public void autoUpdateLoyaltyPoints() {
         log.info("[UC49] Bắt đầu cộng điểm loyalty cho booking COMPLETED...");
@@ -154,7 +154,7 @@ public class ScheduledTaskService {
     // UC50: Tạo báo cáo tháng và gửi cho tất cả ADMIN
     // Chạy vào 8:00 AM ngày đầu tiên của mỗi tháng
     // ================================================================
-    @Scheduled(cron = "0 0 8 1 * *")
+    // @Scheduled(cron = "0 0 8 1 * *")
     @Transactional
     public void generateMonthlyReport() {
         LocalDateTime now = LocalDateTime.now();
@@ -186,7 +186,7 @@ public class ScheduledTaskService {
                 });
     }
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    // @Scheduled(cron = "0 0 2 * * ?")
     public void refreshOpenTripMapContent() {
         List<String> cities = openTripMapProperties.getSchedulerCities();
         if (cities == null || cities.isEmpty()) {

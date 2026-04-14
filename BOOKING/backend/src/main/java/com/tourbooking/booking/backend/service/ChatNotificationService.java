@@ -24,14 +24,16 @@ public class ChatNotificationService {
     }
 
     public void publish(ChatNotification notification) {
-        emitters.forEach(emitter -> {
+        for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("chat-notification")
                         .data(notification));
-            } catch (IOException ex) {
+            } catch (Exception ex) {
+                // If send failed, the emitter is likely already closed or errored.
+                // We just remove it from our tracking list.
                 emitters.remove(emitter);
             }
-        });
+        }
     }
 }

@@ -40,6 +40,8 @@
   let tourData = null;
   let scheduleData = null;
   let currentPrice = 0;
+  let appliedDiscount = 0;
+  let appliedVoucherCode = "";
 
   try {
     const [tourRes, scheduleRes] = await Promise.all([
@@ -68,7 +70,18 @@
   function updateTotals() {
     const count = parseInt(numPeopleInput.value) || 1;
     summaryPeople.textContent = count;
-    summaryTotalPrice.textContent = (count * currentPrice).toLocaleString('vi-VN');
+    const baseTotal = count * currentPrice;
+    
+    if (appliedDiscount > 0) {
+      document.getElementById('discountItem').style.display = 'flex';
+      document.getElementById('summaryDiscountAmount').textContent = '-' + appliedDiscount.toLocaleString('vi-VN') + ' đ';
+      document.getElementById('summaryVoucherCode').textContent = appliedVoucherCode;
+    } else {
+      document.getElementById('discountItem').style.display = 'none';
+    }
+
+    const finalTotal = baseTotal - appliedDiscount;
+    summaryTotalPrice.textContent = (finalTotal > 0 ? finalTotal : 0).toLocaleString('vi-VN');
   }
 
   document.getElementById('plusBtn').onclick = () => {
@@ -84,6 +97,51 @@
   };
 
   numPeopleInput.onchange = updateTotals;
+
+  // Handle Voucher
+  const voucherInput = document.getElementById('voucherCode');
+  const applyVoucherBtn = document.getElementById('applyVoucherBtn');
+  const voucherMsg = document.getElementById('voucherMsg');
+
+  applyVoucherBtn.onclick = async () => {
+    const code = voucherInput.value.trim().toUpperCase();
+    if (!code) return;
+
+    applyVoucherBtn.disabled = true;
+    applyVoucherBtn.textContent = '...';
+
+    try {
+      const count = parseInt(numPeopleInput.value) || 1;
+      const res = await TB.apiFetch('/api/v1/bookings/apply-voucher', {
+        method: 'POST',
+        body: JSON.stringify({
+          voucherCode: code,
+          currentTotal: count * currentPrice
+        })
+      });
+
+      if (res.data.isValid) {
+        appliedDiscount = res.data.discountAmount;
+        appliedVoucherCode = code;
+        voucherMsg.style.color = '#4caf50';
+        voucherMsg.textContent = res.data.message;
+        updateTotals();
+      } else {
+        appliedDiscount = 0;
+        appliedVoucherCode = "";
+        voucherMsg.style.color = '#f44336';
+        voucherMsg.textContent = res.data.message;
+        updateTotals();
+      }
+    } catch (err) {
+      console.error(err);
+      voucherMsg.style.color = '#f44336';
+      voucherMsg.textContent = 'Lỗi hệ thống khi kiểm tra mã.';
+    } finally {
+      applyVoucherBtn.disabled = false;
+      applyVoucherBtn.textContent = 'Áp dụng';
+    }
+  };
 
   // Toggle Payment Method
   const methodCards = document.querySelectorAll('.method-card');
@@ -106,7 +164,8 @@
       const bookingReq = {
         userId: user.id,
         scheduleId: parseInt(scheduleId),
-        numberOfPeople: parseInt(numPeopleInput.value)
+        numberOfPeople: parseInt(numPeopleInput.value),
+        discountCode: appliedVoucherCode || null
       };
 
       const bookingRes = await TB.apiFetch('/api/v1/bookings', {

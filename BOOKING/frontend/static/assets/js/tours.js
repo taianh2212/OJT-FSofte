@@ -8,16 +8,37 @@
   const applyBtn = document.getElementById('applyFilters');
   const compareCountEl = document.getElementById('compareCount');
 
+  const params = new URLSearchParams(window.location.search);
   let state = {
     page: 0,
     size: 9,
-    keyword: '',
+    keyword: params.get('keyword') || '',
     minPrice: '',
     maxPrice: '',
-    categoryId: '',
+    categoryId: params.get('cat') || '',
     sortBy: 'price',
     selected: new Set(JSON.parse(localStorage.getItem('compareIds') || '[]'))
   };
+
+  const pRange = params.get('price');
+  if (pRange && pRange !== 'all') {
+    if (pRange === '3000000-plus') {
+      state.minPrice = '3000000';
+      state.maxPrice = '';
+    } else {
+      const [min, max] = pRange.split('-');
+      state.minPrice = min;
+      state.maxPrice = max;
+    }
+    const priceSelect = document.getElementById('priceRange');
+    if (priceSelect) priceSelect.value = pRange;
+  }
+
+  // Pre-fill search input if keyword exists
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput && state.keyword) {
+    searchInput.value = state.keyword;
+  }
 
   function updateCompareBadge() {
     compareCountEl.textContent = state.selected.size;
@@ -167,6 +188,7 @@
             <option value="${c.id}">${c.categoryName}</option>
           `).join('')}
         `;
+        if (state.categoryId) catsBody.value = state.categoryId;
       }
     } catch (err) {
       console.error('Failed to load categories', err);
