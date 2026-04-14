@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Danh sách Tour Đà Nẵng - DANANGBEST</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .tours-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 40px;
+      padding: 60px 0;
+    }
+
+    .sidebar-filter {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      position: sticky;
+      top: 110px;
+      height: fit-content;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-filter h3 {
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--accent);
+      font-weight: 800;
+    }
+
+    .filter-group {
+      margin-bottom: 30px;
+    }
+
+    .filter-group label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      cursor: pointer;
+    }
+
+    .filter-group input[type="checkbox"] {
+      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      vertical-align: middle;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 50px;
+      padding: 0 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 25px;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    @media (max-width: 960px) {
+      .tours-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar-filter {
+        position: static;
+        margin-bottom: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-bar">
+    <div class="top-info">
+      <span>📞 Hotline: 0913 599 745</span>
+      <span style="margin-left: 20px;">📧 Email: info@danangbest.com</span>
+    </div>
+    <div class="top-links">
+      <a href="./auth/login.html">Đăng nhập</a>/
+      <a href="./auth/register.html">Đăng ký</a>
+    </div>
+  </div>
+
+  <header class="site-header" id="siteHeader">
+    <a class="brand" href="./index.html">
+      <div class="brand-mark">DB</div>
+      <div class="brand-copy">
+        <strong style="font-size: 1.25rem; color: var(--primary);">DANANGBEST</strong>
+        <span>Trao niềm tin - Nhận giá thực</span>
+      </div>
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="./index.html">Trang chủ</a></li>
+        <li><a href="./tours.html" class="active">Tour Đà Nẵng</a></li>
+        <li><a href="./compare.html">So sánh</a></li>
+        <li><a href="./chat.html">Tư vấn AI</a></li>
+      </ul>
+    </nav>
+    <div id="navRight" class="actions"></div>
+  </header>
+
+  <div class="section-full section-grey" style="padding: 60px 0;">
+    <div class="container reveal">
+      <h1
+        style="color: var(--primary); font-size: 3rem; margin-bottom: 10px; font-weight: 800; letter-spacing: -0.03em;">
+        KHÁM PHÁ ĐÀ NẴNG
+      </h1>
+      <p style="color: var(--text-soft); font-size: 1.2rem; font-weight: 500;">Tìm thấy hành trình tuyệt vời dành riêng
+        cho bạn<span id="tourCount" style="color: var(--primary); font-weight: 800;">...</span></p>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="tours-layout">
+      <aside class="reveal">
+        <div class="sidebar-filter">
+          <h3>TÌM KIẾM TOUR</h3>
+          <input type="text" id="searchInput" class="search-input" placeholder="Nhập tên tour...">
+
+          <div class="filter-group">
+            <h3>DANH MỤC</h3>
+            <div id="categoryFilters">
+              <!-- Render via JS -->
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h3>KHOẢNG GIÁ</h3>
+            <label><input type="radio" name="priceRange" value="all" checked> Tất cả mức giá</label>
+            <label><input type="radio" name="priceRange" value="0-1000000"> Dưới 1.000.000đ</label>
+            <label><input type="radio" name="priceRange" value="1000000-3000000"> 1tr - 3tr</label>
+            <label><input type="radio" name="priceRange" value="3000000-plus"> Trên 3.000.000đ</label>
+          </div>
+
+          <button class="btn btn-search" style="width: 100%; height: 55px;" id="applyFilters">LỌC KẾT QUẢ</button>
+        </div>
+      </aside>
+
+      <section class="reveal" style="animation-delay: 0.2s;">
+        <div class="compare-bar" id="compareBar"
+          style="display: none; margin-bottom: 25px; background: var(--accent-soft); padding: 15px 25px; border-radius: 15px; border: 1px dashed var(--accent); justify-content: space-between; align-items: center;">
+          <div style="font-weight: 700; color: var(--primary);">Đã chọn <span id="compareCount">0</span> tour để so sánh
+          </div>
+          <a href="./compare.html" class="btn" style="height: 40px; padding: 0 20px; font-size: 0.8rem;">SO SÁNH
+            NGAY</a>
+        </div>
+
+        <div id="tourGrid" class="tour-grid">
+          <!-- Rendered via JS -->
+        </div>
+
+        <div id="pagination"
+          style="margin-top: 60px; display: flex; justify-content: center; align-items: center; gap: 20px;">
+          <button id="prevBtn" class="btn btn-secondary" style="height: 40px; padding: 0 20px;">&larr; Trước</button>
+          <span id="pageInfo" style="font-weight: 700; color: var(--text-soft);">1 / 1</span>
+          <button id="nextBtn" class="btn btn-secondary" style="height: 40px; padding: 0 20px;">Sau &rarr;</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer style="background: #064e3b; color: white; padding: 100px 5% 40px; margin-top: 100px;">
+    <div
+      style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 60px; margin-bottom: 80px;">
+      <div>
+        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANANGBEST</h3>
+        <p style="opacity: 0.8; line-height: 2; margin-bottom: 30px;">Trao niềm tin - Nhận giá thực. Chúng tôi cam kết
+          mang lại những chuyến đi đáng nhớ nhất cho mọi khách hàng.</p>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 30px; font-weight: 700; border-left: 4px solid var(--accent); padding-left: 15px;">
+          LIÊN HỆ</h4>
+        <p style="opacity: 0.9; margin-bottom: 15px;">📍 Đà Nẵng, Việt Nam</p>
+        <p style="opacity: 0.9;">📞 Hotline: 0913 599 745</p>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 30px; font-weight: 700; border-left: 4px solid var(--accent); padding-left: 15px;">HỖ
+          TRỢ</h4>
+        <ul style="list-style: none; padding: 0; opacity: 0.8; line-height: 2.5;">
+          <li>Chính sách bảo mật</li>
+          <li>Câu hỏi thường gặp</li>
+        </ul>
+      </div>
+    </div>
+    <div
+      style="text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
+      &copy; 2024 DANANGBEST. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/tours.js"></script>
+  <script>
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Login check
+    const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+    if (user) {
+      document.getElementById('navRight').innerHTML = `
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">Chào, ${user.fullName || 'Bạn'}</span>
+          <button class="btn btn-secondary" id="logoutBtn" style="padding: 0 20px; min-height: 40px; height: 40px; font-size: 0.8rem;">Đăng xuất</button>
+        </div>`;
+      document.getElementById('logoutBtn').onclick = () => {
+        localStorage.clear();
+        location.reload();
+      };
+    }
+  </script>
+</body>
+
+</html>
