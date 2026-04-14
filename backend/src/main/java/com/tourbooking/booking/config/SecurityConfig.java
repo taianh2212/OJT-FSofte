@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/error", "/index.html", "/favicon.ico",
                     "/css/**", "/js/**", "/images/**", "/assets/**",
-                    "/pages/**",
+                    "/pages/**", "/*.html",
                     "/user/**", "/admin/**",
                     "/static/**", "/webjars/**", "/uploads/**"
                 ).permitAll()
@@ -56,12 +56,12 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/newsletters").permitAll()
                 // UC11 chat support + UC51 AI chat
                 .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
+                // Demo UC endpoints
+                .requestMatchers("/api/v1/demo/**").permitAll()
                 // Admin chat escalation dashboard
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Read-only categories
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                // Demo UC endpoints (chỉ dùng khi demo, nên xóa trước khi production)
-                .requestMatchers("/api/v1/demo/**").permitAll()
                 // Everything else requires login (can be refined later)
                 .anyRequest().authenticated()
             );
