@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface CategoryService {
     List<CategoryResponse> getAllCategories();
+    com.tourbooking.booking.backend.model.dto.response.PagedResponse<CategoryResponse> getAllCategoriesPaged(org.springframework.data.domain.Pageable pageable);
     CategoryResponse getCategoryById(Long id);
     CategoryResponse createCategory(CategoryRequest request);
     CategoryResponse updateCategory(Long id, CategoryRequest request);

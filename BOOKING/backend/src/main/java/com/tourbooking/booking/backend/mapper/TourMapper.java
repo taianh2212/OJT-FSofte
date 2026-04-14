@@ -32,6 +32,7 @@ public class TourMapper {
             response.setImageUrls(tour.getImages().stream().map(TourImage::getImageUrl).collect(Collectors.toList()));
             response.setImageUrl(tour.getImages().get(0).getImageUrl());
         }
+        response.setExternalId(tour.getExternalId());
 
         return response;
     }
@@ -72,6 +73,7 @@ public class TourMapper {
         response.setSuitableAges(tour.getSuitableAges());
         response.setChildPolicy(tour.getChildPolicy());
         response.setWhyChooseUs(tour.getWhyChooseUs());
+        response.setExternalId(tour.getExternalId());
 
         return response;
     }
@@ -82,6 +84,7 @@ public class TourMapper {
         s.setStartDate(schedule.getStartDate());
         s.setEndDate(schedule.getEndDate());
         s.setAvailableSlots(schedule.getAvailableSlots());
+        s.setMaxSlots(schedule.getMaxSlots());
         s.setStatus(schedule.getStatus() == null ? null : schedule.getStatus().name());
         return s;
     }
@@ -100,7 +103,9 @@ public class TourMapper {
         TourSchedule schedule = new TourSchedule();
         schedule.setStartDate(request.getStartDate());
         schedule.setEndDate(request.getEndDate());
-        schedule.setAvailableSlots(request.getAvailableSlots());
+        schedule.setMaxSlots(request.getMaxSlots());
+        // AvailableSlots should be MaxSlots initially
+        schedule.setAvailableSlots(request.getMaxSlots());
         schedule.setStatus(TourStatus.OPEN);
         return schedule;
     }
@@ -124,6 +129,8 @@ public class TourMapper {
             tour.setEndLocation(request.getEndLocation());
         if (request.getTransportType() != null)
             tour.setTransportType(request.getTransportType());
+        if (request.getExternalId() != null)
+            tour.setExternalId(request.getExternalId());
         // Category and other collections should be handled in the Service layer
     }
 }

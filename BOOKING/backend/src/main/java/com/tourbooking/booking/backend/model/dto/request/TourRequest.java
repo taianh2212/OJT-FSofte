@@ -19,4 +19,5 @@ public class TourRequest {
     private List<String> imageUrls;
     private List<String> highlights;
     private List<TourScheduleRequest> schedules;
+    private String externalId;
 }

@@ -30,6 +30,9 @@ public class TourSchedule extends Base {
     @Column(name = "AvailableSlots")
     private Integer availableSlots;
 
+    @Column(name = "MaxSlots")
+    private Integer maxSlots;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50)
     private TourStatus status = TourStatus.OPEN;

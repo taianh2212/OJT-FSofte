@@ -113,6 +113,30 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public com.tourbooking.booking.backend.model.dto.response.PagedResponse<ReviewResponse> getAllReviewsPaged(Long tourId, Integer rating, org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<Review> page;
+
+        if (tourId != null && rating != null) {
+            page = reviewRepo.findByTourIdAndRating(tourId, rating, pageable);
+        } else if (tourId != null) {
+            page = reviewRepo.findByTourId(tourId, pageable);
+        } else if (rating != null) {
+            page = reviewRepo.findByRating(rating, pageable);
+        } else {
+            page = reviewRepo.findAll(pageable);
+        }
+
+        return com.tourbooking.booking.backend.model.dto.response.PagedResponse.<ReviewResponse>builder()
+                .content(page.getContent().stream().map(ReviewMapper::toResponse).toList())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+    }
+
+    @Override
     @Transactional
     public void deleteReview(Long id) {
         if (!reviewRepo.existsById(id)) {

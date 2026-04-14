@@ -23,6 +23,7 @@ public class TourDetailResponse {
     private String whyChooseUs;
     private List<String> imageUrls;
     private String imageUrl;
+    private String externalId;
     private List<String> highlights;
     private List<TourScheduleSummary> schedules;
 
@@ -32,6 +33,7 @@ public class TourDetailResponse {
         private LocalDate startDate;
         private LocalDate endDate;
         private Integer availableSlots;
+        private Integer maxSlots;
         private String status;
     }
 }

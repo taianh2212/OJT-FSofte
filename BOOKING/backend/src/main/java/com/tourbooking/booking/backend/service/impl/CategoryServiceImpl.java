@@ -28,6 +28,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public com.tourbooking.booking.backend.model.dto.response.PagedResponse<CategoryResponse> getAllCategoriesPaged(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<Category> page = categoryRepository.findAll(pageable);
+        return com.tourbooking.booking.backend.model.dto.response.PagedResponse.<CategoryResponse>builder()
+                .content(page.getContent().stream().map(CategoryMapper::toResponse).toList())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+    }
+
+    @Override
     public CategoryResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));

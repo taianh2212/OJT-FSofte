@@ -95,11 +95,14 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ApiResponse<List<UserResponse>> getAllUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
+    public ApiResponse<com.tourbooking.booking.backend.model.dto.response.PagedResponse<UserResponse>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return ApiResponse.<com.tourbooking.booking.backend.model.dto.response.PagedResponse<UserResponse>>builder()
                 .code(HttpStatus.OK.value())
-                .message("Successfully retrieved all users")
-                .data(userService.getAllUsers())
+                .message("Successfully retrieved users (page " + page + ")")
+                .data(userService.getAllUsersPaged(pageable))
                 .build();
     }
 
