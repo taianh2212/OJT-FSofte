@@ -87,7 +87,7 @@
     const res = await fetch(fullPath, { ...options, headers });
     const text = await res.text();
     let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch (_) { }
+    try { json = text ? JSON.parse(text) : null; } catch (_) {}
     if (!res.ok) {
       const msg = (json && json.message) ? json.message : `HTTP ${res.status}`;
       if (res.status === 401 && token) {

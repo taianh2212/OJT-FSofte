@@ -17,7 +17,7 @@
       <span>📞 Hotline: 0913 599 745</span>
       <span style="margin-left: 20px;">📧 Email: info@danangbest.com</span>
     </div>
-    <div class="top-links">
+    <div class="top-links" id="authLinks">
       <a href="./auth/login.html">Đăng nhập</a>/
       <a href="./auth/register.html">Đăng ký</a>
     </div>
@@ -192,6 +192,7 @@
     });
 
     if (user) {
+      if (el('authLinks')) el('authLinks').style.display = 'none';
       const isAdmin = String(user.role || '').toUpperCase() === 'ADMIN';
       const adminLink = isAdmin
         ? '<a class="btn" href="./admin/chat-escalations.html" style="font-size: 0.8rem; height: 40px; min-height: 40px; border-radius: 10px;">QUẢN TRỊ</a>'

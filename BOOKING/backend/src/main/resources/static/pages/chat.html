@@ -156,22 +156,33 @@
   </div>
 
   <header class="site-header" id="siteHeader">
-    <a class="brand" href="./index.html">
-      <div class="brand-mark">DB</div>
-      <div class="brand-copy">
-        <strong style="font-size: 1.25rem; color: var(--primary);">DANANGBEST</strong>
-        <span>Tư vấn AI thông minh</span>
-      </div>
-    </a>
-    <nav>
-      <ul class="nav-links">
-        <li><a href="./index.html">Trang chủ</a></li>
-        <li><a href="./tours.html">Tour Đà Nẵng</a></li>
-        <li><a href="./chat.html" class="active">Tư vấn AI</a></li>
-      </ul>
-    </nav>
-    <div id="navRight" class="actions"></div>
+    <div class="header-container">
+      <a class="brand" href="./index.html">
+        <div class="brand-mark">DB</div>
+        <div class="brand-copy">
+          <strong style="font-size: 1.4rem; color: var(--primary);">DANANGBEST</strong>
+          <span style="display: block; font-size: 0.7rem; color: var(--text-faint); font-weight: 800; text-transform: uppercase;">Premium Travel Experience</span>
+        </div>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="./index.html">Trang chủ</a></li>
+          <li><a href="./tours.html">Tour Đà Nẵng</a></li>
+          <li><a href="./chat.html" class="active">Tư vấn AI</a></li>
+        </ul>
+      </nav>
+      <div id="navRight" class="actions"></div>
+    </div>
   </header>
+
+  <section class="hero-banner" style="background-image: url('https://images.unsplash.com/photo-1549608276-5786777e6587?q=80&w=2070&auto=format&fit=crop'); height: 60vh;">
+    <div class="hero-content">
+      <h1 class="reveal">HỖ TRỢ THÔNG MINH</h1>
+      <p class="reveal" style="animation-delay: 0.2s;">
+        Trợ lý AI luôn sẵn sàng đồng hành cùng bạn lên kế hoạch cho chuyến đi mơ ước.
+      </p>
+    </div>
+  </section>
 
   <main class="container">
     <div class="chat-layout reveal visible">
@@ -230,9 +241,27 @@
     </div>
   </main>
 
-  <footer style="background: #064e3b; color: white; padding: 40px 0; margin-top: 60px;">
-    <div class="container" style="text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
-      &copy; 2024 DANANGBEST. Trao niềm tin - Nhận giá thực.
+  <footer style="background: #064e3b; color: white; padding: 100px 5% 40px; margin-top: 100px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 60px; margin-bottom: 80px;">
+      <div>
+        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANANGBEST</h3>
+        <p style="opacity: 0.8; line-height: 2; margin-bottom: 30px;">Trao niềm tin - Nhận giá thực. Chúng tôi cam kết mang lại những chuyến đi đáng nhớ nhất cho mọi khách hàng.</p>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 30px; font-weight: 700; border-left: 4px solid var(--accent); padding-left: 15px;">LIÊN HỆ</h4>
+        <p style="opacity: 0.9; margin-bottom: 15px;">📍 Đà Nẵng, Việt Nam</p>
+        <p style="opacity: 0.9;">📞 Hotline: 0913 599 745</p>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 30px; font-weight: 700; border-left: 4px solid var(--accent); padding-left: 15px;">HỖ TRỢ</h4>
+        <ul style="list-style: none; padding: 0; opacity: 0.8; line-height: 2.5;">
+          <li>Chính bảo mật</li>
+          <li>Câu hỏi thường gặp</li>
+        </ul>
+      </div>
+    </div>
+    <div style="text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
+      &copy; 2024 DANANGBEST. All rights reserved.
     </div>
   </footer>
 

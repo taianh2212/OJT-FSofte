@@ -6,6 +6,7 @@ import com.tourbooking.booking.backend.model.dto.response.UserResponse;
 import com.tourbooking.booking.backend.service.GuideService;
 import com.tourbooking.booking.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/guides")
 @RequiredArgsConstructor
@@ -31,17 +33,51 @@ public class GuideController {
         @GetMapping("/assigned-tours")
         @PreAuthorize("hasRole('GUIDE')")
         public ApiResponse<List<TourScheduleResponse>> getAssignedTours(Authentication authentication) {
-                String email = authentication.getName();
-                UserResponse user = userService.getUserByEmail(email);
-                Long guideId = user.getId();
+                try {
+                        log.info("API Hit: /api/v1/guides/assigned-tours by user: {}", authentication.getName());
+                        String email = authentication.getName();
+                        UserResponse user = userService.getUserByEmail(email);
+                        Long guideId = user.getId();
 
-                List<TourScheduleResponse> assignedTours = guideService.getAssignedTours(guideId);
+                        List<TourScheduleResponse> assignedTours = guideService.getAssignedTours(guideId);
+                        log.info("API Success: Returning {} tours", assignedTours.size());
 
-                return ApiResponse.<List<TourScheduleResponse>>builder()
-                                .code(HttpStatus.OK.value())
-                                .message("Successfully retrieved assigned tours")
-                                .data(assignedTours)
-                                .build();
+                        return ApiResponse.<List<TourScheduleResponse>>builder()
+                                        .code(HttpStatus.OK.value())
+                                        .message("Successfully retrieved assigned tours")
+                                        .data(assignedTours)
+                                        .build();
+                } catch (Exception e) {
+                        log.error("API Error in /assigned-tours: {}", e.getMessage(), e);
+                        return ApiResponse.<List<TourScheduleResponse>>builder()
+                                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                        .message("Error: " + e.getMessage())
+                                        .data(null)
+                                        .build();
+                }
+        }
+
+        @GetMapping("/tours/{scheduleId}")
+        @PreAuthorize("hasRole('GUIDE')")
+        public ApiResponse<TourScheduleResponse> getTourDetails(
+                        @PathVariable Long scheduleId,
+                        Authentication authentication) {
+                try {
+                        String email = authentication.getName();
+                        UserResponse user = userService.getUserByEmail(email);
+                        TourScheduleResponse details = guideService.getAssignedTourDetails(user.getId(), scheduleId);
+                        return ApiResponse.<TourScheduleResponse>builder()
+                                        .code(HttpStatus.OK.value())
+                                        .message("Successfully retrieved tour details")
+                                        .data(details)
+                                        .build();
+                } catch (Exception e) {
+                        log.error("Error in /tours/{}: {}", scheduleId, e.getMessage());
+                        return ApiResponse.<TourScheduleResponse>builder()
+                                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                        .message("Error: " + e.getMessage())
+                                        .build();
+                }
         }
 
         @PatchMapping("/tours/{scheduleId}/progress")

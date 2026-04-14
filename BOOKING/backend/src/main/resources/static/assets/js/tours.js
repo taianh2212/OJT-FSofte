@@ -67,23 +67,24 @@
       card.innerHTML = `
         <div class="tour-card-img-wrapper">
           <img src="${t.imageUrl || (t.imageUrls && t.imageUrls[0]) || 'https://danangbest.com/vnt_upload/tour/04_2023/banahill_4.jpg'}" class="tour-card-img" alt="${t.tourName}">
-          <div class="tour-card-badge">${t.categoryName || 'HOT TOUR'}</div>
+          <div class="tour-card-badge">✨ ${t.categoryName || 'Sản phẩm nổi bật'}</div>
         </div>
         <div class="tour-card-body">
           <h3 class="tour-card-title">${t.tourName}</h3>
           <div class="tour-card-meta">
-            <span>🕒 ${t.duration ? t.duration + ' Ngày' : 'Liên hệ'}</span>
-            <span>📍 Đà Nẵng</span>
-            <span>⭐ ${(t.rating || 5).toFixed(1)}</span>
+            <span>⌛ ${t.duration ? t.duration + ' Ngày' : 'Liên hệ'}</span>
+            <span>📍 ${t.startLocation || 'Đà Nẵng'}</span>
+            <span>⭐ ${(t.rating || 5).toFixed(1)} Rating</span>
+            <span>🚌 ${t.transportType || 'Xe du lịch'}</span>
           </div>
           <div class="tour-card-footer">
             <div class="tour-card-price">
-              <span class="price-label">Giá trọn gói</span>
-              ${priceHtml}
+              <span class="price-label">Giá chỉ từ:</span>
+              ${t.price ? `<span class="price-value">${Number(t.price).toLocaleString()}</span><span class="price-currency">VNĐ</span>` : '<span class="price-value">Liên hệ</span>'}
             </div>
-            <div style="display: flex; gap: 8px;">
-               <button class="btn btn-secondary compare-btn" data-id="${t.id}" style="padding: 0 12px; min-height: 42px; width: 42px;">⚖️</button>
-               <a href="./tour-detail.html?id=${t.id}" class="btn" style="padding: 0 20px; min-height: 42px; font-size: 0.85rem;">CHI TIẾT</a>
+            <div style="display: flex; gap: 10px;">
+               <button class="btn btn-secondary compare-btn" data-id="${t.id}" style="padding: 0; min-height: 48px; width: 48px; border-radius: 12px; font-size: 1.2rem;" title="So sánh">⚖️</button>
+               <a href="./tour-detail.html?id=${t.id}" class="btn" style="padding: 0 25px; min-height: 48px; font-size: 0.9rem; border-radius: 12px;">XEM CHI TIẾT</a>
             </div>
           </div>
         </div>
@@ -136,6 +137,21 @@
 
   if (applyBtn) applyBtn.onclick = () => {
     state.keyword = document.getElementById('searchInput')?.value || '';
+    state.categoryId = document.getElementById('categoryFilters')?.value || '';
+    
+    const pRange = document.getElementById('priceRange')?.value || 'all';
+    if (pRange === 'all') {
+      state.minPrice = '';
+      state.maxPrice = '';
+    } else if (pRange === '3000000-plus') {
+      state.minPrice = '3000000';
+      state.maxPrice = '';
+    } else {
+      const [min, max] = pRange.split('-');
+      state.minPrice = min;
+      state.maxPrice = max;
+    }
+
     state.page = 0;
     fetchTours();
   };
@@ -146,20 +162,11 @@
       const catsBody = document.getElementById('categoryFilters');
       if (res.data && catsBody) {
         catsBody.innerHTML = `
-          <label><input type="radio" name="cat" value="" checked> Tất cả danh mục</label>
+          <option value="">Tất cả danh mục</option>
           ${res.data.map(c => `
-            <label><input type="radio" name="cat" value="${c.id}"> ${c.categoryName}</label>
+            <option value="${c.id}">${c.categoryName}</option>
           `).join('')}
         `;
-        
-        // Match selection events
-        catsBody.querySelectorAll('input').forEach(input => {
-          input.addEventListener('change', () => {
-            state.categoryId = input.value;
-            state.page = 0;
-            fetchTours();
-          });
-        });
       }
     } catch (err) {
       console.error('Failed to load categories', err);

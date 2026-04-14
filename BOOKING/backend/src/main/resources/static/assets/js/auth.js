@@ -37,7 +37,14 @@
         localStorage.setItem('user', JSON.stringify(res.data.user));
         msgEl.style.color = 'green';
         msgEl.textContent = 'Login successful!';
-        setTimeout(() => window.location.href = '/pages/index.html', 700);
+        
+        // Điều hướng theo vai trò (Role-based redirection)
+        const role = res.data.user.role;
+        let target = '/pages/index.html';
+        if (role === 'STAFF') target = '/pages/staff/dashboard.html';
+        else if (role === 'GUIDE') target = '/pages/guide/dashboard.html';
+        
+        setTimeout(() => window.location.href = target, 700);
       } catch (err) {
         msgEl.style.color = 'red';
         msgEl.textContent = err.message || 'Login failed';
@@ -92,4 +99,12 @@
       }
     });
   }
+  // Check for tab parameter on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'login' || tab === 'register') {
+      setActiveTab(tab);
+    }
+  });
 })();
