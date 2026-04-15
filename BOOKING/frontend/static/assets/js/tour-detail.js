@@ -114,8 +114,99 @@
     renderSchedules(t.schedules);
   }
 
-  load().catch(err => {
+  async function loadReviews() {
+    try {
+      const res = await TB.apiFetch(`/api/v1/reviews/tour/${encodeURIComponent(id)}`, { method: 'GET' });
+      const reviews = res.data || [];
+      const listEl = el('reviewList');
+      if (reviews.length === 0) {
+        listEl.innerHTML = '<p style="color: var(--text-soft); text-align: center; padding: 20px;">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>';
+        return;
+      }
+      listEl.innerHTML = reviews.map(r => `
+        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <strong style="color: var(--primary);">${escapeHtml(r.userName || 'Khách hàng')}</strong>
+            <span style="color: #fbbf24;">${'⭐'.repeat(r.rating)}</span>
+          </div>
+          <p style="color: var(--text-soft); line-height: 1.6; font-size: 0.95rem;">${escapeHtml(r.comment || '')}</p>
+          <div style="font-size: 0.8rem; color: var(--text-faint); margin-top: 10px;">${r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}</div>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.error('Failed to load reviews', e);
+      el('reviewList').innerHTML = '<p style="color: var(--price); text-align: center;">Lỗi khi tải đánh giá.</p>';
+    }
+  }
+
+  load().then(() => {
+    loadReviews();
+  }).catch(err => {
     console.error(err);
     alert('Lỗi khi tải thông tin tour: ' + err.message);
   });
+
+  const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const navRight = el('navRight');
+  if (navRight) {
+    if (user) {
+      navRight.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">Chào, ${user.fullName || 'Bạn'}</span>
+          ${String(user.role || '').toUpperCase() === 'CUSTOMER' ? '<a class="btn btn-secondary" href="../user/personal-info.html" style="padding: 0 18px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">Thông tin cá nhân</a>' : ''}
+          <button class="btn btn-secondary" id="logoutBtn" style="padding: 0 20px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">Đăng xuất</button>
+        </div>`;
+      const btn = el('logoutBtn');
+      if(btn) btn.onclick = () => { localStorage.clear(); location.reload(); };
+    } else {
+      navRight.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 15px;">
+           <a href="./auth/login.html" style="font-weight: 800; color: var(--text-soft); font-size: 0.9rem;">Đăng nhập</a>
+           <a href="./auth/register.html" class="btn" style="padding: 0 25px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">ĐĂNG KÝ</a>
+        </div>`;
+    }
+  }
+
+  if (user) {
+    const loginPrompt = el('loginPromptReview');
+    const formContainer = el('reviewFormContainer');
+    if(loginPrompt) loginPrompt.style.display = 'none';
+    if(formContainer) formContainer.style.display = 'block';
+
+    const submitBtn = el('submitReviewBtn');
+    if (submitBtn) {
+      submitBtn.onclick = async () => {
+        const rating = el('reviewRating').value;
+        const comment = el('reviewComment').value;
+        if (!comment.trim()) {
+          alert('Vui lòng nhập nhận xét!');
+          return;
+        }
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Đang gửi...';
+          await TB.apiFetch('/api/v1/reviews', {
+            method: 'POST',
+            body: JSON.stringify({
+              tourId: Number(id),
+              userId: user.id || user.userId || user.id, // Fallback check
+              rating: Number(rating),
+              comment: comment.trim()
+            })
+          });
+          alert('Gửi đánh giá thành công!');
+          el('reviewComment').value = '';
+          el('reviewRating').value = '5';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Gửi đánh giá';
+          loadReviews();
+        } catch (err) {
+          console.error(err);
+          alert('Có lỗi xảy ra: ' + (err.response?.data?.message || err.message));
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Gửi đánh giá';
+        }
+      };
+    }
+  }
 })();

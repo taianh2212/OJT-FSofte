@@ -47,17 +47,17 @@
         <div class="layout">
           <div class="card panel">
             <nav class="sidebar-menu">
-              <a href="profile.html" class="active">Tài khoản của tôi</a>
+              <a href="personal-info.html">Thông tin cá nhân</a>
+              <a href="profile.html" class="active">Cập nhật hồ sơ</a>
               <a href="history.html">Lịch sử đặt tour</a>
-              <a href="#">Thông báo</a>
             </nav>
           </div>
 
           <div>
-            <!-- View Loyalty Points (UC26) -->
+            <!-- View Loyalty Points -->
             <div class="loyalty-card">
               <div>
-                <h2 style="margin:0; font-size:1.2rem; font-family:'Manrope',sans-serif; font-weight:600;">Hội Viên TourBooking (UC26)</h2>
+                <h2 style="margin:0; font-size:1.2rem; font-family:'Manrope',sans-serif; font-weight:600;">Hội Viên TourBooking</h2>
                 <p style="margin:4px 0 0; color:rgba(255,255,255,0.8);" id="tierLabel">Hạng: -</p>
               </div>
               <div>
@@ -67,7 +67,7 @@
             </div>
 
             <div class="card panel">
-              <h2 class="section-title">Cập Nhật Thông Tin (UC25)</h2>
+              <h2 class="section-title">Cập Nhật Thông Tin</h2>
               <form onsubmit="event.preventDefault(); updateProfile();">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                   <div class="form-group">
@@ -87,27 +87,8 @@
                     <input type="text" id="profAddress" value="">
                   </div>
                 </div>
-                <button type="submit" class="btn" style="margin-top:10px;">Lưu Thay Đổi (UC25)</button>
+                <button type="submit" class="btn" style="margin-top:10px;">Lưu Thay Đổi</button>
               </form>
-
-              <hr style="border:0; border-top:1px dashed rgba(0,0,0,0.1); margin:30px 0;">
-
-              <h2 class="section-title">Tải Lên CMND/Passport (UC24)</h2>
-              <p style="font-size:0.9rem; color:var(--text-faint); margin-bottom:16px;">Dùng cho việc xác thực tại sân bay/khách sạn.</p>
-              
-              <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-                <div style="font-size:2rem; margin-bottom:10px;">📄</div>
-                <strong style="color:var(--primary);">Bấm để chọn file</strong> hoặc kéo thả file vào đây.
-                <p style="font-size:0.8rem; color:var(--text-faint); margin-top:8px;">Hỗ trợ: JPG, PNG, PDF (Tối đa 5MB)</p>
-                <input type="file" id="fileInput" style="display:none;" onchange="handleUpload(event)" accept="image/*,.pdf">
-              </div>
-
-              <div id="uploadStatus" style="margin-top:16px; display:none; align-items:center; gap:10px; padding:12px; background:#dcfce7; color:#166534; border-radius:8px;">
-                <span>✔️ Đã tải lên file: </span>
-                <strong id="fileName">passport.jpg</strong>
-                <a id="fileLink" href="#" target="_blank" style="margin-left:auto; color:#166534; text-decoration:underline;">Mở</a>
-              </div>
-
             </div>
           </div>
         </div>
@@ -175,38 +156,7 @@
       me.fullName = payload.fullName;
       localStorage.setItem('user', JSON.stringify(me));
 
-      alert('Cập nhật thông tin cá nhân thành công. (UC25)');
-    }
-
-    async function handleUpload(event) {
-      const user = JSON.parse(localStorage.getItem('user') || 'null');
-      const file = event.target.files?.[0];
-      if (!user?.id) {
-        TB.goToLogin('Vui lòng đăng nhập.');
-        return;
-      }
-      if (!file) return;
-
-      const fd = new FormData();
-      fd.append('file', file);
-
-      const token = TB.getToken();
-      const res = await fetch(`/api/v1/users/${encodeURIComponent(user.id)}/documents`, {
-        method: 'POST',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-        body: fd
-      });
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        alert((data && data.message) ? data.message : `Upload thất bại (HTTP ${res.status})`);
-        return;
-      }
-
-      $('fileName').innerText = file.name;
-      $('fileLink').href = data?.data || '#';
-      $('uploadStatus').style.display = 'flex';
-      alert('Upload hồ sơ thành công. (UC24)');
+      alert('Cập nhật thông tin cá nhân thành công.');
     }
 
     loadProfile().catch(err => {
