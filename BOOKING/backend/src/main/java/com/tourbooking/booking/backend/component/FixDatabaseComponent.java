@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-@Component
+// @Component  // DISABLED for H2 development
 @RequiredArgsConstructor
 @Slf4j
 public class FixDatabaseComponent implements CommandLineRunner {

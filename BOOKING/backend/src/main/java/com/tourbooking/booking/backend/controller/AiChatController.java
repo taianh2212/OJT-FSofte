@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PermitAll;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class AiChatController {
     private final ChatSessionRepository sessionRepository;
 
     @PostMapping("/chat")
+    @PermitAll
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AiChatResponse> chat(@Valid @RequestBody AiChatRequest request) {
         ChatSession session = findSession(request);

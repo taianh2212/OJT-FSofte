@@ -17,6 +17,6 @@ public class TourProgressLog extends Base {
     @JoinColumn(name = "ScheduleID", columnDefinition = "BIGINT")
     private TourSchedule schedule;
 
-    @Column(name = "Content", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Content", columnDefinition = "TEXT")
     private String content;
 }

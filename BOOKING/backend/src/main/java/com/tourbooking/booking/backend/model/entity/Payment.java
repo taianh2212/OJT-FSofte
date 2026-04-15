@@ -20,7 +20,7 @@ public class Payment extends Base {
     @JoinColumn(name = "BookingID")
     private Booking booking;
 
-    @Column(name = "Amount", precision = 10, scale = 2)
+    @Column(name = "Amount", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal amount;
 
     @Column(name = "PaymentMethod", length = 50)

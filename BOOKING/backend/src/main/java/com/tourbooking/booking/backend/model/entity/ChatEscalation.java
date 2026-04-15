@@ -20,7 +20,7 @@ public class ChatEscalation extends Base {
     @Column(name = "GuestID", length = 50)
     private String guestId;
 
-    @Column(name = "RequestNote", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "RequestNote", columnDefinition = "TEXT")
     private String requestNote;
 
     @Column(name = "MeetingPreference", length = 255)

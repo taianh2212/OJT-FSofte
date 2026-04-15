@@ -19,17 +19,17 @@ public class RefundRequest extends Base {
     @JoinColumn(name = "BookingID", columnDefinition = "BIGINT")
     private Booking booking;
 
-    @Column(name = "Amount", precision = 10, scale = 2)
+    @Column(name = "Amount", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal amount;
 
-    @Column(name = "Reason", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Reason", columnDefinition = "VARCHAR(MAX)")
     private String reason;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50)
     private RefundStatus status = RefundStatus.PENDING;
 
-    @Column(name = "StaffNote", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "StaffNote", columnDefinition = "TEXT")
     private String staffNote;
 
     @Column(name = "ProcessedAt")

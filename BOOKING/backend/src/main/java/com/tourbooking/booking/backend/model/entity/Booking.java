@@ -29,10 +29,10 @@ public class Booking extends Base {
     @Column(name = "NumberOfPeople")
     private Integer numberOfPeople;
 
-    @Column(name = "TotalPrice", precision = 10, scale = 2)
+    @Column(name = "TotalPrice", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal totalPrice;
 
-    @Column(name = "DiscountAmount", precision = 10, scale = 2)
+    @Column(name = "DiscountAmount", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "DiscountCode", length = 50)

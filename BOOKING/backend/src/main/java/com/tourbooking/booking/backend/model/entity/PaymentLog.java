@@ -16,6 +16,6 @@ public class PaymentLog extends Base {
     @JoinColumn(name = "PaymentID", columnDefinition = "BIGINT")
     private Payment payment;
 
-    @Column(name = "LogMessage", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "LogMessage", columnDefinition = "TEXT")
     private String logMessage;
 }

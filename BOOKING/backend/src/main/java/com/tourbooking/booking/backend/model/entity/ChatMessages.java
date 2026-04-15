@@ -20,7 +20,7 @@ public class ChatMessages extends Base {
     @Column(name = "SenderType", length = 20)
     private String senderType;
 
-    @Column(name = "Message", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Message", columnDefinition = "TEXT")
     private String message;
 
     @Column(name = "GuestId", length = 50)

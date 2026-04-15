@@ -23,10 +23,10 @@ public class City extends Base {
     @Column(name = "CityName", length = 100, nullable = false, unique = true)
     private String cityName;
 
-    @Column(name = "CenterLatitude", precision = 9, scale = 6, nullable = false)
+    @Column(name = "CenterLatitude", precision = 9, scale = 6, nullable = false, columnDefinition = "DECIMAL(9,6)")
     private BigDecimal centerLatitude;
 
-    @Column(name = "CenterLongitude", precision = 9, scale = 6, nullable = false)
+    @Column(name = "CenterLongitude", precision = 9, scale = 6, nullable = false, columnDefinition = "DECIMAL(9,6)")
     private BigDecimal centerLongitude;
 }
 

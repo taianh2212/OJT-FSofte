@@ -29,7 +29,7 @@ import java.util.List;
  * - UC46: Tự động cập nhật chỗ trống của TourSchedule
  * - UC47: Tự động hủy Booking chưa thanh toán quá 24h
  * - UC48: Gửi email thông báo khi hủy booking (tích hợp trong UC47)
- * - UC49: Tự động cộng điểm loyal cho booking COMPLETED (stub - chờ entity LoyaltyPoint)
+ * - UC49: Tự động cộng điểm loyal cho booking COMPLETED
  * - UC50: Tạo và gửi báo cáo tháng cho ADMIN
  */
 @Slf4j
@@ -41,52 +41,58 @@ public class ScheduledTaskService {
     private final TourScheduleRepository tourScheduleRepository;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final LoyaltyService loyaltyService;
     private final OpenTripMapService openTripMapService;
     private final OpenTripMapProperties openTripMapProperties;
     private final TourRepository tourRepository;
 
-    // ================================================================
-    // UC46: Tự động cập nhật chỗ trống (AvailableSlots) cho TourSchedule
-    // Chạy mỗi 5 phút
-    // ================================================================
-    // @Scheduled(fixedRate = 300_000)
+    @Scheduled(fixedRate = 300_000)
     @Transactional
     public void autoUpdateSlots() {
-        List<TourSchedule> openSchedules = tourScheduleRepository.findAllOpen();
-        if (openSchedules.isEmpty()) return;
+        // Lấy cả OPEN và FULL để kiểm tra chuyển trạng thái hai chiều
+        List<TourSchedule> schedules = tourScheduleRepository.findAll().stream()
+                .filter(s -> s.getStatus() == TourStatus.OPEN || s.getStatus() == TourStatus.FULL)
+                .toList();
+
+        if (schedules.isEmpty()) return;
 
         int updated = 0;
-        for (TourSchedule schedule : openSchedules) {
-            // Đếm số booking CONFIRMED trong schedule
-            long confirmedCount = 0;
-            if (schedule.getBookings() != null) {
-                confirmedCount = schedule.getBookings().stream()
-                        .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                        .mapToLong(b -> b.getNumberOfPeople() != null ? b.getNumberOfPeople() : 0)
-                        .sum();
+        for (TourSchedule schedule : schedules) {
+            TourStatus oldStatus = schedule.getStatus();
+
+            // Kiểm tra schedule đã quá ngày khởi hành
+            if (schedule.getStartDate() != null && schedule.getStartDate().isBefore(java.time.LocalDate.now())) {
+                schedule.setStatus(TourStatus.COMPLETED);
+                tourScheduleRepository.save(schedule);
+                updated++;
+                continue;
             }
 
-            // Lấy tổng slot ban đầu (giả sử được lưu; nếu < 0 thì đặt về 0)
-            // AvailableSlots hiện tại = tổng ban đầu - đã đặt CONFIRMED
-            // Để đơn giản: không cho slot âm và đánh dấu FULL nếu == 0
-            if (schedule.getAvailableSlots() != null && schedule.getAvailableSlots() <= 0) {
+            // OPEN → FULL khi hết chỗ
+            if (oldStatus == TourStatus.OPEN
+                    && schedule.getAvailableSlots() != null
+                    && schedule.getAvailableSlots() <= 0) {
                 schedule.setStatus(TourStatus.FULL);
+                tourScheduleRepository.save(schedule);
+                updated++;
+            }
+
+            // FULL → OPEN khi có chỗ trở lại (do hủy booking)
+            if (oldStatus == TourStatus.FULL
+                    && schedule.getAvailableSlots() != null
+                    && schedule.getAvailableSlots() > 0) {
+                schedule.setStatus(TourStatus.OPEN);
                 tourScheduleRepository.save(schedule);
                 updated++;
             }
         }
 
         if (updated > 0) {
-            log.info("[UC46] Cập nhật {} TourSchedule sang trạng thái FULL.", updated);
+            log.info("[UC46] Cập nhật trạng thái cho {} TourSchedule.", updated);
         }
     }
 
-    // ================================================================
-    // UC47: Tự động hủy Booking PENDING chưa thanh toán quá 24 giờ
-    // UC48: Gửi email thông báo cho khách hàng khi booking bị hủy
-    // Chạy mỗi 1 giờ
-    // ================================================================
-    // @Scheduled(fixedRate = 3_600_000)
+    @Scheduled(fixedRate = 3_600_000)
     @Transactional
     public void autoCancelUnpaidBookings() {
         LocalDateTime cutoff = LocalDateTime.now().minusHours(24);
@@ -95,23 +101,19 @@ public class ScheduledTaskService {
         if (unpaidBookings.isEmpty()) return;
 
         for (Booking booking : unpaidBookings) {
-            // Hủy booking
             booking.setStatus(BookingStatus.CANCELLED);
             bookingRepository.save(booking);
 
-            // Trả lại slot cho TourSchedule
             TourSchedule schedule = booking.getSchedule();
             if (schedule != null && booking.getNumberOfPeople() != null) {
                 int currentSlots = schedule.getAvailableSlots() != null ? schedule.getAvailableSlots() : 0;
                 schedule.setAvailableSlots(currentSlots + booking.getNumberOfPeople());
-                // Nếu đang FULL và giờ có slot → mở lại
                 if (schedule.getStatus() == TourStatus.FULL && schedule.getAvailableSlots() > 0) {
                     schedule.setStatus(TourStatus.OPEN);
                 }
                 tourScheduleRepository.save(schedule);
             }
 
-            // UC48: Gửi email thông báo cho khách hàng
             User customer = booking.getUser();
             if (customer != null && customer.getEmail() != null) {
                 mailService.sendBookingCancelledEmail(
@@ -126,39 +128,51 @@ public class ScheduledTaskService {
         log.info("[UC47] Đã hủy {} booking PENDING quá hạn (> 24h chưa thanh toán).", unpaidBookings.size());
     }
 
-    // ================================================================
-    // UC49: Tự động cộng điểm loyalty cho booking COMPLETED
-    // Chạy mỗi ngày lúc 02:00 AM
-    // Lưu ý: Hiện tại schema chưa có bảng LoyaltyPoints, nên chỉ log
-    //        Khi có bảng, implement logic cộng điểm thực tế tại đây
-    // ================================================================
-    // @Scheduled(cron = "0 0 2 * * *")
+    @Scheduled(cron = "0 0 2 * * *")
     @Transactional
     public void autoUpdateLoyaltyPoints() {
         log.info("[UC49] Bắt đầu cộng điểm loyalty cho booking COMPLETED...");
 
-        List<Booking> allBookings = bookingRepository.findAll();
-        long completedCount = allBookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.COMPLETED)
-                .count();
+        // Lấy tất cả booking COMPLETED mà chưa có discountCode bắt đầu bằng "LOYALTY_AWARDED"
+        // (dùng discountCode không null check đơn giản - hoặc ta dùng flag riêng)
+        List<Booking> completedBookings = bookingRepository.findByStatus(BookingStatus.COMPLETED);
 
-        // TODO: Khi schema có bảng LoyaltyPoints, implement logic sau:
-        // - Mỗi booking COMPLETED → cộng (totalPrice / 10_000) điểm cho user
-        // - Lưu vào bảng LoyaltyPoints
-        // - Đánh dấu booking đã được cộng điểm (thêm cột PointsAwarded)
+        int awarded = 0;
+        for (Booking booking : completedBookings) {
+            // Skip nếu đã cộng điểm rồi (đánh dấu bằng prefix trong discountCode)
+            if (booking.getDiscountCode() != null && booking.getDiscountCode().startsWith("LOYALTY_AWARDED")) {
+                continue;
+            }
+            if (booking.getUser() == null || booking.getTotalPrice() == null) {
+                continue;
+            }
 
-        log.info("[UC49] Hiện có {} booking COMPLETED. Sẵn sàng cộng điểm khi bảng LoyaltyPoints được tạo.", completedCount);
+            // Quy đổi: mỗi 100,000 VND = 1 điểm
+            int points = booking.getTotalPrice().intValue() / 100000;
+            if (points > 0) {
+                try {
+                    loyaltyService.addPoint(booking.getUser().getId(), points);
+
+                    // Đánh dấu đã cộng điểm để tránh cộng trùng
+                    String existingCode = booking.getDiscountCode();
+                    booking.setDiscountCode(
+                        "LOYALTY_AWARDED" + (existingCode != null ? "|" + existingCode : "")
+                    );
+                    bookingRepository.save(booking);
+                    awarded++;
+                } catch (Exception e) {
+                    log.error("[UC49] Lỗi cộng điểm cho booking {}: {}", booking.getId(), e.getMessage());
+                }
+            }
+        }
+
+        log.info("[UC49] Đã cộng điểm cho {} booking COMPLETED.", awarded);
     }
 
-    // ================================================================
-    // UC50: Tạo báo cáo tháng và gửi cho tất cả ADMIN
-    // Chạy vào 8:00 AM ngày đầu tiên của mỗi tháng
-    // ================================================================
-    // @Scheduled(cron = "0 0 8 1 * *")
+    @Scheduled(cron = "0 0 8 1 * *")
     @Transactional
     public void generateMonthlyReport() {
         LocalDateTime now = LocalDateTime.now();
-        // Lấy tháng trước để báo cáo
         LocalDateTime firstDayOfLastMonth = now.minusMonths(1).withDayOfMonth(1)
                 .withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime firstDayOfThisMonth = now.withDayOfMonth(1)
@@ -167,7 +181,6 @@ public class ScheduledTaskService {
         String monthYear = firstDayOfLastMonth.format(DateTimeFormatter.ofPattern("MM/yyyy"));
         log.info("[UC50] Bắt đầu tạo báo cáo tháng {}...", monthYear);
 
-        // Thống kê booking
         long totalBookings = bookingRepository.findAllInPeriod(firstDayOfLastMonth, firstDayOfThisMonth).size();
         long confirmed    = bookingRepository.countByStatusAndCreatedAtBetween(BookingStatus.CONFIRMED, firstDayOfLastMonth, firstDayOfThisMonth);
         long cancelled    = bookingRepository.countByStatusAndCreatedAtBetween(BookingStatus.CANCELLED, firstDayOfLastMonth, firstDayOfThisMonth);
@@ -176,7 +189,6 @@ public class ScheduledTaskService {
 
         String reportContent = buildReportContent(monthYear, totalBookings, confirmed, cancelled, completed, revenue);
 
-        // Gửi báo cáo cho tất cả tài khoản ADMIN
         List<User> allUsers = userRepository.findAll();
         allUsers.stream()
                 .filter(u -> u.getRole() == UserRole.ADMIN && u.getEmail() != null && Boolean.TRUE.equals(u.getIsActive()))
@@ -186,7 +198,7 @@ public class ScheduledTaskService {
                 });
     }
 
-    // @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void refreshOpenTripMapContent() {
         List<String> cities = openTripMapProperties.getSchedulerCities();
         if (cities == null || cities.isEmpty()) {

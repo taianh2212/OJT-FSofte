@@ -5,10 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import javax.sql.DataSource;
+import java.sql.Connection;
 
 /**
  * Tự động kiểm tra và tạo các bảng DB cần thiết khi ứng dụng khởi động.
  * Đảm bảo mọi người pull code về đều có đủ schema mà không cần chạy script tay.
+ * 
+ * SKIP for H2 database (development).
  */
 @Slf4j
 @Component
@@ -16,14 +20,31 @@ import org.springframework.stereotype.Component;
 public class DatabaseInitializer {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
 
     @PostConstruct
     public void initialize() {
+        // Skip initialization if using H2 database (development)
+        if (isH2Database()) {
+            log.info("=== DatabaseInitializer: H2 database detected, skipping initialization ===");
+            return;
+        }
+        
         log.info("=== DatabaseInitializer: Checking required tables... ===");
         initTourProgressLogs();
         initTourActivityImages();
         initTourScheduleColumns();
         log.info("=== DatabaseInitializer: Done. ===");
+    }
+
+    private boolean isH2Database() {
+        try (Connection conn = dataSource.getConnection()) {
+            String url = conn.getMetaData().getURL();
+            return url != null && url.contains("h2:");
+        } catch (Exception e) {
+            log.warn("Could not determine database type", e);
+            return false;
+        }
     }
 
     // =========================================================

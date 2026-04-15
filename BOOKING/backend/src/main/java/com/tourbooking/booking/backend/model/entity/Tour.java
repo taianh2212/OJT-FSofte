@@ -17,13 +17,13 @@ public class Tour extends Base {
     @Column(name = "TourName", length = 200)
     private String tourName;
 
-    @Column(name = "Description", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Description", columnDefinition = "VARCHAR(MAX)")
     private String description;
 
-    @Column(name = "Itinerary", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Itinerary", columnDefinition = "VARCHAR(MAX)")
     private String itinerary;
 
-    @Column(name = "Price", precision = 10, scale = 2)
+    @Column(name = "Price", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
     @Column(name = "Duration")
@@ -35,31 +35,31 @@ public class Tour extends Base {
     @Column(name = "EndLocation", length = 100)
     private String endLocation;
 
-    @Column(name = "Latitude", precision = 9, scale = 6)
+    @Column(name = "Latitude", precision = 9, scale = 6, columnDefinition = "DECIMAL(9,6)")
     private BigDecimal latitude;
 
-    @Column(name = "Longitude", precision = 9, scale = 6)
+    @Column(name = "Longitude", precision = 9, scale = 6, columnDefinition = "DECIMAL(9,6)")
     private BigDecimal longitude;
 
     @Column(name = "TransportType", length = 50)
     private String transportType;
 
-    @Column(name = "ChildPolicy", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "ChildPolicy", columnDefinition = "TEXT")
     private String childPolicy;
 
     @Column(name = "SuitableAges", length = 200)
     private String suitableAges;
 
-    @Column(name = "WhyChooseUs", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "WhyChooseUs", columnDefinition = "TEXT")
     private String whyChooseUs;
 
     @Column(name = "BestTime", length = 200)
     private String bestTime;
 
-    @Column(name = "Inclusions", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Inclusions", columnDefinition = "TEXT")
     private String inclusions;
 
-    @Column(name = "Exclusions", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Exclusions", columnDefinition = "TEXT")
     private String exclusions;
 
     @ManyToOne(fetch = FetchType.LAZY)

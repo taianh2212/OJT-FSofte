@@ -25,7 +25,7 @@ public class Review extends Base {
     @Column(name = "Rating")
     private Integer rating;
 
-    @Column(name = "Comment", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Comment", columnDefinition = "TEXT")
     private String comment;
 
     @Column(name = "ReviewDate")

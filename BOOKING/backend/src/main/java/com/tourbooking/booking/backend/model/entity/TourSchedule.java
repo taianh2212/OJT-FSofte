@@ -41,10 +41,10 @@ public class TourSchedule extends Base {
     @JoinColumn(name = "GuideID", columnDefinition = "BIGINT")
     private User guide;
 
-    @Column(name = "CurrentProgress", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "CurrentProgress", columnDefinition = "TEXT")
     private String currentProgress;
 
-    @Column(name = "ReportContent", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "ReportContent", columnDefinition = "TEXT")
     private String reportContent;
 
     @Column(name = "ReportSubmittedAt")

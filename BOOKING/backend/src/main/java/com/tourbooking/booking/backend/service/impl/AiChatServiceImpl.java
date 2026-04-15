@@ -1,10 +1,12 @@
 package com.tourbooking.booking.backend.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -41,15 +43,16 @@ public class AiChatServiceImpl implements AiChatService {
     @Value("${gemini.api.url}")
     private String geminiApiUrl;
 
+    @Value("${app.public-base-url:http://localhost:8080}")
+    private String baseUrl;
+
     @Override
+    @Transactional
     public AiChatResponse chat(AiChatRequest request) {
         User user = null;
         if (request.getUserId() != null) {
             user = userRepo.findById(request.getUserId()).orElse(null);
         }
-
-        // KHÔNG save tin nhắn user ở đây vì frontend đã save qua /api/v1/chat/messages
-        // Chỉ gọi Gemini và lưu phản hồi AI
 
         String reply = callGemini(request.getMessage());
 
@@ -66,45 +69,53 @@ public class AiChatServiceImpl implements AiChatService {
         return AiChatResponse.builder().reply(reply).build();
     }
 
-    // =====================================================================
-    // Gọi Gemini API - dùng JSON string trực tiếp để tránh lỗi serialize
-    // =====================================================================
     private String callGemini(String userMessage) {
         try {
-            String tourContext = buildTourContext(userMessage);
+            // Trích xuất từ khóa thô (loại bỏ từ thừa) để search DB tốt hơn
+            String searchKeyword = extractKeyword(userMessage);
+            String tourContext = buildTourContext(searchKeyword);
 
             String systemPrompt =
-                "Bạn là trợ lý tư vấn tour du lịch chuyên nghiệp của TourBooking - nền tảng đặt tour tại Việt Nam.\\n\\n" +
-                "NGUYÊN TẮC:\\n" +
-                "- Luôn trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp\\n" +
-                "- Chỉ tư vấn về du lịch, tour, địa điểm, thời tiết, ngân sách\\n" +
-                "- Trả lời ngắn gọn, có cấu trúc, dùng emoji phù hợp\\n" +
-                "- Cuối mỗi câu hỏi thêm để hiểu rõ nhu cầu khách hàng\\n" +
-                "- Nếu khách muốn đặt tour, hướng dẫn xem trang /pages/tours.html\\n\\n" +
-                "TOUR HIỆN CÓ TRONG HỆ THỐNG:\\n" +
+                "Bạn là chuyên viên tư vấn du lịch của TourBooking.\\n\\n" +
+                "NGUYÊN TẮC QUAN TRỌNG:\\n" +
+                "1. Luôn trả lời bằng tiếng Việt, thân thiện, ngắn gọn.\\n" +
+                "2. CHỈ giới thiệu các tour CÓ TRONG DANH SÁCH BÊN DƯỚI. TUYỆT ĐỐI KHÔNG TỰ BỊA RA TOUR KHÔNG CÓ TRONG DANH SÁCH.\\n" +
+                "3. Khi khách muốn đi một địa điểm (ví dụ: Đà Nẵng), HÃY TÌM và LIỆT KÊ TRỰC TIẾP tối đa 5 tour ở địa điểm đó.\\n" +
+                "4. CHẮC CHẮN PHẢI CUNG CẤP GIÁ TIỀN và ĐƯỜNG LINK cho mỗi tour. Link lấy chính xác từ trường 'Link đặt tour'.\\n" +
+                "5. KHÔNG hỏi thêm các câu thừa thãi nếu đã có địa điểm.\\n" +
+                "6. Nếu không có tour nào khớp (hoặc khi khách hỏi chung chung), hãy giới thiệu TỐI ĐA 5 tour nổi bật nhất trong danh sách.\\n\\n" +
+                
+                "ĐỊNH DẠNG MỖI TOUR KHUYÊN DÙNG:\\n" +
+                "🌟 **[Tên tour]**\\n" +
+                "💰 Giá: [Giá tiền] | ⏱ [Thời gian]\\n" +
+                "📍 [Điểm đi] → [Điểm đến]\\n" +
+                "🔗 [xem thêm tại đây](LINK_ĐẶT_TOUR)\\n\\n" +
+                
+                "DANH SÁCH TOUR TRONG HỆ THỐNG:\\n" +
                 tourContext.replace("\"", "\\\"").replace("\n", "\\n") + "\\n\\n" +
-                "Câu hỏi của khách: " + userMessage.replace("\"", "\\\"");
+                "Yêu cầu của khách: " + userMessage.replace("\"", "\\\"").replace("\n", "\\n");
 
-            // Build JSON string trực tiếp
             String jsonBody = "{"
                 + "\"contents\":[{"
                 + "\"parts\":[{\"text\":\"" + systemPrompt + "\"}]"
                 + "}],"
                 + "\"generationConfig\":{"
-                + "\"temperature\":0.7,"
-                + "\"maxOutputTokens\":512,"
+                + "\"temperature\":0.5,"
+                + "\"maxOutputTokens\":2048,"
                 + "\"topP\":0.9"
                 + "}"
                 + "}";
 
             RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("X-goog-api-key", geminiApiKey);
 
             HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
-            String url = geminiApiUrl + "?key=" + geminiApiKey;
 
-            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(geminiApiUrl, entity, String.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 JsonNode root = objectMapper.readTree(response.getBody());
@@ -128,40 +139,114 @@ public class AiChatServiceImpl implements AiChatService {
         }
     }
 
-    // Lấy danh sách tour từ DB làm context cho Gemini
+    /**
+     * Xây dựng context tour chi tiết từ DB để truyền cho Gemini.
+     * Bao gồm: ID (cho link), tên, giá, thời gian, điểm đi/đến, rating, mô tả, có pickup/lunch không.
+     */
     private String buildTourContext(String keyword) {
         try {
-            List<Tour> tours = tourRepo.searchToursWithFilters(keyword, null, null, null, null);
-            if (tours.isEmpty()) {
-                tours = tourRepo.findAll().stream().limit(8).collect(Collectors.toList());
+            List<Tour> tours;
+            if (keyword != null && !keyword.isBlank()) {
+                // Liệt kê các tour khớp từ khóa
+                tours = tourRepo.searchToursWithFilters(keyword, null, null, null, null);
+                
+                // Nếu search theo cả cụm từ không ra, thử search theo từng từ đơn (nếu từ > 2 ký tự)
+                if (tours.isEmpty()) {
+                    String[] words = keyword.split("\\s+");
+                    for (String word : words) {
+                        if (word.length() > 2) {
+                            List<Tour> wordMatch = tourRepo.searchToursWithFilters(word, null, null, null, null);
+                            if (!wordMatch.isEmpty()) {
+                                tours = wordMatch;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                tours = java.util.Collections.emptyList();
             }
-            if (tours.isEmpty()) return "Chưa có dữ liệu tour.";
 
-            return tours.stream().limit(8).map(t ->
-                t.getTourName()
-                + " | Gia: " + (t.getPrice() != null ? String.format("%,.0f", t.getPrice()) + " VND" : "lien he")
-                + " | " + (t.getDuration() != null ? t.getDuration() + " ngay" : "")
-                + " | " + (t.getStartLocation() != null ? "tu " + t.getStartLocation() : "")
-                + " | " + (t.getEndLocation() != null ? "den " + t.getEndLocation() : "")
-                + " | rating: " + (t.getRating() != null ? t.getRating() : "N/A")
-            ).collect(Collectors.joining("; "));
+            // Nếu vẫn không thấy hoặc keyword rỗng, lấy top 20 tour mới nhất/nổi bật
+            if (tours.isEmpty()) {
+                tours = tourRepo.findAllWithBasicDetails().stream().limit(20).collect(Collectors.toList());
+            }
+
+            if (tours.isEmpty()) return "Hiện chưa có tour nào trong hệ thống.";
+
+            return tours.stream().limit(20).map(t -> {
+                String tourId = t.getId() != null ? String.valueOf(t.getId()) : "?";
+                String name = t.getTourName() != null ? t.getTourName() : "Không tên";
+                String price = t.getPrice() != null
+                    ? String.format("%,.0f VND", t.getPrice())
+                    : "Liên hệ";
+                String duration = t.getDuration() != null ? t.getDuration() + " ngày" : "N/A";
+                String from = t.getStartLocation() != null ? t.getStartLocation() : "N/A";
+                String to = t.getEndLocation() != null ? t.getEndLocation() : "N/A";
+                String rating = t.getRating() != null ? String.format("%.1f/5", t.getRating()) : "Chưa có";
+                String transport = t.getTransportType() != null ? t.getTransportType() : "N/A";
+                boolean hasPickup = Boolean.TRUE.equals(t.getHasPickup());
+                boolean hasLunch = Boolean.TRUE.equals(t.getHasLunch());
+
+                // Cắt mô tả nếu quá dài
+                String desc = t.getDescription() != null
+                    ? (t.getDescription().length() > 200
+                        ? t.getDescription().substring(0, 200) + "..."
+                        : t.getDescription())
+                    : "";
+
+                String link = baseUrl + "/pages/tour-detail.html?id=" + tourId;
+
+                return "---" +
+                    "\nID: " + tourId +
+                    "\nTên tour: " + name +
+                    "\nGiá: " + price +
+                    "\nThời gian: " + duration +
+                    "\nKhởi hành: " + from + " → " + to +
+                    "\nPhương tiện: " + transport +
+                    "\nRating: " + rating +
+                    "\nCó đón/trả: " + (hasPickup ? "Có" : "Không") +
+                    "\nCó bữa trưa: " + (hasLunch ? "Có" : "Không") +
+                    "\nMô tả: " + desc +
+                    "\nLink đặt tour: " + link;
+
+            }).collect(Collectors.joining("\n"));
 
         } catch (Exception e) {
             log.warn("[Gemini] Cannot load tour context: {}", e.getMessage());
-            return "Khong the tai du lieu tour.";
+            return "Không thể tải dữ liệu tour lúc này.";
         }
     }
 
-    // Fallback khi Gemini API không phản hồi được
+    /**
+     * Loại bỏ các từ thừa/ngữ cảnh để lấy từ khóa chính (Địa danh, tên tour)
+     */
+    private String extractKeyword(String message) {
+        if (message == null) return "";
+        return message.toLowerCase()
+            .replace("tôi muốn đi", "")
+            .replace("tìm tour", "")
+            .replace("giới thiệu", "")
+            .replace("có những sản phẩm nào", "")
+            .replace("sản phẩm", "")
+            .replace("tour du lịch", "")
+            .replace("tư vấn", "")
+            .replace("đến", "")
+            .replace("tại", "")
+            .replace("đi", "")
+            .trim();
+    }
+
     private String fallbackResponse(String userMessage) {
         String lower = userMessage.toLowerCase();
         if (lower.contains("nhân viên") || lower.contains("hỗ trợ") || lower.contains("gặp người")) {
             return "Tôi sẽ kết nối bạn với nhân viên tư vấn ngay! Bạn hãy nhấn nút **'Talk to staff'** bên dưới nhé.";
         }
-        return "😔 Xin lỗi, hệ thống AI đang tạm thời gặp sự cố.\n\n"
+        return "🤖 Xin lỗi, hệ thống AI đang tạm thời gặp sự cố.\n\n"
              + "Bạn có thể:\n"
-             + "• Xem danh sách tour tại /pages/tours.html\n"
+             + "• Xem danh sách tour tại " + baseUrl + "/pages/tours.html\n"
              + "• Nhấn **'Talk to staff'** để gặp nhân viên tư vấn\n"
              + "• Thử lại sau vài giây";
     }
 }
+

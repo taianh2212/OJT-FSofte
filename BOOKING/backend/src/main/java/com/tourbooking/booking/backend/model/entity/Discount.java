@@ -22,7 +22,7 @@ public class Discount extends Base {
     @Column(name = "DiscountType", nullable = false, length = 20)
     private DiscountType discountType;
 
-    @Column(name = "Value", nullable = false, precision = 10, scale = 2)
+    @Column(name = "`Value`", nullable = false, precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal value;
 
     @Column(name = "StartDate")
@@ -40,6 +40,6 @@ public class Discount extends Base {
     @Column(name = "IsActive")
     private Boolean isActive = true;
 
-    @Column(name = "MinimumBookingAmount", precision = 10, scale = 2)
+    @Column(name = "MinimumBookingAmount", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal minimumBookingAmount;
 }
