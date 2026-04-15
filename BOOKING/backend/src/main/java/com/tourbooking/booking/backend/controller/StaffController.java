@@ -18,6 +18,16 @@ public class StaffController {
 
     private final StaffService staffService;
 
+    @GetMapping("/bookings")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<List<com.tourbooking.booking.backend.model.dto.response.BookingResponse>> listBookings(@RequestParam(required = false) String status) {
+        return ApiResponse.<List<com.tourbooking.booking.backend.model.dto.response.BookingResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Bookings retrieved successfully")
+                .data(staffService.listBookings(status))
+                .build();
+    }
+
     @PatchMapping("/bookings/{id}/confirm")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<String> confirmBooking(@PathVariable Long id) {
@@ -29,6 +39,16 @@ public class StaffController {
                 .build();
     }
 
+    @GetMapping("/guides")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<List<com.tourbooking.booking.backend.model.dto.response.UserResponse>> listGuides() {
+        return ApiResponse.<List<com.tourbooking.booking.backend.model.dto.response.UserResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Guides retrieved successfully")
+                .data(staffService.listGuides())
+                .build();
+    }
+
     @PatchMapping("/schedules/{id}/assign-guide")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<String> assignGuide(@PathVariable Long id, @RequestParam Long guideId) {
@@ -37,6 +57,26 @@ public class StaffController {
                 .code(HttpStatus.OK.value())
                 .message("Guide assigned successfully")
                 .data(null)
+                .build();
+    }
+
+    @GetMapping("/schedules")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<List<com.tourbooking.booking.backend.model.dto.response.TourScheduleResponse>> listSchedules() {
+        return ApiResponse.<List<com.tourbooking.booking.backend.model.dto.response.TourScheduleResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Schedules retrieved successfully")
+                .data(staffService.listSchedules())
+                .build();
+    }
+
+    @GetMapping("/schedules/{id}")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ApiResponse<com.tourbooking.booking.backend.model.dto.response.TourScheduleResponse> getScheduleDetails(@PathVariable Long id) {
+        return ApiResponse.<com.tourbooking.booking.backend.model.dto.response.TourScheduleResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Schedule details retrieved successfully")
+                .data(staffService.getScheduleDetails(id))
                 .build();
     }
 

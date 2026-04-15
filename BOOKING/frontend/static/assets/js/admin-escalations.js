@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   const listEl = document.getElementById('escalationList');
   const reloadBtn = document.getElementById('reloadEscalations');
   const infoEl = document.getElementById('escalationInfo');
@@ -7,10 +7,14 @@
     try {
       const res = await TB.apiFetch('/api/v1/admin/chat/escalations');
       renderList(res.data || []);
-      infoEl.hidden = true;
+      if (infoEl) infoEl.hidden = true;
     } catch (err) {
-      infoEl.hidden = false;
-      infoEl.textContent = 'Unable to load sessions: ' + (err.message || 'Unknown error');
+      if (infoEl) {
+        infoEl.hidden = false;
+        infoEl.textContent = 'Unable to load sessions: ' + (err.message || 'Unknown error');
+      } else {
+        console.error('Unable to load sessions:', err);
+      }
     }
   }
 
@@ -27,6 +31,13 @@
     const card = document.createElement('section');
     card.className = 'card escalation-card';
 
+    function formatBadgeStatus(s) {
+      if(s === 'WAITING_STAFF') return 'Waiting Staff';
+      if(s === 'STAFF_CHATTING') return 'Staff Chatting';
+      return s;
+    }
+    const cleanStatus = session.status?.toLowerCase() || '';
+
     const header = document.createElement('div');
     header.className = 'escalation-header';
     header.innerHTML = `
@@ -34,7 +45,7 @@
         <h3>Session #${session.id}</h3>
         <p class="muted">Customer: ${session.customerLabel || 'Guest'}</p>
       </div>
-      <span class="status-badge ${session.status?.toLowerCase() || ''}">${session.status}</span>
+      <span class="status-badge status-${cleanStatus}" style="letter-spacing: 0.5px">${formatBadgeStatus(session.status)}</span>
     `;
 
     const meta = document.createElement('div');

@@ -141,7 +141,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.basedir}/src/main/resources/static</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../frontend/static/assets</directory>
@@ -151,6 +151,11 @@
                                 <resource>
                                     <directory>${project.basedir}/../frontend/static/pages</directory>
                                     <targetPath>pages</targetPath>
+                                    <filtering>false</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/../frontend/static/user</directory>
+                                    <targetPath>user</targetPath>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>
