@@ -64,6 +64,7 @@ public class SecurityConfig {
                 // UC11 chat support + UC51 AI chat
                 .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
                 // Admin chat escalation dashboard
+                .requestMatchers("/api/v1/admin/chat/escalations", "/api/v1/admin/chat/escalations/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Read-only categories
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
