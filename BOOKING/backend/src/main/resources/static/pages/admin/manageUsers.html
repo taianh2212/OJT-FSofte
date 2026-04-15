@@ -5,10 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users - TourBooking Admin</title>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Users - TourBooking Admin</title>
     <link rel="stylesheet" href="../../assets/css/admin-common.css">
     <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/toast.js"></script>
@@ -22,7 +18,6 @@
                 <a href="./dashboard.html" class="nav-item">Dashboard</a>
                 <a href="./manageTours.html" class="nav-item">Tours</a>
                 <a href="./manageCategories.html" class="nav-item">Categories</a>
-                <a href="./manageDiscounts.html" class="nav-item">Discounts</a>
                 <a href="./manageUsers.html" class="nav-item active">Users</a>
                 <a href="./manageReview.html" class="nav-item">Reviews</a>
                 <a href="./financialReport.html" class="nav-item">Financial Report</a>
@@ -69,10 +64,12 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <div id="pagination" class="pagination-container"></div>
             </div>
         </main>
     </div>
-        </main>
+    </main>
     </div>
 
     <!-- Modal for Create/Edit User -->
@@ -86,7 +83,7 @@
                 <input type="email" id="email" class="form-control" placeholder="Enter email address">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="passwordGroup">
                 <label>Password *</label>
                 <input type="password" id="password" class="form-control" placeholder="Enter password">
                 <small>Leave blank to keep current password when editing</small>
@@ -162,24 +159,32 @@
 
         let currentEditId = null;
 
-        // LOAD USERS
-        async function loadUsers() {
-            try {
-                const response = await TB.apiFetch(API);
-                const data = response.data || response;
+        let currentPage = 0;
+        let pageSize = 10;
 
-                if (!data || data.length === 0) {
-                    document.getElementById("userTable").innerHTML = `
+        // LOAD USERS
+        async function loadUsers(page = 0) {
+            currentPage = page;
+            const userTable = document.getElementById("userTable");
+            
+            try {
+                const response = await TB.apiFetch(`${API}?page=${page}&size=${pageSize}`);
+                const data = response.data;
+                const users = data.content;
+
+                if (!users || users.length === 0) {
+                    userTable.innerHTML = `
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 2rem;">No users found.</td>
                         </tr>
                     `;
                     updateStats([]);
+                    renderPagination(0, 0);
                     return;
                 }
 
                 let html = "";
-                data.forEach(u => {
+                users.forEach(u => {
                     const currentUser = JSON.parse(localStorage.getItem('user'));
                     const isSelf = u.id === currentUser.id;
 
@@ -212,16 +217,52 @@
                         </tr>
                     `;
                 });
-                document.getElementById("userTable").innerHTML = html;
-                updateStats(data);
+                userTable.innerHTML = html;
+                updateStatsFromPagedData(data);
+                renderPagination(data.totalPages, data.page);
             } catch (error) {
                 console.error('Error loading users:', error);
-                document.getElementById("userTable").innerHTML = `
+                userTable.innerHTML = `
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading users. Please try again.</td>
                     </tr>
                 `;
             }
+        }
+
+        function renderPagination(totalPages, currentPage) {
+            const container = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'flex';
+            
+            let html = `
+                <button class="page-btn" ${currentPage === 0 ? 'disabled' : ''} onclick="loadUsers(${currentPage - 1})">&laquo;</button>
+            `;
+            
+            for (let i = 0; i < totalPages; i++) {
+                if (i === 0 || i === totalPages - 1 || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="loadUsers(${i})">${i + 1}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<span class="page-info">...</span>`;
+                }
+            }
+            
+            html += `
+                <button class="page-btn" ${currentPage === totalPages - 1 ? 'disabled' : ''} onclick="loadUsers(${currentPage + 1})">&raquo;</button>
+            `;
+            container.innerHTML = html;
+        }
+
+        function updateStatsFromPagedData(data) {
+            document.getElementById('totalUsers').innerText = data.totalElements;
+            // Since we only have paged data, we can't easily calculate active/blocked total from frontend.
+            // I'll leave the badges as is for now or maybe fetch a summary API later.
+            // For now, I'll update total and clear others or set them based on current view.
+            document.getElementById('activeUsers').innerText = '-';
+            document.getElementById('blockedUsers').innerText = '-';
         }
 
         // UPDATE STATISTICS
@@ -240,9 +281,18 @@
             currentEditId = null;
             document.getElementById('modalTitle').innerText = 'Create New User';
             document.getElementById('userId').value = '';
-            document.getElementById('email').value = '';
+
+            const emailInput = document.getElementById('email');
+            emailInput.value = '';
+            emailInput.disabled = false;
+
+            document.getElementById('passwordGroup').style.display = 'block';
             document.getElementById('password').value = '';
-            document.getElementById('fullName').value = '';
+
+            const fullNameInput = document.getElementById('fullName');
+            fullNameInput.value = '';
+            fullNameInput.disabled = false;
+
             document.getElementById('role').value = 'CUSTOMER';
             document.getElementById('isActive').value = 'true';
             document.getElementById('userModal').style.display = 'flex';
@@ -256,9 +306,18 @@
                 currentEditId = id;
                 document.getElementById('modalTitle').innerText = 'Edit User';
                 document.getElementById('userId').value = u.id;
-                document.getElementById('email').value = u.email;
+
+                const emailInput = document.getElementById('email');
+                emailInput.value = u.email;
+                emailInput.disabled = true;
+
+                document.getElementById('passwordGroup').style.display = 'none';
                 document.getElementById('password').value = '';
-                document.getElementById('fullName').value = u.fullName;
+
+                const fullNameInput = document.getElementById('fullName');
+                fullNameInput.value = u.fullName;
+                fullNameInput.disabled = true;
+
                 document.getElementById('role').value = u.role;
                 document.getElementById('isActive').value = u.isActive.toString();
                 document.getElementById('userModal').style.display = 'flex';
@@ -331,7 +390,7 @@
             if (!confirm(`Are you sure you want to ${action} this user?`)) {
                 return;
             }
-            
+
             try {
                 await TB.apiFetch(`${API}/${id}/status`, {
                     method: "PUT",
@@ -357,7 +416,7 @@
             return div.innerHTML;
         }
 
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('userModal');
             if (event.target == modal) {
                 closeModal();

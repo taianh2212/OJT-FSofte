@@ -17,5 +17,5 @@ public class TourResponse {
     private String transportType;
     private List<String> imageUrls;
     private String imageUrl;
-
+    private String externalId;
 }

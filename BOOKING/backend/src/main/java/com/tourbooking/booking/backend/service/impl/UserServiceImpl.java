@@ -56,6 +56,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public com.tourbooking.booking.backend.model.dto.response.PagedResponse<UserResponse> getAllUsersPaged(org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<User> page = userRepository.findAll(pageable);
+        return com.tourbooking.booking.backend.model.dto.response.PagedResponse.<UserResponse>builder()
+                .content(page.getContent().stream().map(UserMapper::toResponse).toList())
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));

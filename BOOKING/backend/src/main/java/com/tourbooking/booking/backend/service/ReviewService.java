@@ -15,6 +15,7 @@ public interface ReviewService {
             String direction);
 
     List<ReviewResponse> getAllReviews();
+    com.tourbooking.booking.backend.model.dto.response.PagedResponse<ReviewResponse> getAllReviewsPaged(Long tourId, Integer rating, org.springframework.data.domain.Pageable pageable);
 
     ReviewResponse createReview(ReviewRequest request);
 

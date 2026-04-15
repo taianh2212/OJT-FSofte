@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dana - Khám Phá Đà Nẵng Đích Thực</title>
+  <title>DaNangBest - Khám Phá Đà Nẵng Đích Thực</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@600;700;800&display=swap"
     rel="stylesheet">
@@ -17,7 +17,7 @@
       <span>📞 Hotline: 0913 599 745</span>
       <span style="margin-left: 20px;">📧 Email: info@danangbest.com</span>
     </div>
-    <div class="top-links" id="topLinks">
+    <div class="top-links">
       <a href="./auth/login.html">Đăng nhập</a>/
       <a href="./auth/register.html">Đăng ký</a>
     </div>
@@ -28,7 +28,7 @@
       <a class="brand" href="./index.html">
         <div class="brand-mark">DB</div>
         <div class="brand-copy">
-          <strong>DANA</strong>
+          <strong>DANANGBEST</strong>
           <span>Trao niềm tin - Nhận giá thực</span>
         </div>
       </a>
@@ -80,8 +80,8 @@
         </div>
         <div style="padding: 5px;">
           <button class="btn-search-main" onclick="handleSearch()">
-            <span class="icon">🔍</span>
-            <span>TÌM KIẾM</span>
+             <span class="icon">🔍</span>
+             <span>TÌM KIẾM</span>
           </button>
         </div>
       </div>
@@ -139,7 +139,7 @@
     <div
       style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 60px; margin-bottom: 80px;">
       <div>
-        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANA</h3>
+        <h3 style="color: var(--accent); margin-bottom: 30px; font-size: 1.8rem;">DANANGBEST</h3>
         <p style="opacity: 0.8; line-height: 2; margin-bottom: 30px;">Trao niềm tin - Nhận giá trị thực. Chúng tôi cam
           kết mang lại những chuyến đi đáng nhớ nhất cho mọi khách hàng.</p>
         <div style="display: flex; gap: 15px;">
@@ -174,7 +174,7 @@
     </div>
     <div
       style="text-align: center; color: rgba(255,255,255,0.3); font-size: 0.85rem; padding-top: 50px; border-top: 1px solid rgba(255,255,255,0.05);">
-      &copy; 2024 DANA. All rights reserved. Designed for excellence.
+      &copy; 2024 DANANGBEST. All rights reserved. Designed for excellence.
     </div>
   </footer>
 
@@ -194,30 +194,18 @@
     if (user) {
       const isAdmin = String(user.role || '').toUpperCase() === 'ADMIN';
       const adminLink = isAdmin
-        ? '<a class="btn" href="./admin/dashboard.html" style="font-size: 0.8rem; height: 40px; min-height: 40px; border-radius: 10px;">QUẢN TRỊ</a>'
+        ? '<a class="btn" href="./admin/chat-escalations.html" style="font-size: 0.8rem; height: 40px; min-height: 40px; border-radius: 10px;">QUẢN TRỊ</a>'
         : '';
-      
-      // Update main nav
       navRight.innerHTML = `
         <div style="display: flex; align-items: center; gap: 20px;">
           <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">Chào, ${user.fullName || 'Bạn'}</span>
           ${adminLink}
           <button class="btn btn-secondary" id="logoutBtn" style="padding: 0 20px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">Đăng xuất</button>
         </div>`;
-      
-      // Hide top bar links
-      if (el('topLinks')) el('topLinks').style.display = 'none';
-
       el('logoutBtn').onclick = () => {
         localStorage.clear();
         location.reload();
       };
-    } else {
-      navRight.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 15px;">
-           <a href="./auth/login.html" style="font-weight: 800; color: var(--text-soft); font-size: 0.9rem;">Đăng nhập</a>
-           <a href="./auth/register.html" class="btn" style="padding: 0 25px; min-height: 40px; height: 40px; font-size: 0.8rem; border-radius: 10px;">ĐĂNG KÝ</a>
-        </div>`;
     }
 
     window.handleSearch = () => {
@@ -283,24 +271,6 @@
       document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     }
 
-    async function fetchCategories() {
-      try {
-        const res = await TB.apiFetch('/api/v1/categories');
-        const catsBody = el('catSelect');
-        if (res.data && catsBody) {
-          catsBody.innerHTML = `
-            <option value="">Tất cả tour</option>
-            ${res.data.map(c => `
-              <option value="${c.id}">${c.categoryName}</option>
-            `).join('')}
-          `;
-        }
-      } catch (err) {
-        console.error('Failed to load categories', err);
-      }
-    }
-
-    fetchCategories();
     loadFeatured();
     initReveal();
   </script>

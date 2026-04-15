@@ -19,11 +19,16 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping
-    public ApiResponse<List<ReviewResponse>> getAllReviews() {
-        return ApiResponse.<List<ReviewResponse>>builder()
+    public ApiResponse<com.tourbooking.booking.backend.model.dto.response.PagedResponse<ReviewResponse>> getAllReviews(
+            @RequestParam(required = false) Long tourId,
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return ApiResponse.<com.tourbooking.booking.backend.model.dto.response.PagedResponse<ReviewResponse>>builder()
                 .code(HttpStatus.OK.value())
-                .message("Successfully retrieved all reviews")
-                .data(reviewService.getAllReviews())
+                .message("Successfully retrieved reviews (page " + page + ")")
+                .data(reviewService.getAllReviewsPaged(tourId, rating, pageable))
                 .build();
     }
 

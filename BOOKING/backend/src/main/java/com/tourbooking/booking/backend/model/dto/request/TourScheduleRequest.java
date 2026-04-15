@@ -8,4 +8,5 @@ public class TourScheduleRequest {
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer availableSlots;
+    private Integer maxSlots;
 }
