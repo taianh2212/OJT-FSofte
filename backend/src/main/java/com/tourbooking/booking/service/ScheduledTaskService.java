@@ -24,6 +24,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Service chứa tất cả các tác vụ tự động (Scheduled Jobs):
+ * - UC46: Tự động cập nhật chỗ trống của TourSchedule
+ * - UC47: Tự động hủy Booking chưa thanh toán quá 24h
+ * - UC48: Gửi email thông báo khi hủy booking (tích hợp trong UC47)
+ * - UC49: Tự động cộng điểm loyal cho booking COMPLETED
+ * - UC50: Tạo và gửi báo cáo tháng cho ADMIN
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,6 +41,7 @@ public class ScheduledTaskService {
     private final TourScheduleRepository tourScheduleRepository;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final LoyaltyService loyaltyService;
     private final OpenTripMapService openTripMapService;
     private final OpenTripMapProperties openTripMapProperties;
     private final TourRepository tourRepository;
@@ -40,28 +49,46 @@ public class ScheduledTaskService {
     @Scheduled(fixedRate = 300_000)
     @Transactional
     public void autoUpdateSlots() {
-        List<TourSchedule> openSchedules = tourScheduleRepository.findAllOpen();
-        if (openSchedules.isEmpty()) return;
+        // Lấy cả OPEN và FULL để kiểm tra chuyển trạng thái hai chiều
+        List<TourSchedule> schedules = tourScheduleRepository.findAll().stream()
+                .filter(s -> s.getStatus() == TourStatus.OPEN || s.getStatus() == TourStatus.FULL)
+                .toList();
+
+        if (schedules.isEmpty()) return;
 
         int updated = 0;
-        for (TourSchedule schedule : openSchedules) {
-            long confirmedCount = 0;
-            if (schedule.getBookings() != null) {
-                confirmedCount = schedule.getBookings().stream()
-                        .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                        .mapToLong(b -> b.getNumberOfPeople() != null ? b.getNumberOfPeople() : 0)
-                        .sum();
+        for (TourSchedule schedule : schedules) {
+            TourStatus oldStatus = schedule.getStatus();
+
+            // Kiểm tra schedule đã quá ngày khởi hành
+            if (schedule.getStartDate() != null && schedule.getStartDate().isBefore(java.time.LocalDate.now())) {
+                schedule.setStatus(TourStatus.COMPLETED);
+                tourScheduleRepository.save(schedule);
+                updated++;
+                continue;
             }
 
-            if (schedule.getAvailableSlots() != null && schedule.getAvailableSlots() <= 0) {
+            // OPEN → FULL khi hết chỗ
+            if (oldStatus == TourStatus.OPEN
+                    && schedule.getAvailableSlots() != null
+                    && schedule.getAvailableSlots() <= 0) {
                 schedule.setStatus(TourStatus.FULL);
+                tourScheduleRepository.save(schedule);
+                updated++;
+            }
+
+            // FULL → OPEN khi có chỗ trở lại (do hủy booking)
+            if (oldStatus == TourStatus.FULL
+                    && schedule.getAvailableSlots() != null
+                    && schedule.getAvailableSlots() > 0) {
+                schedule.setStatus(TourStatus.OPEN);
                 tourScheduleRepository.save(schedule);
                 updated++;
             }
         }
 
         if (updated > 0) {
-            log.info("[UC46] Cập nhật {} TourSchedule sang trạng thái FULL.", updated);
+            log.info("[UC46] Cập nhật trạng thái cho {} TourSchedule.", updated);
         }
     }
 
@@ -106,12 +133,40 @@ public class ScheduledTaskService {
     public void autoUpdateLoyaltyPoints() {
         log.info("[UC49] Bắt đầu cộng điểm loyalty cho booking COMPLETED...");
 
-        List<Booking> allBookings = bookingRepository.findAll();
-        long completedCount = allBookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.COMPLETED)
-                .count();
+        // Lấy tất cả booking COMPLETED mà chưa có discountCode bắt đầu bằng "LOYALTY_AWARDED"
+        // (dùng discountCode không null check đơn giản - hoặc ta dùng flag riêng)
+        List<Booking> completedBookings = bookingRepository.findByStatus(BookingStatus.COMPLETED);
 
-        log.info("[UC49] Hiện có {} booking COMPLETED. Sẵn sàng cộng điểm khi bảng LoyaltyPoints được tạo.", completedCount);
+        int awarded = 0;
+        for (Booking booking : completedBookings) {
+            // Skip nếu đã cộng điểm rồi (đánh dấu bằng prefix trong discountCode)
+            if (booking.getDiscountCode() != null && booking.getDiscountCode().startsWith("LOYALTY_AWARDED")) {
+                continue;
+            }
+            if (booking.getUser() == null || booking.getTotalPrice() == null) {
+                continue;
+            }
+
+            // Quy đổi: mỗi 100,000 VND = 1 điểm
+            int points = booking.getTotalPrice().intValue() / 100000;
+            if (points > 0) {
+                try {
+                    loyaltyService.addPoint(booking.getUser().getId(), points);
+
+                    // Đánh dấu đã cộng điểm để tránh cộng trùng
+                    String existingCode = booking.getDiscountCode();
+                    booking.setDiscountCode(
+                        "LOYALTY_AWARDED" + (existingCode != null ? "|" + existingCode : "")
+                    );
+                    bookingRepository.save(booking);
+                    awarded++;
+                } catch (Exception e) {
+                    log.error("[UC49] Lỗi cộng điểm cho booking {}: {}", booking.getId(), e.getMessage());
+                }
+            }
+        }
+
+        log.info("[UC49] Đã cộng điểm cho {} booking COMPLETED.", awarded);
     }
 
     @Scheduled(cron = "0 0 8 1 * *")
@@ -179,7 +234,9 @@ public class ScheduledTaskService {
 
     private String buildReportContent(String monthYear, long total, long confirmed,
                                        long cancelled, long completed, BigDecimal revenue) {
-        return "   BÁO CÁO KINH DOANH THÁNG " + monthYear + "\n" +
+        return "========================================\n" +
+               "   BÁO CÁO KINH DOANH THÁNG " + monthYear + "\n" +
+               "========================================\n\n" +
                "THỐNG KÊ BOOKING:\n" +
                "  - Tổng booking trong tháng  : " + total     + "\n" +
                "  - Đã xác nhận (CONFIRMED)   : " + confirmed + "\n" +
@@ -187,6 +244,7 @@ public class ScheduledTaskService {
                "  - Đã hủy (CANCELLED)        : " + cancelled + "\n\n" +
                "DOANH THU:\n" +
                "  - Tổng doanh thu tháng      : " + String.format("%,.0f", revenue) + " VND\n\n" +
+               "========================================\n" +
                "Báo cáo được tạo tự động bởi hệ thống TourBooking.\n" +
                "Ngày tạo: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n";
     }
