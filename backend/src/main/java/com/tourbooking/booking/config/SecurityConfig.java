@@ -58,6 +58,8 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/newsletters").permitAll()
                 // UC11 chat support + UC51 AI chat
                 .requestMatchers("/api/v1/chat/**", "/api/v1/ai/**").permitAll()
+                // Demo UC controller
+                .requestMatchers("/api/v1/demo/**").permitAll()
                 // Admin chat escalation dashboard - allow STAFF and ADMIN
                 .requestMatchers("/api/v1/admin/chat/**").hasAnyRole("ADMIN", "STAFF")
                 // Generic admin routes - only ADMIN

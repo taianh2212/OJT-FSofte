@@ -13,22 +13,35 @@ import org.springframework.stereotype.Service;
 public class LoyaltyServiceImpl implements LoyaltyService {
 
     private final LoyaltyPointRepository loyaltyPointRepository;
-    @SuppressWarnings("unused")
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public LoyaltyPoint getPoint(Long userId) {
+        LoyaltyPoint lp = loyaltyPointRepository.findByUserId(userId);
+        if (lp != null) {
+            return lp;
+        }
 
-        return loyaltyPointRepository.findByUserId(userId);
+        com.tourbooking.booking.model.entity.User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        LoyaltyPoint created = new LoyaltyPoint();
+        created.setUser(user);
+        created.setPoints(0);
+        return loyaltyPointRepository.save(created);
     }
 
     @Override
     public void addPoint(Long userId, int point) {
+        LoyaltyPoint lp = getPoint(userId);
+        if (lp == null) {
+            return;
+        }
 
-        LoyaltyPoint lp = loyaltyPointRepository.findByUserId(userId);
-
-        lp.setPoints(lp.getPoints() + point);
-
+        int current = lp.getPoints() == null ? 0 : lp.getPoints();
+        lp.setPoints(current + Math.max(point, 0));
         loyaltyPointRepository.save(lp);
     }
 }
